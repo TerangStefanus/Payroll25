@@ -6,6 +6,7 @@
         public string nama { get; set; }
         public string password { get; set; }
         public string deskripsi { get; set; }
+        public string password_ripem { get; set; }
     }
 
     public class ModelMenu

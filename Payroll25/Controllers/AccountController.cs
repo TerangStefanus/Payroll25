@@ -31,7 +31,8 @@ namespace Payroll25.Controllers
             {
                 //Data dicek masuk
                 var hashpass = _encPassMhs(password);// password di enkripsi menggunakan RIPEMD160
-                if(hashpass == data.password) 
+
+                if(hashpass == data.password_ripem) 
                 {
                     //Pengecekan Password aman
                     isAuth = true;

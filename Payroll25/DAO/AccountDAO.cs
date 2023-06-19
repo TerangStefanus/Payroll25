@@ -13,11 +13,12 @@ namespace Payroll25.DAO
                 try
                 {
                     //k = Karyawan ur = USER_ROLE rr = REF_ROLE
-                    string query = @"SELECT k.NPP, k.NAMA, k.PASSWORD,rr.DESKRIPSI
-                                    FROM simka.MST_KARYAWAN a
+                    string query = @"SELECT k.NPP, k.NAMA, k.PASSWORD,k.PASSWORD_RIPEM,rr.DESKRIPSI
+                                    FROM simka.MST_KARYAWAN k
                                     JOIN siatmax.TBL_USER_ROLE ur ON k.NPP = ur.NPP
                                     JOIN siatmax.REF_ROLE rr ON ur.ID_ROLE = rr.ID_ROLE
-                                    WHERE k.NPP = @npp";
+                                    WHERE k.NPP = @username";
+
 
                     var param = new { username = npp };
                     var data = conn.QueryFirstOrDefault<UserModel>(query, param);
@@ -53,6 +54,7 @@ namespace Payroll25.DAO
                                     JOIN siatmax.TBL_USER_ROLE ur ON ur.ID_ROLE = rr.ID_ROLE
                                     JOIN simka.MST_KARYAWAN k ON k.NPP = ur.NPP
                                     WHERE rr.DESKRIPSI =@role";
+
                     var param = new { role = npp };
                     var data = conn.Query<ModelMenu>(query, param).AsList();
 
@@ -79,9 +81,10 @@ namespace Payroll25.DAO
                     // k = Karyawan ur = USER_ROLE rr = REF_ROLE
                     string query = @"SELECT DISTINCT ssm.* FROM siatmax.TBL_ROLE_SUBMENU rsm
                                 JOIN siatmax.REF_ROLE rr ON rr.ID_ROLE = rsm.ID_ROLE
-	                            LEFT JOIN siatmax.TBL_SI_SUBMENU ssm ON rsm.ID_SI_SUBMENU = ssm.ID_SI_SUBMENU
-	                            LEFT JOIN siatmax.TBL_SI_MENU sm ON sm.ID_SI_MENU = sm.ID_SI_MENU
-	                            WHERE rr.DESKRIPSI = @role AND ssm.ISACTIVE = 1 AND sm.ISACTIVE = 1";
+                             LEFT JOIN siatmax.TBL_SI_SUBMENU ssm ON rsm.ID_SI_SUBMENU = ssm.ID_SI_SUBMENU
+                             LEFT JOIN siatmax.TBL_SI_MENU sm ON sm.ID_SI_MENU = sm.ID_SI_MENU
+                             WHERE rr.DESKRIPSI = @role AND ssm.ISACTIVE = 1 AND sm.ISACTIVE = 1";
+
                     var param = new { role = npp };
                     var data = conn.Query<ModelSubMenu>(query, param).AsList();
 
