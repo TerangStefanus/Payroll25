@@ -19,19 +19,24 @@ namespace Payroll25.Controllers
             DAO = new AccountDAO();
         }
 
-        [HttpPost]
+		public IActionResult Login()
+		{
+			return View();
+		}
+
+		[HttpPost]
         [AutoValidateAntiforgeryToken]
         public IActionResult LoginAct(string username, string password)
         {
             ClaimsIdentity identity = new ClaimsIdentity();
             bool isAuth = false;
             var data = DAO.GetKaryawan(username);
+            var dataMHS = DAO.GetMahasiswa(username);
 
-            if(data != null)
+            if(data != null ) 
             {
                 //Data dicek masuk
                 var hashpass = _encPassMhs(password);// password di enkripsi menggunakan RIPEMD160
-
                 if(hashpass == data.password_ripem) 
                 {
                     //Pengecekan Password aman
@@ -49,6 +54,7 @@ namespace Payroll25.Controllers
                        CookieAuthenticationDefaults.AuthenticationScheme,
                        new ClaimsPrincipal(identity));
                 }
+                
                 else
                 {
                     // Password salah
@@ -56,32 +62,78 @@ namespace Payroll25.Controllers
 
                 }
             }
+            else if(dataMHS != null)
+            {
+                //Data dicek masuk
+                var hashpass = _encPassMhs(password);// password di enkripsi menggunakan RIPEMD160
+                if (hashpass == dataMHS.PASSWORD)
+                {
+                    isAuth = true;
+                    identity = new ClaimsIdentity(new[] {
+                               new Claim(ClaimTypes.Name, dataMHS.NPM),
+                               new Claim(ClaimTypes.Name, dataMHS.NAMA_MHS),
+                               new Claim(ClaimTypes.Role, dataMHS.ROLE),
+                               new Claim("username", dataMHS.NPM),
+                               new Claim("name_mhs", dataMHS.NAMA_MHS),
+                               new Claim("no_hp",dataMHS.NO_HP),
+                               new Claim("tgl_lahir",dataMHS.TGL_LAHIR),
+                               new Claim("alamat",dataMHS.ALAMAT),
+                               new Claim("role", dataMHS.ROLE),
+
+                               //new Claim("menu", GenerateMenu(data.deskripsi))
+                    }, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    HttpContext.SignInAsync(
+                       CookieAuthenticationDefaults.AuthenticationScheme,
+                       new ClaimsPrincipal(identity));
+                }
+            }
             else
             {
-                TempData["error"] = "Data Karyawan tidak ditemukan";
+                TempData["error"] = "Data Mahasiswa tidak ditemukan";
             }
 
-            //return RedirectToAction("Index", "Home");
-
-            if (isAuth && data.deskripsi == "KSDM")
+            if(data != null) 
             {
-                var principal = new ClaimsPrincipal(identity);
-                var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                if (isAuth && data.deskripsi == "KSDM")
+                {
+                    var principal = new ClaimsPrincipal(identity);
+                    var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home");
+                }
+
+                else if (isAuth)
+                {
+                    var principal = new ClaimsPrincipal(identity);
+                    var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                    return RedirectToAction("SlipGaji", "Home");
+                }
+                else
+                {
+                    return RedirectToAction("Login");
+                }
             }
-
-            else if (isAuth)
+            else if(dataMHS != null)
             {
-                var principal = new ClaimsPrincipal(identity);
-                var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                if (isAuth && dataMHS.ROLE == "Mahasiswa")
+                {
+                    var principal = new ClaimsPrincipal(identity);
+                    var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                return RedirectToAction("SlipGaji", "Home");
+                    return RedirectToAction("Index_User", "User");
+                }
+                else
+                {
+                    return RedirectToAction("Login");
+                }
             }
             else
             {
                 return RedirectToAction("Login");
             }
+
 
         }
 
@@ -125,9 +177,13 @@ namespace Payroll25.Controllers
             return menu;
         }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
-    }
+		public async Task<RedirectToActionResult> Logout()
+		{
+			// Clear the existing external cookie
+			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return RedirectToAction("Login");
+		}
+
+
+	}
 }

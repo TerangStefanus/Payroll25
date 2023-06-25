@@ -59,7 +59,7 @@
                 <li class="nav-item dropdown">
                     <a class="dropdown-toggle text-dark" data-toggle="dropdown" href="#">
                         <img class="rounded-circle me-lg-2" src="/Assets/dist/img/user.jpg" alt="">
-                        <span class="d-none d-lg-inline-flex">@User.Identity.Name</span>
+                        <span class="d-none d-lg-inline-flex"> @User.Identity.Name</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <a href="#" class="dropdown-item">My Profile</a>
@@ -83,10 +83,9 @@
             <div class="sidebar" style="background:#16347a">
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                    <div class="image">
-                        <img src="/Assets/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-                    </div>
+                    
                     <div class="info">
+                        <h4 class="mb-0" style="color: rgba(255, 255, 255, 8);">USER</h4>
                         <h6 class="mb-0" style="color: rgba(255, 255, 255, 8);">@User.Identity.Name</h6>
                         @*  <span>@User.Identity.Name<span>*@
                     </div>
@@ -100,7 +99,7 @@
                             <a href="/Home/Index" class="nav-link">
                                 <i class="nav-icon fas fa-home"></i>
                                 <p>
-                                    Home
+                                    Profile
                                 </p>
                             </a>
                         </li>
@@ -108,62 +107,11 @@
                             <a href="/Home/Index" class="nav-link">
                                 <i class="nav-icon fas fa-wallet"></i>
                                 <p>
-                                    Kode Rekening
+                                    Payslip
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/Home/Index" class="nav-link">
-                                <i class="nav-icon fas fa-user"></i>
-                                <p>
-                                    Identitas Dosen
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="" class="nav-link">
-                                <i class="nav-icon fas fa-award"></i>
-                                <p>
-                                    Honor
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/KomponenVariabel/KehadiranLembur" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Pendadaran</p>
-                                    </a>
-                                </li>
-
-                            </ul>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/KomponenVariabel/CutiPanjang" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Ujian Reguler</p>
-                                    </a>
-                                </li>
-
-                            </ul>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/KomponenVariabel/SuplesiInsentif" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Ujian Sisipan</p>
-                                    </a>
-                                </li>
-
-                            </ul>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/KomponenVariabel/PenerimaanLainLain" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Mengajar Pasca Sarjana</p>
-                                    </a>
-                                </li>
-                           </ul>
-                         
+                        
                         <li class="nav-item">
                             <a href="/Account/Logout" class="nav-link">
                                 <i class="nav-icon fas fa-sign-out-alt"></i>
@@ -193,7 +141,6 @@
                 </div><!-- /.container-fluid -->
             </div>
             <!-- /.content-header -->
-
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
@@ -279,7 +226,7 @@
     <script src="/js/site.js"></script>
 
     <script src="/Assets/dist/js/main.js"></script>
-    
+
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

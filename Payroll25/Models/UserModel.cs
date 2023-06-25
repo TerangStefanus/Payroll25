@@ -24,4 +24,15 @@
         public string LINK { get; set; }
     }
 
+    public class MhsModel
+    {
+        public string NPM { get; set; }
+        public string NAMA_MHS { get; set; }
+        public string PASSWORD { get; set; }    
+        public string ROLE { get; set; }  
+        public string NO_HP { get; set; }
+        public string TGL_LAHIR { get; set;}
+        public string ALAMAT { get; set; }
+    }
+
 }
