@@ -108,7 +108,7 @@ namespace Payroll25.Controllers
                     var principal = new ClaimsPrincipal(identity);
                     var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                    return RedirectToAction("SlipGaji", "Home");
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {

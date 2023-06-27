@@ -1,0 +1,264 @@
+﻿@model IEnumerable<Payroll25.Models.IdentitasDosenModel>
+
+@{
+    Layout = "_Layout";
+}
+
+<head>
+    <!-- Referensi ke jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Referensi ke DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+</head>
+
+<body>
+    <h1 style="margin-bottom: 30px"><strong>Identitas Dosen</strong></h1>
+
+    <div class="border border-5" style="padding: 10px 10px 10px 10px">
+        <h3>Tambah Identitas Dosen</h3>
+    </div>
+    <div class="border border-5" style="margin-bottom: 30px;">
+        <div class="row">
+            <div class="col-sm-6 p-3 ">
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">NPM / NPP :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;"> asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">NAMA :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">NAMA_LENGKAP :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">TGL_LAHIR :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">JNS_KEL :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;"> asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">AGAMA :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">ID_UNIT :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">ID_UNIT_AKADEMIK :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+            </div>
+            <div class="col-sm-6 p-3 ">
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">ID_REF_GOLONGAN :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;"> asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">ID_REF_JBTN_AKADEMIK :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">NO_TELPON_HP :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">NPWP :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">ALAMAT :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;"> asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">USERNAME :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">PASSWORD :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+
+                <div class="row">
+                    <label style="font-size: 25px;margin-left: 20px;">PASSWORD_RIPEM :</label>
+                    <p style="border-style: groove; padding: 5px;margin-left: 20px;">asdasdasdsadasdsa</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 p-3 justify-content-center" style="margin-bottom: 0px;bottom: 20px;">
+            <button type="button" class="btn btn-primary" style="align-items: center;">Search</button>
+            <button type="button" class="btn btn-primary" style="align-items: center;">Add</button>
+        </div>
+
+    </div>
+
+
+    @*<p>
+        <a asp-action="Create">Create New</a>
+    </p>*@
+
+    <div class="">
+        <table id="data-table" class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.NPP)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.NAMA)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.NAMA_LENGKAP_GELAR)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TGL_LAHIR)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.JNS_KEL)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AGAMA)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ID_UNIT)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ID_UNIT_AKADEMIK)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ID_REF_GOLONGAN)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ID_REF_JBTN_AKADEMIK)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.NO_TELPON_HP)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.NPWP)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ALAMAT)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.USERNAME)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PASSWORD)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PASSWORD_RIPEM)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NPP)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NAMA)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NAMA_LENGKAP_GELAR)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TGL_LAHIR)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JNS_KEL)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AGAMA)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ID_UNIT)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ID_UNIT_AKADEMIK)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ID_REF_GOLONGAN)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ID_REF_JBTN_AKADEMIK)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NO_TELPON_HP)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NPWP)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ALAMAT)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.USERNAME)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PASSWORD)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PASSWORD_RIPEM)
+                        </td>
+                        @*<td>
+                            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) 
+                            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                        </td>*@
+                        <td>
+                            <form asp-action="Edit" asp-route-id="item.PrimaryKey" method="get">
+                                <button type="submit" class="btn btn-success">Edit</button>
+                            </form>
+                            <form asp-action="Delete" asp-route-id="item.PrimaryKey" method="post">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+
+<script>
+    $(document).ready(function () {
+        $('#data-table').DataTable({
+            "paging": true, // Menampilkan pagination
+            "lengthMenu": [10, 25, 50, 100], // Opsi jumlah data per halaman
+            "pageLength": 10, // Jumlah data yang ditampilkan per halaman
+            "scrollY": 400, // Tinggi scrollable tbody
+            "scrollX": true, // Membuat thead menjadi scrollable secara horizontal
+            "scrollCollapse": true, // Mengatur tinggi tabel tetap sama saat tabel kosong
+            "order": [[0, "asc"]] // Mengurutkan data berdasarkan kolom pertama secara ascending
+        });
+    });
+</script>
+
+
+
+
+
+

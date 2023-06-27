@@ -24,17 +24,25 @@ namespace Payroll25.Controllers
 			return View();
 		}
 
-		public  IActionResult DetailProfile()
-		{
-            string NPM = @User.Identity.Name;
+		//public  IActionResult DetailProfile()
+		//{
+  //          //var nameMhsClaim = User.FindFirst("name_mhs");
+  //          //var nameMhs = nameMhsClaim?.Value;
+  //          //var noHPClaim = User.FindAll("no_hp");
+  //          //var tgl_LahirClaim = User.FindAll("tgl_lahir");
+  //          //var alamatClaim = User.FindAll("alamat");
 
-            var profile = DAO.GetMahasiswa(NPM);
+  //          //// Mengisi model dengan nilai klaim yang ditemukan
+  //          //var model = new MhsModel
+  //          //{
+  //          //    NameMhs = nameMhs,
+  //          //    NoHp = noHPClaim.FirstOrDefault()?.Value,
+  //          //    TglLahir = tgl_LahirClaim.FirstOrDefault()?.Value,
+  //          //    Alamat = alamatClaim.FirstOrDefault()?.Value
+  //          //};
 
-            return View(profile);
-        }
-
-
-
+  //          return View(model);
+  //      }
 
 	}
 }
