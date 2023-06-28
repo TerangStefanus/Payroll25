@@ -8,6 +8,7 @@
 
         //REMINDER TGL_LAHIR di SQL Server datetime
         public string TGL_LAHIR { get; set; }
+
         public string JNS_KEL { get; set; }
         public string AGAMA { get; set; }
         public int ID_UNIT { get; set; }
