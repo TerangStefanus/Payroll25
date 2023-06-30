@@ -2,29 +2,93 @@
     ViewData["Title"] = "Home Page";
 }
 
+<div class="container">
     <div class="text-center">
         <h1 class="display-4">Selamat Datang</h1>
         <h2 class="display-4">Admin Payroll Universitas Atma Jaya Yogyakarta</h2>
         <hr />
 
-        <h3>Menu Dashboard Payroll</h3>
+        <h3 style="margin-top: 30px">Menu Dashboard Payroll</h3>
 
-        <div class="row">
-            <div class="col border span-6">
-                <h4>Dashboard Admin</h4>
-                <p>Master Data Karyawan</p>
+        <div class="row" style="margin-top: 30px">
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-primary" data-aos="fade-up">
+                    <div class="card-background" style="background-image: url('path/to/background-image.jpg')"></div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-bar fa-4x mb-3"></i>
+                        <h4 class="card-title">Dashboard Admin</h4>
+                        <p class="card-text">Master Data Karyawan</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="col border span-6">
-                <h4>Dashboard Admin</h4>
-                <p>Master Data Karyawan</p>
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-success" data-aos="fade-up">
+                    <div class="card-background" style="background-image: url('path/to/background-image.jpg')"></div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-4x mb-3"></i>
+                        <h4 class="card-title">Dashboard Admin</h4>
+                        <p class="card-text">Master Data Rekening</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="col border span-6">
-                <h4>Dashboard Admin</h4>
-                <p>Master Data Karyawan</p>
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-warning" data-aos="fade-up">
+                    <div class="card-background" style="background-image: url('path/to/background-image.jpg')"></div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-cogs fa-4x mb-3"></i>
+                        <h4 class="card-title">Dashboard Admin</h4>
+                        <p class="card-text">Master Data Karyawan</p>
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
+</div>
 
+@section Styles {
+    <style>
+        .card {
+            margin-bottom: 30px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .card-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.5;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24), 0 4px 10px rgba(0, 0, 0, 0.34);
+        }
+
+        .card-body {
+            position: relative;
+            z-index: 1;
+            padding: 30px;
+        }
+
+        .card-title {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+}
+
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+}
