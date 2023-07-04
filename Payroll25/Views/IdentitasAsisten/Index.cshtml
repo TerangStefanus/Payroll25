@@ -1,104 +1,81 @@
-﻿@model IEnumerable<Payroll25.Models.IdentitasAsistenModel>
+﻿@model IndexViewModel
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<head>
-    <!-- Referensi ke jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<h2>Create</h2>
 
-    <!-- Referensi ke DataTables -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
-</head>
+<div class="container border p-3">
+    @using (Html.BeginForm("Create", "IdentitasAsisten", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
 
-<body>
-    <h1 style="margin-bottom: 30px"><strong>Identitas Asisten Staff</strong></h1>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="border border-5" style="padding: 10px">
-        <h3>Tambah Identitas Asisten</h3>
-    </div>
-
-    <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
-        <div class="row">
-            
-            <div class="col-sm-6" style="margin-top: 20px;">
-                <div class="form-group d-flex">
-                    <label class="font-weight-bold" style="width: 200px;padding-left: 20px;padding-top: 10px;">ID ASISTEN: </label>
-                    <input type="text" class="form-control" style="margin-right: 130px;margin-top: 5px;"></input>
-                </div>
-
-                <div class="form-group d-flex">
-                    @*//REMINDER ini ID_REF_JBTN_AKADEMIK*@
-                    <label class="font-weight-bold" style="width: 200px;padding-left: 20px;padding-top: 10px;">ID TAHUN AKADEMIK: </label>
-                    <input type="text" class="form-control" style="margin-right: 130px;margin-top: 5px;"></input>
-                </div>
-
-                <div class="form-group d-flex">
-                    <label class="font-weight-bold" style="width: 200px;padding-left: 20px;padding-top: 10px;">NO SEMESTER: </label>
-                    <input type="text" class="form-control" style="margin-right: 130px;margin-top: 5px;"></input>
-                </div>
-
-                <div class="form-group d-flex">
-                    <label class="font-weight-bold" style="width: 200px;padding-left: 20px;padding-top: 10px;">NPM: </label>
-                    <input type="text" class="form-control" style="margin-right: 130px;margin-top: 5px;"></input>
-                </div>
-
-            </div>
+        <div class="form-group">
+            <label asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="control-label"></label>
+            <input asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="form-control" />
+            <span asp-validation-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="text-danger"></span>
         </div>
-        <div class="text-center" style="margin-top: 30px;margin-right: 20px;margin-bottom: 20px;">
-            <button type="button" class="btn btn-primary">Search</button>
-            <button type="button" class="btn btn-primary">Add</button>
+
+        <div class="form-group">
+            <label asp-for="IdentitasAsisten.NO_SEMESTER" class="control-label"></label>
+            <input asp-for="IdentitasAsisten.NO_SEMESTER" class="form-control" />
+            <span asp-validation-for="IdentitasAsisten.NO_SEMESTER" class="text-danger"></span>
         </div>
-    </div>
 
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
+        <div class="form-group">
+            <label asp-for="IdentitasAsisten.NPM" class="control-label"></label>
+            <input asp-for="IdentitasAsisten.NPM" class="form-control" />
+            <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
+        </div>
 
+        <div class="form-group">
+            <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
+            <input asp-for="IdentitasAsisten.ID_UNIT" class="form-control" />
+            <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    }
+</div>
+
+<h2>Index</h2>
+
+<div class="container">
     <table class="table">
         <thead>
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.ID_ASSISTEN)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.ID_TAHUN_AKADEMIK)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.NO_SEMESTER)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.NPM)
-                </th>
-                <th></th>
+                <th>ID Asisten</th>
+                <th>ID Tahun Akademik</th>
+                <th>NPM</th>
+                <th>NO SEMESTER</th>
+                <th>ID UNIT</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var identitasAsisten in Model.IdentitasAsistenList)
             {
                 <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ID_ASSISTEN)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ID_TAHUN_AKADEMIK)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.NO_SEMESTER)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.NPM)
-                    </td>
-                    <td>
-                        @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                        @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                        @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-                    </td>
+                    <td>@identitasAsisten.ID_ASISTEN</td>
+                    <td>@identitasAsisten.ID_TAHUN_AKADEMIK</td>
+                    <td>@identitasAsisten.NPM</td>
+                    <td>@identitasAsisten.NO_SEMESTER</td>
+                    <td>@identitasAsisten.ID_UNIT</td>
                 </tr>
             }
         </tbody>
     </table>
 
-</body>
+    <div class="pagination-container"></div>
+</div>
+
+
+
+
+
+
+
