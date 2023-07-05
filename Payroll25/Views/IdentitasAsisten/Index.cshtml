@@ -4,56 +4,72 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
+<head>
+    <!-- Referensi ke jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Referensi ke DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+</head>
 
-<div class="container border p-3">
-    @using (Html.BeginForm("Create", "IdentitasAsisten", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
+<body>
+    <h1 style="margin-bottom: 30px"><strong>Identitas Asisten</strong></h1>
 
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="border border-5" style="padding: 10px">
+        <h3>Tambah Identitas Asisten</h3>
+    </div>
 
-        <div class="form-group">
-            <label asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="control-label"></label>
-            <input asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="form-control" />
-            <span asp-validation-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="text-danger"></span>
+    <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
+        <div class="row">
+            <div class="col-sm-6" style="margin-top: 20px;">
+                @using (Html.BeginForm("Create", "IdentitasAsisten", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.NO_SEMESTER" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.NO_SEMESTER" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.NO_SEMESTER" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.NPM" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.NPM" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.ID_UNIT" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <input type="submit" value="Create" class="btn btn-primary" />
+                    </div>
+                }
+            </div>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label asp-for="IdentitasAsisten.NO_SEMESTER" class="control-label"></label>
-            <input asp-for="IdentitasAsisten.NO_SEMESTER" class="form-control" />
-            <span asp-validation-for="IdentitasAsisten.NO_SEMESTER" class="text-danger"></span>
-        </div>
 
-        <div class="form-group">
-            <label asp-for="IdentitasAsisten.NPM" class="control-label"></label>
-            <input asp-for="IdentitasAsisten.NPM" class="form-control" />
-            <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
-            <input asp-for="IdentitasAsisten.ID_UNIT" class="form-control" />
-            <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
-        </div>
-
-        <div class="form-group">
-            <input type="submit" value="Create" class="btn btn-primary" />
-        </div>
-    }
-</div>
-
-<h2>Index</h2>
-
-<div class="container">
-    <table class="table">
-        <thead>
+    <table class="table hidden" id="dataTable">
+        <thead style="background-color: #8FA0C7">
             <tr>
                 <th>ID Asisten</th>
                 <th>ID Tahun Akademik</th>
                 <th>NPM</th>
                 <th>NO SEMESTER</th>
                 <th>ID UNIT</th>
+                <th>BUTTON</th>
             </tr>
         </thead>
         <tbody>
@@ -65,17 +81,55 @@
                     <td>@identitasAsisten.NPM</td>
                     <td>@identitasAsisten.NO_SEMESTER</td>
                     <td>@identitasAsisten.ID_UNIT</td>
+                    <td>
+                        <div class="d-flex">
+                            <form asp-action="Edit" asp-route-id="item.PrimaryKey" method="get">
+                                <button type="submit" class="btn btn-success mr-2">Edit</button>
+                            </form>
+                            <form asp-action="Delete" asp-route-id="item.PrimaryKey" method="post">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 
-    <div class="pagination-container"></div>
-</div>
+</body>
 
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Inisialisasi DataTables pada tabel
+            $('#dataTable').DataTable();
 
+            // Mengatur klik event pada link "Details"
+            $('.details-link').click(function () {
+                var npm = $(this).data('npm');
 
+                // Panggil AJAX untuk mengambil detail asisten berdasarkan NPM
+                $.ajax({
+                    url: '/IdentitasAsisten/GetDetails',
+                    data: { npm: npm },
+                    type: 'GET',
+                    dataType: 'html',
+                    success: function (response) {
+                        // Tampilkan detail dalam modal popup
+                        $('#modal-container').html(response);
+                        $('#modal-container').dialog({
+                            title: 'Details Asisten',
+                            modal: true,
+                            width: 400,
+                            height: 300
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Terjadi kesalahan saat memuat detail asisten.');
+                    }
+                });
+            });
+        });
+    </script>
 
-
-
-
+}
