@@ -30,20 +30,27 @@ namespace Payroll25.Controllers
 
 
         // GET: IdentitasAsistenController/Details/5
-        public ActionResult GetDetails(string npm)
+        [HttpGet]
+        public IActionResult GetDetails(string npm)
         {
-            // Panggil metode di DAO untuk mendapatkan detail asisten berdasarkan NPM
             IdentitasAsistenModel detailAsisten = DAO.GetDetails(npm);
 
             if (detailAsisten != null)
             {
-                return View(detailAsisten);
+                IndexViewModel viewModel = new IndexViewModel
+                {
+                    IdentitasAsisten = detailAsisten
+                };
+                TempData["success"] = "Berhasil mengubah data!"; 
             }
             else
             {
-                return Content("Detail asisten tidak ditemukan.");
+                TempData["error"] = "Gagal Mengambil Data";
             }
+
+            return RedirectToAction("IdentitasAsisten");
         }
+
 
         // POST: IdentitasAsisten/Create
         [HttpPost]
