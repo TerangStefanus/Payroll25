@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Payroll25.Models;
 using System.Data.SqlClient;
+using System.Security.Cryptography;
 
 namespace Payroll25.DAO
 {
@@ -39,9 +40,7 @@ namespace Payroll25.DAO
                 {
                     conn.Open();
 
-                    var query = @"SELECT * 
-                          FROM payroll.TBL_ASISTEN 
-                          WHERE NPM = @userNPM";
+                    var query = @"SELECT * FROM payroll.TBL_ASISTEN WHERE NPM = @userNPM";
 
                     var parameters = new { userNPM = npm };
 
@@ -88,6 +87,41 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+        public bool UpdateDetails(IndexViewModel viewModel,int ID_Asisten)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"UPDATE payroll.TBL_ASISTEN
+                                  SET ID_TAHUN_AKADEMIK = @ID_Tahun_Akademik, NO_SEMESTER = @no_Semester, NPM = @npm, ID_UNIT = @ID_Unit
+                                  WHERE ID_ASISTEN = @userID;";
+
+                    var parameters = new
+                    {
+                        userID = ID_Asisten,
+                        ID_Tahun_Akademik = viewModel.IdentitasAsisten.ID_TAHUN_AKADEMIK,
+                        no_Semester = viewModel.IdentitasAsisten.NO_SEMESTER,
+                        npm = viewModel.IdentitasAsisten.NPM,
+                        ID_Unit = viewModel.IdentitasAsisten.ID_UNIT
+                    };
+
+                    conn.Execute(query, parameters);
+
+                    return true; // Successfully executed the update operation
+                
+                }
+                catch (Exception)
+                {
+                    return false; // Failed to execute the update operation
+                }
+            }
+        }
+
+
+
+
 
 
 

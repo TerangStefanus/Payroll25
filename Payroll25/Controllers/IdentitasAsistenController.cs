@@ -4,6 +4,7 @@ using Payroll25.DAO;
 using Payroll25.Models;
 using System.Dynamic;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace Payroll25.Controllers
 {
@@ -41,7 +42,7 @@ namespace Payroll25.Controllers
                 {
                     IdentitasAsisten = detailAsisten
                 };
-                TempData["success"] = "Berhasil mengubah data!"; 
+                TempData["success"] = "Berhasil mengubah data!";
             }
             else
             {
@@ -57,7 +58,11 @@ namespace Payroll25.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(IndexViewModel viewModel)
         {
-            if (viewModel != null)
+            if (viewModel == null)
+            {
+                viewModel = new IndexViewModel();
+            }
+            else if (viewModel != null)
             {
                 var errors = new List<string>();
 
@@ -124,17 +129,33 @@ namespace Payroll25.Controllers
         // POST: IdentitasAsistenController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult EditDetails(IndexViewModel viewModel, int ID_Asisten)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                bool updateResult = DAO.UpdateDetails(viewModel, ID_Asisten);
+
+                if (updateResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menyimpan ke database.");
+                }
             }
-            catch
+
+            catch (Exception ex)
             {
-                return View();
+                // Handle the exception
+                ModelState.AddModelError("", "An error occurred while updating details. Please try again."); // Menambahkan pesan error ke ModelState
             }
-        }
+
+            // If the execution reaches this point, there was an error, so return the view with the updated ModelState
+            return View("Index", viewModel);
+        } 
+
+
 
         // GET: IdentitasAsistenController/Delete/5
         public ActionResult Delete(int id)
