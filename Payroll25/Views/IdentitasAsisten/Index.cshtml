@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <table class="table hidden" id="dataTable">
+    <table class="table" id="dataTable">
         <thead style="background-color: #8FA0C7">
             <tr>
                 <th>ID Asisten</th>
@@ -72,7 +72,6 @@
         <tbody>
             @foreach (var identitasAsisten in Model.IdentitasAsistenList)
             {
-                @Html.AntiForgeryToken()
                 <tr>
                     <td>@identitasAsisten.ID_ASISTEN</td>
                     <td>@identitasAsisten.ID_TAHUN_AKADEMIK</td>
@@ -82,11 +81,7 @@
                     <td>
                         <div class="d-flex">
                             <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#editModal-@(identitasAsisten.ID_ASISTEN)" id="submit">Edit</button>
-                            
-                            <form asp-action="Delete" asp-route-id="item.PrimaryKey" method="post">
-                                <button type="submit" class="btn btn-danger mr-2">Delete</button>
-                            </form>
-
+                            <button type="button" class="btn btn-danger mr-2" data-toggle="modal" data-target="#deleteModal-@(identitasAsisten.ID_ASISTEN)" id="submit">Delete</button>
                             <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#detailModal-@(identitasAsisten.ID_ASISTEN)" id="submit">Detail</button>
                         </div>
                     </td>
@@ -106,33 +101,27 @@
                                 @using (Html.BeginForm("EditDetails", "IdentitasAsisten", new { ID_Asisten = identitasAsisten.ID_ASISTEN }, FormMethod.Post))
                                 {
                                     @Html.AntiForgeryToken()
-
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
                                     <div class="form-group">
                                         <label asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="control-label"></label>
                                         <input asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="form-control" value="@identitasAsisten.ID_TAHUN_AKADEMIK" />
                                         <span asp-validation-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="text-danger"></span>
                                     </div>
-
                                     <div class="form-group">
                                         <label asp-for="IdentitasAsisten.NO_SEMESTER" class="control-label"></label>
                                         <input asp-for="IdentitasAsisten.NO_SEMESTER" class="form-control" value="@identitasAsisten.NO_SEMESTER" />
                                         <span asp-validation-for="IdentitasAsisten.NO_SEMESTER" class="text-danger"></span>
                                     </div>
-
                                     <div class="form-group">
                                         <label asp-for="IdentitasAsisten.NPM" class="control-label"></label>
                                         <input asp-for="IdentitasAsisten.NPM" class="form-control" value="@identitasAsisten.NPM" />
                                         <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
                                     </div>
-
                                     <div class="form-group">
                                         <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
                                         <input asp-for="IdentitasAsisten.ID_UNIT" class="form-control" value="@identitasAsisten.ID_UNIT" />
                                         <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
                                     </div>
-
                                     <div class="form-group">
                                         <input type="submit" value="Save" class="btn btn-primary" />
                                     </div>
@@ -142,11 +131,40 @@
                     </div>
                 </div>
 
+                <!-- Modal Delete -->
+                <div class="modal fade" id="deleteModal-@(identitasAsisten.ID_ASISTEN)" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-@(identitasAsisten.ID_ASISTEN)" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel-@(identitasAsisten.ID_ASISTEN)">Delete Confirmation</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <!-- Data passed is displayed in this part of the modal body -->
+                                <input type="text" placeholder="NPM" name="NPM" class="form-control" id="NPM" value="@identitasAsisten.NPM" hidden>
+                                <p>Apakah Anda Yakin akan menghapus data Asisten @identitasAsisten.NPM ini?</p>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <form asp-action="Delete" asp-route-ID_Asisten="@identitasAsisten.ID_ASISTEN" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             }
         </tbody>
     </table>
 
-    
+
+    <!-- Modal Details -->
     @foreach (var item in Model.IdentitasAsistenList)
     {
         @Html.AntiForgeryToken()
@@ -159,7 +177,7 @@
                             <h5 class="modal-title" id="exampleModalLabel">Detail Data</h5>
 
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
 
@@ -195,65 +213,53 @@
 
     @*@foreach (var item in Model.IdentitasAsistenList)
     {
-        @Html.AntiForgeryToken()
-        <form asp-action="EditDetails" asp-controller="IdentitasAsisten" method="post">
-            <div class="modal fade" id="editModal-@(item.ID_ASISTEN)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <form asp-action="Delete" asp-controller="IdentitasAsisten" method="post">
+            <div class="modal fade" id="deleteModal-@(item.ID_ASISTEN)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 
                 <div class="modal-dialog">
                     <div class="modal-content">
+
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Edit Data</h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Konfirmasi</h5>
 
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
 
                         <div class="modal-body">
-                            <h6 id="modal_body_@(item.ID_ASISTEN)"></h6>
-                            <div class="form-group">
-                                <label>ID Asisten</label>
-                                <input type="text" class="form-control" name="ID Asisten" value="@item.ID_ASISTEN" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>ID Tahun Akademik</label>
-                                <input type="number" name="ID_TAHUN_AKADEMIK" value="@item.ID_TAHUN_AKADEMIK" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <label>NO Semester</label>
-                                <input type="number" name="NO_SEMESTER" value="@item.NO_SEMESTER" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <label>NPM</label>
-                                <input type="text" name="NPM" value="@item.NPM" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <label>ID Unit</label>
-                                <input type="number" name="ID_UNIT" value="@item.ID_UNIT" class="form-control" />
-                            </div>
-                            <div class="d-flex">
-                                <button type="button" class="btn btn-secondary btn-sm w-100 mr-2" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-success btn-sm w-100 mr-2">Edit</button>
-                            </div>
-                            
+
+                            <!-- Data passed is displayed in this part of the modal body -->
+                            <input type="text" placeholder="NPM" name="NPM" class="form-control" id="NPM" value="@item.NPM" hidden>
+                            <p>Apakah Anda Yakin akan menghapus data Asisten @item.NPM ini?</p>
+
                         </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tidak</button>
+                            <button type="submit" class="btn btn-primary">Ya</button>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </form>
+
     }*@
 
-
     
-
-
 </body> 
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable();
+        });
+    </script>
 }
 
 

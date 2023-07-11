@@ -121,7 +121,7 @@ namespace Payroll25.Controllers
 
 
         // GET: IdentitasAsistenController/Edit/5
-        public ActionResult Edit(int id)
+        public IActionResult Edit(int id)
         {
             return View();
         }
@@ -129,7 +129,7 @@ namespace Payroll25.Controllers
         // POST: IdentitasAsistenController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditDetails(IndexViewModel viewModel, int ID_Asisten)
+        public IActionResult EditDetails(IndexViewModel viewModel, int ID_Asisten)
         {
             try
             {
@@ -145,10 +145,10 @@ namespace Payroll25.Controllers
                 }
             }
 
-            catch (Exception ex)
+            catch (Exception )
             {
                 // Handle the exception
-                ModelState.AddModelError("", "An error occurred while updating details. Please try again."); // Menambahkan pesan error ke ModelState
+                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
             }
 
             // If the execution reaches this point, there was an error, so return the view with the updated ModelState
@@ -166,16 +166,30 @@ namespace Payroll25.Controllers
         // POST: IdentitasAsistenController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(IndexViewModel viewModel, int ID_Asisten)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                bool updateResult = DAO.DeleteDetails(viewModel, ID_Asisten);
+
+                if (updateResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menghapus Data.");
+                }
             }
-            catch
+
+            catch (Exception)
             {
-                return View();
+                // Handle Error
+                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
             }
+
+            // Ketika Data di eksekusi pada point ini maka terjadi error 
+            return View("Index", viewModel);
         }
     }
 }
