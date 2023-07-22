@@ -16,28 +16,48 @@ namespace Payroll25.Controllers
             DAO = new BebanMengajarDAO();
         }
 
-        public async Task<IActionResult> Index(string prodi = null, string namaMK = null)
+        public async Task<IActionResult> Index(string prodi = null, string namaMK = null, string fakultas = null)
         {
             try
             {
                 var viewModel = new BebanViewModel();
 
-                // If both prodi and namaMK are provided
-                if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(namaMK))
+                // Jika terdapat input prodi & namaMK & fakultas lakukan tampilkan model ini 
+                if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(namaMK) && !string.IsNullOrEmpty(fakultas))
+                {
+                    viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(prodi, namaMK, fakultas);
+                }
+                // Jika terdapat input prodi & namaMK lakukan tampilkan model ini 
+                else if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(namaMK))
                 {
                     viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(prodi, namaMK);
                 }
-                // If only prodi is provided
+                // Jika terdapat input prodi & fakultas lakukan tampilkan model ini 
+                else if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(fakultas))
+                {
+                    viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(prodi, fakultas);
+                }
+                // Jika terdapat input namaMK & fakultas lakukan tampilkan model ini 
+                else if (!string.IsNullOrEmpty(namaMK) && !string.IsNullOrEmpty(fakultas))
+                {
+                    viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(namaMK, fakultas);
+                }
+                // Jika terdapat input prodi lakukan tampilkan model ini 
                 else if (!string.IsNullOrEmpty(prodi))
                 {
                     viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(prodi);
                 }
-                // If only namaMK is provided
+                // Jika terdapat input namaMK lakukan tampilkan model ini 
                 else if (!string.IsNullOrEmpty(namaMK))
                 {
                     viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(null, namaMK);
                 }
-                // If none of the parameters are provided
+                // Jika terdapat input namaMK lakukan tampilkan model ini 
+                else if (!string.IsNullOrEmpty(fakultas))
+                {
+                    viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync(null, null, fakultas);
+                }
+                // Jika tidak terdapat input tampilkan model ini
                 else
                 {
                     viewModel.BebanMengajarList = await DAO.ShowBebanMengajarAsync();
@@ -45,6 +65,7 @@ namespace Payroll25.Controllers
 
                 viewModel.ProdiFilter = prodi;
                 viewModel.NamaMKFilter = namaMK;
+                viewModel.FakultasFilter = fakultas;
 
                 return View(viewModel);
             }

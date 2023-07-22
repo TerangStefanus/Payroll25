@@ -47,22 +47,28 @@
         </div>
 
         <div class="border border-5 p-3 mb-4">
+            <h3>Cari Beban Mengajar</h3>
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                     <form id="searchForm">
-                        <div class="form-group d-flex">
-                            <label class="font-weight-bold" style="width: 200px;padding-left: 20px;padding-top: 10px;">Prodi: </label>
-                            <input type="text" class="form-control" name="prodi" style="margin-right: 15px;margin-top: 5px;" value="@Model.ProdiFilter">
-
-                            <label class="font-weight-bold" style="width: 200px;padding-left: 20px;padding-top: 10px;">Nama Mata Kuliah: </label>
-                            <input type="text" class="form-control" name="namaMK" style="margin-right: 15px;margin-top: 5px;" value="@Model.NamaMKFilter">
-
-                            <button type="button" class="btn btn-primary" id="showButton">Show</button>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Prodi:</label>
+                            <input type="text" class="form-control" name="prodi" value="@Model.ProdiFilter">
                         </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Nama Mata Kuliah:</label>
+                            <input type="text" class="form-control" name="namaMK" value="@Model.NamaMKFilter">
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Fakultas:</label>
+                            <input type="text" class="form-control" name="fakultas" value="@Model.FakultasFilter">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="showButton">Show</button>
                     </form>
                 </div>
             </div>
         </div>
+
 
 
         <!-- Tabel data beban mengajar -->

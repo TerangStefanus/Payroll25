@@ -20,6 +20,7 @@
             public BebanMengajarModel BebanMengajar { get;set;}
             public string ProdiFilter { get; set; }
             public string NamaMKFilter { get; set; }
+            public string FakultasFilter { get; set; }
         }
 
     }
