@@ -99,10 +99,10 @@
                 
             </div>
         </div>
-        <div class="text-center" style="margin-top: 30px;margin-right: 20px;margin-bottom: 20px;">
+        @*<div class="text-center" style="margin-top: 30px;margin-right: 20px;margin-bottom: 20px;">
             <button type="button" class="btn btn-primary">Search</button>
             <button type="button" class="btn btn-primary">Add</button>
-        </div>
+        </div>*@
     </div>
 
 
@@ -224,10 +224,10 @@
                         <td>
                             <div class="d-flex">
                                 <form asp-action="Edit" asp-route-id="item.PrimaryKey" method="get">
-                                    <button type="submit" class="btn btn-success mr-2">Edit</button>
+                                    <button type="submit" class="btn btn-secondary mr-2">Edit</button>
                                 </form>
                                 <form asp-action="Delete" asp-route-id="item.PrimaryKey" method="post">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <button type="submit" class="btn btn-secondary">Delete</button>
                                 </form>
                             </div>
                         </td>

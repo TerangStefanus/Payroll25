@@ -16,7 +16,7 @@ namespace Payroll25.DAO
                     // Jika Anda memiliki parameter dalam query, Anda dapat menambahkannya ke objek DynamicParameters.
                     // parameters.Add("parameterName", parameterValue);
 
-                    var query = @"SELECT TOP 20 NPP, NAMA, NAMA_LENGKAP_GELAR, 
+                    var query = @"SELECT TOP 50 NPP, NAMA, NAMA_LENGKAP_GELAR, 
                                   TGL_LAHIR, JNS_KEL, AGAMA, ID_UNIT, ID_UNIT_AKADEMIK, ID_REF_GOLONGAN, 
                                   ID_REF_JBTN_AKADEMIK, NO_TELPON_HP, NPWP, ALAMAT, USERNAME, PASSWORD, PASSWORD_RIPEM 
                                   FROM simka.MST_KARYAWAN ";

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using Payroll25.Models;
+using System.Data.SqlClient;
 
 namespace Payroll25.DAO
 {
-    public class BebanMengajarDAO
+    public class TunjanganPengabdianDAO
     {
-        public async Task<IEnumerable<BebanMengajarModel>> ShowBebanMengajarAsync(string prodi = null, string namaMK = null, string fakultas = null)
+        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync(string prodi = null, string namaMK = null, string fakultas = null)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -29,31 +26,22 @@ namespace Payroll25.DAO
                         query += "TOP 50 ";
                     }
 
-                    query += @"MKARY.[NPP],
-                            KLS.[KODE_MK],
-                            MK.[SKS],
-                            MK.[NAMA_MK],
-                            KLS.[KELAS],
-                            CONVERT(varchar, BM.[TGL_AWAL_SK], 23) AS AWAL,
-                            CONVERT(varchar, BM.[TGL_AKHIR_SK], 23) AS AKHIR
-                            FROM
-                            [PAYROLL].[simka].[MST_KARYAWAN] AS MKARY
-                            JOIN
-                            [PAYROLL].[dbo].[tbl_kelas] AS KLS ON MKARY.[NPP] = KLS.[NPP_DOSEN1]
-                            JOIN
-                            [PAYROLL].[dbo].[tbl_matakuliah] AS MK ON KLS.[KODE_MK] = MK.[KODE_MK]
-                            JOIN
-                            [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR] AS BM ON MKARY.[NPP] = BM.[NPP]
-                            JOIN
-                            [PAYROLL].[dbo].[tbl_semester_akademik] AS SA ON KLS.[ID_TAHUN_AKADEMIK] = SA.[ID_TAHUN_AKADEMIK]
-                            JOIN
-                            [PAYROLL].[dbo].[ref_prodi] AS PRD ON PRD.[ID_PRODI] = KLS.[ID_PRODI_BUAT]
-                            JOIN
-                            [PAYROLL].[dbo].[ref_fakultas] AS FKL ON FKL.[ID_FAKULTAS] = PRD.[ID_FAKULTAS]";
+                    query += @"MST_KARYAWAN.NPP,
+                               tbl_matakuliah.SKS,
+                               tbl_matakuliah.NAMA_MK,
+                               tbl_kelas.KELAS,
+                               TBL_VAKASI.JUMLAH AS Jml_Hadir,
+                               TBL_VAKASI.DATE_INSERTED AS Tgl_buat,
+                               ref_prodi.ID_UNIT AS Kode_unit
+                               FROM PAYROLL.simka.MST_KARYAWAN
+                               JOIN PAYROLL.dbo.tbl_kelas ON MST_KARYAWAN.NPP = tbl_kelas.NPP_DOSEN1
+                               JOIN PAYROLL.dbo.tbl_matakuliah ON tbl_kelas.ID_MK = tbl_matakuliah.ID_MK
+                               JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                               JOIN PAYROLL.dbo.ref_prodi ON tbl_matakuliah.ID_PRODI = ref_prodi.ID_PRODI";
 
                     if (!string.IsNullOrEmpty(prodi))
                     {
-                        query += " WHERE PRD.[PRODI] = @Prodi";
+                        query += " WHERE ref_prodi.[PRODI] = @Prodi";
                         parameters.Add("@Prodi", prodi);
                     }
 
@@ -68,7 +56,7 @@ namespace Payroll25.DAO
                             query += " WHERE";
                         }
 
-                        query += " MK.[NAMA_MK] LIKE @NamaMK";
+                        query += " tbl_matakuliah.[NAMA_MK] LIKE @NamaMK";
                         parameters.Add("@NamaMK", $"%{namaMK}%");
                     }
 
@@ -83,13 +71,13 @@ namespace Payroll25.DAO
                             query += " WHERE";
                         }
 
-                        query += " FKL.[FAKULTAS] LIKE @Fakultas";
+                        query += " tbl_matakuliah.[FAKULTAS] LIKE @Fakultas";
                         parameters.Add("@Fakultas", $"%{fakultas}%");
                     }
 
-                    query += " ORDER BY KLS.[KODE_MK] ASC ";
+                    query += " ORDER BY tbl_matakuliah.[KODE_MK] ASC ";
 
-                    var data = await conn.QueryAsync<BebanMengajarModel>(query, parameters);
+                    var data = await conn.QueryAsync<TunjanganPengabdianModel>(query, parameters);
                     return data;
                 }
                 catch (Exception)
@@ -99,6 +87,8 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+
 
     }
 }
