@@ -155,5 +155,37 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+        public async Task<IEnumerable<TunjanganPengabdianModel>> GetBulanGaji(int tahun = 0)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"SELECT 
+                                [ID_BULAN_GAJI]
+                    FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI]
+                    WHERE [ID_TAHUN] = @inputTahun";
+
+                    var parameters = new { inputTahun = tahun };
+
+                    var data = await conn.QueryAsync<int>(query, parameters);
+
+                    // Set nilai properti GET_BULAN_GAJI dengan data yang diperoleh dari database
+                    var result = data.Select(id_bulan => new TunjanganPengabdianModel
+                    {
+                        GET_BULAN_GAJI = id_bulan
+                    });
+
+                    return result.ToList();
+                }
+                catch (Exception)
+                {
+                    // Handle exceptions here
+                    return Enumerable.Empty<TunjanganPengabdianModel>();
+                }
+            }
+        }
+
     }
 }

@@ -76,9 +76,25 @@
 
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                             <label asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="control-label"></label>
-                            <input asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="form-control" />
+                            <select asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="form-control">
+                                <option value="">Pilih ID Bulan Gaji</option>
+                                @foreach (var bulanGaji in Model.TunjanganPengabdianList)
+                                {
+                                    <option value="@bulanGaji.ID_BULAN_GAJI">@bulanGaji.ID_BULAN_GAJI</option>
+                                }
+                            </select>
                             <span asp-validation-for="TunjanganPengabdian.ID_BULAN_GAJI" class="text-danger"></span>
                         </div>
+
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label class="control-label">Tahun</label>
+                            <input type="number" class="form-control" id="tahunInput" />
+                        </div>
+
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <button type="button" class="btn btn-primary" onclick="getCariBulanGaji()">Search Tahun</button>
+                        </div>
+
 
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                             <label asp-for="TunjanganPengabdian.JUMLAH" class="control-label"></label>
@@ -200,6 +216,17 @@
                     options += "<option value='" + data[i].id + "'>" + data[i].id + "</option>";
                 }
                 $("#TunjanganPengabdian_ID_KOMPONEN_GAJI").html(options);
+            });
+        }
+
+        function getCariBulanGaji() {
+            var tahun = $("#tahunInput").val();
+            $.get("/TunjanganPengabdian/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
+                var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                for (var i = 0; i < data.length; i++) {
+                    options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + "</option>";
+                }
+                $("#TunjanganPengabdian_ID_BULAN_GAJI").html(options);
             });
         }
 

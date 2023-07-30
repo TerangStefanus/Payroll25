@@ -20,6 +20,8 @@
 
         public int ID_BULAN_GAJI { get; set; }
 
+        public int GET_BULAN_GAJI { get; set; }// Untuk Dropdown GetBulanGaji
+
         //public string NPP { get; set; } sudah ada 
 
         public float JUMLAH { get; set; }

@@ -55,7 +55,7 @@ namespace Payroll25.Controllers
             return View(viewModel);
         }
 
-        // Metode untuk mengirimkan data Komponen Gaji berdasarkan NPP ke view dalam bentuk dropdown
+        // Metode untuk mengirimkan ID Komponen Gaji berdasarkan NPP ke view dalam bentuk dropdown
         [HttpGet]
         public async Task<IActionResult> GetKomponenGajiDropdown(string npp)
         {
@@ -65,6 +65,26 @@ namespace Payroll25.Controllers
 
                 // Pastikan model yang dikembalikan sesuai dengan model yang digunakan di view
                 var result = komponenGajiList.Select(k => new { id = k.GET_KOMPONEN_GAJI });
+
+                return Json(result);
+            }
+            catch (Exception)
+            {
+                // Handle exceptions here
+                return BadRequest("Failed to get Komponen Gaji data.");
+            }
+        }
+
+        // Metode untuk mengirimkan ID Bulan Gaji berdasarkan NPP ke view dalam bentuk dropdown
+        [HttpGet]
+        public async Task<IActionResult> GetBulanGajiDropdown(int tahun)
+        {
+            try
+            {
+                var bulanGajiList = await DAO.GetBulanGaji(tahun);
+
+                // Pastikan model yang dikembalikan sesuai dengan model yang digunakan di view
+                var result = bulanGajiList.Select(k => new { id_bulan = k.GET_BULAN_GAJI });
 
                 return Json(result);
             }
