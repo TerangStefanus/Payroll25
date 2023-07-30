@@ -26,7 +26,7 @@ namespace Payroll25.DAO
                     else
                     {
                         // Data diambil 0 karena menghindari out of memory
-                        query += "TOP 50 ";
+                        query += "TOP 0 ";
                     }
 
                     query += @"MKARY.[NPP],

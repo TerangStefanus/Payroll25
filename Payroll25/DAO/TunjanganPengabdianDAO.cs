@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Humanizer;
 using Payroll25.Models;
 using System.Data.SqlClient;
 
@@ -23,7 +24,7 @@ namespace Payroll25.DAO
                     else
                     {
                         // Data diambil 0 karena menghindari out of memory
-                        query += "TOP 50 ";
+                        query += "TOP 0 ";
                     }
 
                     query += @"MST_KARYAWAN.NPP,
@@ -37,7 +38,8 @@ namespace Payroll25.DAO
                                JOIN PAYROLL.dbo.tbl_kelas ON MST_KARYAWAN.NPP = tbl_kelas.NPP_DOSEN1
                                JOIN PAYROLL.dbo.tbl_matakuliah ON tbl_kelas.ID_MK = tbl_matakuliah.ID_MK
                                JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                               JOIN PAYROLL.dbo.ref_prodi ON tbl_matakuliah.ID_PRODI = ref_prodi.ID_PRODI";
+                               JOIN PAYROLL.dbo.ref_prodi ON tbl_matakuliah.ID_PRODI = ref_prodi.ID_PRODI
+                               JOIN PAYROLL.dbo.ref_fakultas ON ref_fakultas.ID_FAKULTAS = ref_prodi.ID_FAKULTAS";
 
                     if (!string.IsNullOrEmpty(prodi))
                     {
@@ -71,7 +73,7 @@ namespace Payroll25.DAO
                             query += " WHERE";
                         }
 
-                        query += " tbl_matakuliah.[FAKULTAS] LIKE @Fakultas";
+                        query += " ref_fakultas.[FAKULTAS] LIKE @Fakultas";
                         parameters.Add("@Fakultas", $"%{fakultas}%");
                     }
 
@@ -88,7 +90,70 @@ namespace Payroll25.DAO
             }
         }
 
+        public bool InsertVakasi(TunjanganPengabdianModel.TunjanganViewModel viewModel)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    conn.Open();
 
+                    var query = @"INSERT INTO payroll.TBL_VAKASI
+                                    (ID_KOMPONEN_GAJI, ID_BULAN_GAJI,NPP, JUMLAH, DATE_INSERTED,DESKRIPSI) 
+                                    VALUES 
+                                    (@ID_KOMPONEN_GAJI, @ID_BULAN_GAJI, @NPP, @JUMLAH,@DATE_INSERTED,@DESKRIPSI)";
 
+                    var parameters = new
+                    {
+                        ID_KOMPONEN_GAJI = viewModel.TunjanganPengabdian.ID_KOMPONEN_GAJI,
+                        ID_BULAN_GAJI = viewModel.TunjanganPengabdian.ID_BULAN_GAJI,
+                        NPP = viewModel.TunjanganPengabdian.NPP,
+                        JUMLAH = viewModel.TunjanganPengabdian.JUMLAH,
+                        DATE_INSERTED = DateTime.Now,
+                        DESKRIPSI = viewModel.TunjanganPengabdian.DESKRIPSI
+                    };
+
+                    conn.Execute(query, parameters);
+
+                    return true; // Berhasil melakukan insert
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false; // Gagal melakukan insert
+                }
+            }
+        }
+
+        public async Task<IEnumerable<TunjanganPengabdianModel>> GetKomponenGaji(string npp = null)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"SELECT 
+                            [ID_KOMPONEN_GAJI]
+                            FROM [PAYROLL].[payroll].[TBL_KOMPONEN_GAJI_KARY]
+                            WHERE [NPP] = @inputNPP";
+
+                    var parameters = new { inputNPP = npp };
+
+                    var data = await conn.QueryAsync<int>(query, parameters);
+
+                    // Set nilai properti GET_KOMPONEN_GAJI dengan data yang diperoleh dari database
+                    var result = data.Select(id => new TunjanganPengabdianModel
+                    {
+                        GET_KOMPONEN_GAJI = id
+                    });
+
+                    return result.ToList();
+                }
+                catch (Exception)
+                {
+                    // Handle exceptions here
+                    return Enumerable.Empty<TunjanganPengabdianModel>();
+                }
+            }
+        }
     }
 }

@@ -70,8 +70,6 @@
             </div>
         </div>
 
-
-
         <!-- Tabel data beban mengajar -->
         <table class="table" id="dataTable">
             <thead style="background-color: #8FA0C7">
@@ -87,7 +85,33 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model.BebanMengajarList == null || !Model.BebanMengajarList.Any())
+                @for (int i = 0; i < Model.BebanMengajarList.Count(); i++)
+                {
+                    var bebanMengajar = Model.BebanMengajarList.ElementAt(i);
+                    <tr>
+                        <td>@bebanMengajar.NPP</td>
+                        <td>@bebanMengajar.KODE_MK</td>
+                        <td>@bebanMengajar.SKS</td>
+                        <td>@bebanMengajar.NAMA_MK</td>
+                        <td>@bebanMengajar.KELAS</td>
+                        <td>@bebanMengajar.AWAL</td>
+                        <td>@bebanMengajar.AKHIR</td>
+                        <td>
+                            <div class="d-flex">
+                                <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#editModal-@(bebanMengajar.NPP)" id="editButton-@(bebanMengajar.NPP)">Edit</button>
+                                <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#deleteModal-@(bebanMengajar.NPP)" id="deleteButton-@(bebanMengajar.NPP)">Delete</button>
+                                <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#detailModal-@(bebanMengajar.NPP)" id="detailButton-@(bebanMengajar.NPP)">Detail</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- TODO -->
+                    <!-- Modal Edit/Update bisa ditambahkan di sini -->
+                    <!-- TODO -->
+                    <!-- Modal Delete bisa ditambahkan di sini -->
+                }
+
+                @*@if (Model.BebanMengajarList == null || !Model.BebanMengajarList.Any())
                 {
                     <tr>
                         <td colspan="8" class="text-center">No data found.</td>
@@ -121,7 +145,7 @@
                         <!-- TODO -->
                         <!-- Modal Delete bisa ditambahkan di sini -->
                     }
-                }
+                }*@
             </tbody>
         </table>
     </div>

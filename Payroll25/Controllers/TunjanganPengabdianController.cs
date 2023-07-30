@@ -21,52 +21,13 @@ namespace Payroll25.Controllers
         {
             try
             {
-                var viewModel = new TunjanganViewModel();
-
-                // Jika terdapat input prodi & namaMK & fakultas lakukan tampilkan model ini 
-                if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(namaMK) && !string.IsNullOrEmpty(fakultas))
+                var viewModel = new TunjanganViewModel
                 {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(prodi, namaMK, fakultas);
-                }
-                // Jika terdapat input prodi & namaMK lakukan tampilkan model ini 
-                else if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(namaMK))
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(prodi, namaMK);
-                }
-                // Jika terdapat input prodi & fakultas lakukan tampilkan model ini 
-                else if (!string.IsNullOrEmpty(prodi) && !string.IsNullOrEmpty(fakultas))
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(prodi, fakultas);
-                }
-                // Jika terdapat input namaMK & fakultas lakukan tampilkan model ini 
-                else if (!string.IsNullOrEmpty(namaMK) && !string.IsNullOrEmpty(fakultas))
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(namaMK, fakultas);
-                }
-                // Jika terdapat input prodi lakukan tampilkan model ini 
-                else if (!string.IsNullOrEmpty(prodi))
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(prodi);
-                }
-                // Jika terdapat input namaMK lakukan tampilkan model ini 
-                else if (!string.IsNullOrEmpty(namaMK))
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(null, namaMK);
-                }
-                // Jika terdapat input namaMK lakukan tampilkan model ini 
-                else if (!string.IsNullOrEmpty(fakultas))
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(null, null, fakultas);
-                }
-                // Jika tidak terdapat input tampilkan model ini
-                else
-                {
-                    viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync();
-                }
-
-                viewModel.ProdiFilter = prodi;
-                viewModel.NamaMKFilter = namaMK;
-                viewModel.FakultasFilter = fakultas;
+                    TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(prodi, namaMK, fakultas),
+                    ProdiFilter = prodi,
+                    NamaMKFilter = namaMK,
+                    FakultasFilter = fakultas
+                };
 
                 return View(viewModel);
             }
@@ -83,67 +44,104 @@ namespace Payroll25.Controllers
             return View();
         }
 
-        // GET: TunjanganPengabdianController/Create
-        public ActionResult Create()
+        // GET: TunjanganPengabdian/Create
+        public async Task<IActionResult> Create(string npp)
         {
-            return View();
+            var viewModel = new TunjanganViewModel();
+
+            // Mendapatkan data Komponen Gaji berdasarkan NPP dan mengisi dropdown
+            viewModel.TunjanganPengabdianList = await DAO.GetKomponenGaji(npp);
+
+            return View(viewModel);
         }
 
-        // POST: TunjanganPengabdianController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // Metode untuk mengirimkan data Komponen Gaji berdasarkan NPP ke view dalam bentuk dropdown
+        [HttpGet]
+        public async Task<IActionResult> GetKomponenGajiDropdown(string npp)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var komponenGajiList = await DAO.GetKomponenGaji(npp);
+
+                // Pastikan model yang dikembalikan sesuai dengan model yang digunakan di view
+                var result = komponenGajiList.Select(k => new { id = k.GET_KOMPONEN_GAJI });
+
+                return Json(result);
             }
-            catch
+            catch (Exception)
             {
-                return View();
+                // Handle exceptions here
+                return BadRequest("Failed to get Komponen Gaji data.");
             }
         }
 
-        // GET: TunjanganPengabdianController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: TunjanganPengabdianController/Edit/5
+        // POST: TunjanganPengabdian/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Create(TunjanganViewModel viewModel)
         {
-            try
+            if (viewModel == null)
             {
-                return RedirectToAction(nameof(Index));
+                viewModel = new TunjanganViewModel();
             }
-            catch
+            else if (viewModel != null)
             {
-                return View();
-            }
-        }
+                var errors = new List<string>();
 
-        // GET: TunjanganPengabdianController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+                if (viewModel.TunjanganPengabdian.ID_KOMPONEN_GAJI == 0)
+                {
+                    errors.Add("ID Komponen Gaji harus diisi.");
 
-        // POST: TunjanganPengabdianController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
+                }
+
+                if (viewModel.TunjanganPengabdian.ID_BULAN_GAJI == 0)
+                {
+                    errors.Add("ID BULAN GAJI harus diisi.");
+
+                }
+
+                if (string.IsNullOrEmpty(viewModel.TunjanganPengabdian.NPP))
+                {
+                    errors.Add("NPP harus diisi.");
+
+                }
+
+                if (viewModel.TunjanganPengabdian.JUMLAH == 0)
+                {
+                    errors.Add("Masukan Jumlah harus diisi.");
+                }
+
+                if (errors.Count == 0)
+                {
+                    // Melakukan insert Identitas Asisten ke database menggunakan objek viewModel
+                    bool insertResult = await Task.Run(() => DAO.InsertVakasi(viewModel));
+
+                    if (insertResult)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "TERJADI KESALAHAN SAAT MENYIMPAN DATA PADA DATABASE.");
+                    }
+                }
+                else
+                {
+                    foreach (var error in errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error);
+                    }
+                }
+
             }
-            catch
+            else
             {
-                return View();
+                return BadRequest("Data tidak valid. Mohon isi formulir dengan benar.");
             }
+
+            // Gunakan await dan .Result untuk mendapatkan hasil dari metode asynchronous
+            viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync();
+            return View("Index", viewModel);
         }
     }
 }
