@@ -32,7 +32,7 @@ namespace Payroll25.DAO
                                tbl_matakuliah.NAMA_MK,
                                tbl_kelas.KELAS,
                                TBL_VAKASI.JUMLAH AS Jml_Hadir,
-                               TBL_VAKASI.DATE_INSERTED AS Tgl_buat,
+                               CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS Tgl_buat,
                                ref_prodi.ID_UNIT AS Kode_unit
                                FROM PAYROLL.simka.MST_KARYAWAN
                                JOIN PAYROLL.dbo.tbl_kelas ON MST_KARYAWAN.NPP = tbl_kelas.NPP_DOSEN1
@@ -186,6 +186,5 @@ namespace Payroll25.DAO
                 }
             }
         }
-
     }
 }

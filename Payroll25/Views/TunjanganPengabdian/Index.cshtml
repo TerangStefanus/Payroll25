@@ -42,7 +42,7 @@
         <h1 class="my-4">Tunjangan Pengabdian</h1>
 
         <div class="border border-5 p-3 mb-4">
-            <h3>Tambah Tunjangan Pengabdian</h3>
+            <h3>Tambah Vakasi</h3>
             <!-- TODO -->
             <!-- Form tambah beban mengajar bisa ditambahkan di sini -->
         </div>
@@ -74,27 +74,23 @@
                             <span asp-validation-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <label asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="control-label"></label>
-                            <select asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="form-control">
-                                <option value="">Pilih ID Bulan Gaji</option>
-                                @foreach (var bulanGaji in Model.TunjanganPengabdianList)
-                                {
-                                    <option value="@bulanGaji.ID_BULAN_GAJI">@bulanGaji.ID_BULAN_GAJI</option>
-                                }
-                            </select>
-                            <span asp-validation-for="TunjanganPengabdian.ID_BULAN_GAJI" class="text-danger"></span>
+                        <div class="form-group row">
+                            <div class="col-sm-6 mx-auto">
+                                <label asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="control-label"></label>
+                                <select asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="form-control" id="bulanGajiDropdown">
+                                    <option value="">Pilih ID Bulan Gaji</option>
+                                    @foreach (var bulanGaji in Model.TunjanganPengabdianList)
+                                    {
+                                        <option value="@bulanGaji.ID_BULAN_GAJI">@bulanGaji.ID_BULAN_GAJI</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="TunjanganPengabdian.ID_BULAN_GAJI" class="text-danger"></span>
+                            </div>
+                            <div class="col-sm-6 mx-auto">
+                                <label class="control-label">Tahun</label>
+                                <input type="number" class="form-control" id="tahunInput" />
+                            </div>
                         </div>
-
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <label class="control-label">Tahun</label>
-                            <input type="number" class="form-control" id="tahunInput" />
-                        </div>
-
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <button type="button" class="btn btn-primary" onclick="getCariBulanGaji()">Search Tahun</button>
-                        </div>
-
 
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                             <label asp-for="TunjanganPengabdian.JUMLAH" class="control-label"></label>
@@ -110,7 +106,7 @@
 
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                             <input type="submit" value="Create" class="btn btn-primary" />
-                            <button type="button" class="btn btn-primary" onclick="getCariKomponenGaji()">Search Input</button>
+                            <button type="button" class="btn btn-primary" onclick="getCariData()">Search</button>
                         </div>
                     }
                 </div>
@@ -122,10 +118,77 @@
             <div class="row">
                 <div class="col-sm-4">
                     <form id="searchForm" method="get" asp-action="Index" asp-controller="TunjanganPengabdian">
+                        
                         <div class="form-group">
                             <label class="font-weight-bold">Fakultas:</label>
-                            <input type="text" class="form-control" name="fakultas" value="@Model.FakultasFilter">
+                            <select class="form-control" name="fakultas">
+                                <option value="">Pilih Fakultas</option>
+                                @if (Model.FakultasFilter == "teknologi_industri")
+                                {
+                                    <option value="teknologi_industri" selected>Teknologi Industri</option>
+                                }
+                                else
+                                {
+                                    <option value="teknologi_industri">Teknologi Industri</option>
+                                }
+
+                                @if (Model.FakultasFilter == "bisnis_ekonomika")
+                                {
+                                    <option value="bisnis_ekonomika" selected>Bisnis dan Ekonomika</option>
+                                }
+                                else
+                                {
+                                    <option value="bisnis_ekonomika">Bisnis dan Ekonomika</option>
+                                }
+
+                                @if (Model.FakultasFilter == "hukum")
+                                {
+                                    <option value="hukum" selected>Hukum</option>
+                                }
+                                else
+                                {
+                                    <option value="hukum">Hukum</option>
+                                }
+
+                                @if (Model.FakultasFilter == "teknobiologi")
+                                {
+                                    <option value="teknobiologi" selected>Teknobiologi</option>
+                                }
+                                else
+                                {
+                                    <option value="teknobiologi">Teknobiologi</option>
+                                }
+
+                                @if (Model.FakultasFilter == "teknik")
+                                {
+                                    <option value="teknik" selected>Teknik</option>
+                                }
+                                else
+                                {
+                                    <option value="teknik">Teknik</option>
+                                }
+
+                                @if (Model.FakultasFilter == "ilmu_sosial_dan_politik")
+                                {
+                                    <option value="ilmu_sosial_dan_politik" selected>Ilmu Sosial dan Politik</option>
+                                }
+                                else
+                                {
+                                    <option value="ilmu_sosial_dan_politik">Ilmu Sosial dan Politik</option>
+                                }
+
+                                @if (Model.FakultasFilter == "program_pascasarjana")
+                                {
+                                    <option value="program_pascasarjana" selected>Program Pascasarjana</option>
+                                }
+                                else
+                                {
+                                    <option value="program_pascasarjana">Program Pascasarjana</option>
+                                }
+                            </select>
                         </div>
+
+
                         <div class="form-group">
                             <label class="font-weight-bold">Prodi:</label>
                             <input type="text" class="form-control" name="prodi" value="@Model.ProdiFilter">
@@ -208,8 +271,10 @@
             }
         });
 
-        function getCariKomponenGaji() {
+        function getCariData() {
             var npp = $("#nppInput").val();
+            var tahun = $("#tahunInput").val();
+
             $.get("/TunjanganPengabdian/GetKomponenGajiDropdown", { npp: npp }, function (data) {
                 var options = "<option value=''>Pilih Komponen Gaji</option>";
                 for (var i = 0; i < data.length; i++) {
@@ -217,18 +282,16 @@
                 }
                 $("#TunjanganPengabdian_ID_KOMPONEN_GAJI").html(options);
             });
-        }
 
-        function getCariBulanGaji() {
-            var tahun = $("#tahunInput").val();
             $.get("/TunjanganPengabdian/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
                 var options = "<option value=''>Pilih ID Bulan Gaji</option>";
                 for (var i = 0; i < data.length; i++) {
                     options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + "</option>";
                 }
-                $("#TunjanganPengabdian_ID_BULAN_GAJI").html(options);
+                $("#bulanGajiDropdown").html(options);
             });
         }
+
 
     </script>
 }
