@@ -7,79 +7,32 @@ namespace Payroll25.DAO
 {
     public class TunjanganPengabdianDAO
     {
-        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync(string prodi = null, string namaMK = null, string fakultas = null)
+        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync()
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
                 try
                 {
                     var parameters = new DynamicParameters();
-                    string query = @"SELECT ";
 
-                    if (!string.IsNullOrEmpty(prodi) || !string.IsNullOrEmpty(namaMK) || !string.IsNullOrEmpty(fakultas))
-                    {
-                        // Data diambil 1000 atau kurang karena menghindari penggunaan memory berlebih
-                        query += "TOP 1000 ";
-                    }
-                    else
-                    {
-                        // Data diambil 0 karena menghindari out of memory
-                        query += "TOP 0 ";
-                    }
+                    var query = @"SELECT
+                                 TBL_VAKASI.ID_VAKASI,
+                                 MST_KARYAWAN.NPP,
+	                             TBL_VAKASI.ID_BULAN_GAJI,
+	                             TBL_VAKASI.JUMLAH AS Jml_Hadir,
+                                 CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS Tgl_buat,
+	                             TBL_VAKASI.DESKRIPSI
+                                 FROM 
+                                    PAYROLL.simka.MST_KARYAWAN
+                                 JOIN 
+                                    PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                                 JOIN 
+                                    PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                                 WHERE 
+                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 74";
 
-                    query += @"MST_KARYAWAN.NPP,
-                               tbl_matakuliah.SKS,
-                               tbl_matakuliah.NAMA_MK,
-                               tbl_kelas.KELAS,
-                               TBL_VAKASI.JUMLAH AS Jml_Hadir,
-                               CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS Tgl_buat,
-                               ref_prodi.ID_UNIT AS Kode_unit
-                               FROM PAYROLL.simka.MST_KARYAWAN
-                               JOIN PAYROLL.dbo.tbl_kelas ON MST_KARYAWAN.NPP = tbl_kelas.NPP_DOSEN1
-                               JOIN PAYROLL.dbo.tbl_matakuliah ON tbl_kelas.ID_MK = tbl_matakuliah.ID_MK
-                               JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                               JOIN PAYROLL.dbo.ref_prodi ON tbl_matakuliah.ID_PRODI = ref_prodi.ID_PRODI
-                               JOIN PAYROLL.dbo.ref_fakultas ON ref_fakultas.ID_FAKULTAS = ref_prodi.ID_FAKULTAS";
+                    var data = conn.Query<TunjanganPengabdianModel>(query, parameters).ToList();
 
-                    if (!string.IsNullOrEmpty(prodi))
-                    {
-                        query += " WHERE ref_prodi.[PRODI] = @Prodi";
-                        parameters.Add("@Prodi", prodi);
-                    }
-
-                    if (!string.IsNullOrEmpty(namaMK))
-                    {
-                        if (!string.IsNullOrEmpty(prodi))
-                        {
-                            query += " AND";
-                        }
-                        else
-                        {
-                            query += " WHERE";
-                        }
-
-                        query += " tbl_matakuliah.[NAMA_MK] LIKE @NamaMK";
-                        parameters.Add("@NamaMK", $"%{namaMK}%");
-                    }
-
-                    if (!string.IsNullOrEmpty(fakultas))
-                    {
-                        if (!string.IsNullOrEmpty(prodi) || !string.IsNullOrEmpty(namaMK))
-                        {
-                            query += " AND";
-                        }
-                        else
-                        {
-                            query += " WHERE";
-                        }
-
-                        query += " ref_fakultas.[FAKULTAS] LIKE @Fakultas";
-                        parameters.Add("@Fakultas", $"%{fakultas}%");
-                    }
-
-                    query += " ORDER BY tbl_matakuliah.[KODE_MK] ASC ";
-
-                    var data = await conn.QueryAsync<TunjanganPengabdianModel>(query, parameters);
                     return data;
                 }
                 catch (Exception)
@@ -125,37 +78,6 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<IEnumerable<TunjanganPengabdianModel>> GetKomponenGaji(string npp = null)
-        {
-            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-            {
-                try
-                {
-                    var query = @"SELECT 
-                            [ID_KOMPONEN_GAJI]
-                            FROM [PAYROLL].[payroll].[TBL_KOMPONEN_GAJI_KARY]
-                            WHERE [NPP] = @inputNPP";
-
-                    var parameters = new { inputNPP = npp };
-
-                    var data = await conn.QueryAsync<int>(query, parameters);
-
-                    // Set nilai properti GET_KOMPONEN_GAJI dengan data yang diperoleh dari database
-                    var result = data.Select(id => new TunjanganPengabdianModel
-                    {
-                        GET_KOMPONEN_GAJI = id
-                    });
-
-                    return result.ToList();
-                }
-                catch (Exception)
-                {
-                    // Handle exceptions here
-                    return Enumerable.Empty<TunjanganPengabdianModel>();
-                }
-            }
-        }
-
         public async Task<IEnumerable<TunjanganPengabdianModel>> GetBulanGaji(int tahun = 0)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -164,8 +86,8 @@ namespace Payroll25.DAO
                 {
                     var query = @"SELECT 
                                 [ID_BULAN_GAJI]
-                    FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI]
-                    WHERE [ID_TAHUN] = @inputTahun";
+                                FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI]
+                                WHERE [ID_TAHUN] = @inputTahun";
 
                     var parameters = new { inputTahun = tahun };
 
@@ -186,5 +108,42 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+        public bool UpdateVakasiTunjangan(TunjanganPengabdianModel.TunjanganViewModel viewModel, int ID_Vakasi)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"UPDATE payroll.TBL_VAKASI
+                                 SET 
+                                 ID_BULAN_GAJI = @ID_BULAN_GAJI, 
+                                 JUMLAH = @JUMLAH, 
+                                 DATE_INSERTED = @DATE_INSERTED, 
+                                 DESKRIPSI = @DESKRIPSI
+                                 WHERE ID_VAKASI = @userID;";
+
+                    var parameters = new
+                    {
+                        userID = ID_Vakasi,
+                        //ID_KOMPONEN_GAJI = viewModel.TunjanganPengabdian.ID_KOMPONEN_GAJI,
+                        ID_BULAN_GAJI = viewModel.TunjanganPengabdian.ID_BULAN_GAJI,
+                        JUMLAH = viewModel.TunjanganPengabdian.JUMLAH,
+                        DATE_INSERTED = DateTime.Now,
+                        DESKRIPSI = viewModel.TunjanganPengabdian.DESKRIPSI
+                    };
+
+                    conn.Execute(query, parameters);
+
+                    return true; // Successfully executed the update operation
+
+                }
+                catch (Exception)
+                {
+                    return false; // Failed to execute the update operation
+                }
+            }
+        }
+
     }
 }

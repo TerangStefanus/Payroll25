@@ -17,16 +17,14 @@ namespace Payroll25.Controllers
             DAO = new TunjanganPengabdianDAO();
         }
 
-        public async Task<IActionResult> Index(string prodi = null, string namaMK = null, string fakultas = null)
+        public async Task<IActionResult> Index()
         {
             try
             {
                 var viewModel = new TunjanganViewModel
                 {
-                    TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(prodi, namaMK, fakultas),
-                    ProdiFilter = prodi,
-                    NamaMKFilter = namaMK,
-                    FakultasFilter = fakultas
+                    TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(),
+                    TunjanganPengabdian = new TunjanganPengabdianModel()
                 };
 
                 return View(viewModel);
@@ -44,38 +42,8 @@ namespace Payroll25.Controllers
             return View();
         }
 
-        // GET: TunjanganPengabdian/Create
-        public async Task<IActionResult> Create(string npp)
-        {
-            var viewModel = new TunjanganViewModel();
 
-            // Mendapatkan data Komponen Gaji berdasarkan NPP dan mengisi dropdown
-            viewModel.TunjanganPengabdianList = await DAO.GetKomponenGaji(npp);
-
-            return View(viewModel);
-        }
-
-        // Metode untuk mengirimkan ID Komponen Gaji berdasarkan NPP ke view dalam bentuk dropdown
-        [HttpGet]
-        public async Task<IActionResult> GetKomponenGajiDropdown(string npp)
-        {
-            try
-            {
-                var komponenGajiList = await DAO.GetKomponenGaji(npp);
-
-                // Pastikan model yang dikembalikan sesuai dengan model yang digunakan di view
-                var result = komponenGajiList.Select(k => new { id = k.GET_KOMPONEN_GAJI });
-
-                return Json(result);
-            }
-            catch (Exception)
-            {
-                // Handle exceptions here
-                return BadRequest("Failed to get Komponen Gaji data.");
-            }
-        }
-
-        // Metode untuk mengirimkan ID Bulan Gaji berdasarkan NPP ke view dalam bentuk dropdown
+        // Metode untuk mengirimkan ID Bulan Gaji berdasarkan input Tahun ke view dalam bentuk dropdown
         [HttpGet]
         public async Task<IActionResult> GetBulanGajiDropdown(int tahun)
         {
@@ -161,6 +129,34 @@ namespace Payroll25.Controllers
 
             // Gunakan await dan .Result untuk mendapatkan hasil dari metode asynchronous
             viewModel.TunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync();
+            return View("Index", viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditDetails(TunjanganViewModel viewModel, int ID_Vakasi)
+        {
+            try
+            {
+                bool updateResult = DAO.UpdateVakasiTunjangan(viewModel,ID_Vakasi);
+
+                if (updateResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menyimpan ke database.");
+                }
+            }
+
+            catch (Exception)
+            {
+                // Handle the exception
+                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
+            }
+
+            // If the execution reaches this point, there was an error, so return the view with the updated ModelState
             return View("Index", viewModel);
         }
     }
