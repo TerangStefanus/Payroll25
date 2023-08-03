@@ -145,5 +145,29 @@ namespace Payroll25.DAO
             }
         }
 
+        public bool DeleteVakasiTunjangan(TunjanganPengabdianModel.TunjanganViewModel viewModel, int ID_Vakasi)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"DELETE FROM payroll.TBL_VAKASI
+                                  WHERE ID_VAKASI = @userID;";
+
+                    var parameters = new { userID = ID_Vakasi };
+
+                    conn.Execute(query, parameters);
+
+                    return true; // Successfully executed the update operation
+
+                }
+                catch (Exception)
+                {
+                    return false; // Failed to execute the update operation
+                }
+            }
+        }
+
+
     }
 }

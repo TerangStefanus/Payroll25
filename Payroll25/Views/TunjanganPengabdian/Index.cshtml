@@ -60,7 +60,7 @@
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                             <label asp-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="control-label"></label>
                             <select asp-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="form-control">
-                                <option value="">Pilih Komponen Gaji</option>
+ @*                               <option value="">Pilih Komponen Gaji</option>*@
                                 <option value="74">74 - Tunjangan Pengabdian</option>
                             </select>
                             <span asp-validation-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="text-danger"></span>
@@ -131,8 +131,8 @@
                         <td>
                             <div class="d-flex">
                                 <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#editModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Edit</button>
-                                <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#deleteModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Delete</button>
-                                <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#detailModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Detail</button>
+                                <button type="button" class="btn btn-danger mr-2" data-toggle="modal" data-target="#deleteModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Delete</button>
+                                @*<button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#detailModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Detail</button>*@
                             </div>
                         </td>
                     </tr>
@@ -177,9 +177,33 @@
                         </div>
                     </div>
 
-
-                    <!-- TODO -->
                     <!-- Modal Delete bisa ditambahkan di sini -->
+                    <div class="modal fade" id="deleteModal-@(tunjanganPengabdian.ID_VAKASI)" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-@(tunjanganPengabdian.ID_VAKASI)" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel-@(tunjanganPengabdian.ID_VAKASI)">Delete Confirmation</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+
+                                    <!-- Data passed is displayed in this part of the modal body -->
+                                    <input type="text" placeholder="NPP" name="NPP" class="form-control" id="NPP" value="@tunjanganPengabdian.NPP" hidden>
+                                    <p>Apakah Anda Yakin akan menghapus data Vakasi Tunjangan Pengabdian dengan @tunjanganPengabdian.NPP ini?</p>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <form asp-action="Delete" asp-route-ID_Vakasi="@tunjanganPengabdian.ID_VAKASI" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
             </tbody>
         </table>
@@ -194,6 +218,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
     <script>
+
         $(document).ready(function () {
             $('#dataTable').DataTable();
             $('#showButton').click(function () {

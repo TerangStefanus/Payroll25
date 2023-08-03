@@ -159,5 +159,34 @@ namespace Payroll25.Controllers
             // If the execution reaches this point, there was an error, so return the view with the updated ModelState
             return View("Index", viewModel);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(TunjanganViewModel viewModel, int ID_Vakasi)
+        {
+            try
+            {
+                bool updateResult = DAO.DeleteVakasiTunjangan(viewModel, ID_Vakasi);
+
+                if (updateResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menghapus Data.");
+                }
+            }
+
+            catch (Exception)
+            {
+                // Handle Error
+                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
+            }
+
+            // Ketika Data di eksekusi pada point ini maka terjadi error 
+            return View("Index", viewModel);
+        }
+
     }
 }
