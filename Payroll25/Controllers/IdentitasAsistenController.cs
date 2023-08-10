@@ -23,7 +23,8 @@ namespace Payroll25.Controllers
             var viewModel = new IndexViewModel
             {
                 IdentitasAsistenList = DAO.ShowIdentitasAssisten(),
-                IdentitasAsisten = new IdentitasAsistenModel()
+                IdentitasAsisten = new IdentitasAsistenModel(),
+                UnitsList = (List<IdentitasAsistenModel>)DAO.GetUnit()
             };
 
             return View(viewModel);
@@ -84,6 +85,21 @@ namespace Payroll25.Controllers
                 if (viewModel.IdentitasAsisten.ID_UNIT == 0)
                 {
                     errors.Add("ID Unit harus diisi.");
+                }
+
+                if (string.IsNullOrEmpty(viewModel.IdentitasAsisten.NO_REKENING))
+                {
+                    errors.Add("NO_REKENING harus diisi.");
+                }
+
+                if (string.IsNullOrEmpty(viewModel.IdentitasAsisten.NAMA_REKENING))
+                {
+                    errors.Add("NAMA_REKENING harus diisi.");
+                }
+
+                if (string.IsNullOrEmpty(viewModel.IdentitasAsisten.NAMA_BANK))
+                {
+                    errors.Add("NAMA_BANK harus diisi.");
                 }
 
 
@@ -191,5 +207,8 @@ namespace Payroll25.Controllers
             // Ketika Data di eksekusi pada point ini maka terjadi error 
             return View("Index", viewModel);
         }
+
+
+
     }
 }

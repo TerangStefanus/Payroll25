@@ -52,6 +52,34 @@
 
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                        <div class="form-group row">
+                            <div class="col-sm-6 mx-auto">
+                                <label class="control-label" style="margin-left: 20px;">Tahun</label>
+                                <select class="form-control" id="tahunInput" style="margin-left: 20px;">
+                                    @{
+                                        var currentYear = DateTime.Now.Year;
+                                        for (var Year = currentYear; Year >= 2019; Year--)
+                                        {
+                                            <option value="@Year">@Year</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-sm-6 mx-auto">
+                                <label asp-for="HonorPascaSarjana.ID_BULAN_GAJI" class="control-label" style="margin-left: 20px;"></label>
+                                <select asp-for="HonorPascaSarjana.ID_BULAN_GAJI" class="form-control" id="bulanGajiDropdown" style="margin-left: 20px;">
+                                    <option value="">Pilih ID Bulan Gaji</option>
+                                    @foreach (var bulanGaji in Model.HonorPascaSarjanaList)
+                                    {
+                                        <option value="@bulanGaji.ID_BULAN_GAJI">@bulanGaji.ID_BULAN_GAJI</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="HonorPascaSarjana.ID_BULAN_GAJI" class="text-danger"></span>
+                            </div>
+                            
+                        </div>
+
                         <div class="form-group" style="width: 670px; padding-left: 20px; padding-top: 10px;">
                             <label asp-for="HonorPascaSarjana.NPP" class="control-label"></label>
                             <input asp-for="HonorPascaSarjana.NPP" class="form-control" id="nppInput" />
@@ -67,23 +95,7 @@
                             <span asp-validation-for="HonorPascaSarjana.ID_KOMPONEN_GAJI" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group row">
-                            <div class="col-sm-6 mx-auto">
-                                <label asp-for="HonorPascaSarjana.ID_BULAN_GAJI" class="control-label" style="margin-left: 20px;"></label>
-                                <select asp-for="HonorPascaSarjana.ID_BULAN_GAJI" class="form-control" id="bulanGajiDropdown" style="margin-left: 20px;">
-                                    <option value="">Pilih ID Bulan Gaji</option>
-                                    @foreach (var bulanGaji in Model.HonorPascaSarjanaList)
-                                    {
-                                        <option value="@bulanGaji.ID_BULAN_GAJI">@bulanGaji.ID_BULAN_GAJI</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="HonorPascaSarjana.ID_BULAN_GAJI" class="text-danger"></span>
-                            </div>
-                            <div class="col-sm-6 mx-auto">
-                                <label class="control-label" style="margin-left: 20px;">Tahun</label>
-                                <input type="number" class="form-control" id="tahunInput" style="margin-left: 20px;" />
-                            </div>
-                        </div>
+                        
 
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                             <label asp-for="HonorPascaSarjana.JUMLAH" class="control-label"></label>
@@ -98,8 +110,7 @@
                         </div>
 
                         <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <input type="submit" value="Create" class="btn btn-primary" />
-                            <button type="button" class="btn btn-primary" onclick="getCariData()">Search</button>
+                            <input type="submit" value="Create" class="btn btn-primary" />  
                         </div>
                     }
                 </div>
@@ -261,12 +272,18 @@
 
             $.get("/TunjanganPengabdian/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
                 var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                 for (var i = 0; i < data.length; i++) {
-                    options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + "</option>";
+                    options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + " - " + namaBulan[i] + "</option>";
                 }
                 $("#bulanGajiDropdown").html(options);
             });
+
         }
+
+        $("#tahunInput").change(function () {
+            getCariData();
+        });
 
     </script>
 }

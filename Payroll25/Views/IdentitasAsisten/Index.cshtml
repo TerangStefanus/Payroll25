@@ -8,9 +8,11 @@
     <!-- Referensi ke DataTables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
+
     <h1 style="margin-bottom: 30px"><strong>Identitas Asisten</strong></h1>
 
     <div class="border border-5" style="padding: 10px">
@@ -46,8 +48,35 @@
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                         <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.ID_UNIT" class="form-control" />
+
+                        <select class="form-control form-control-lg" id="selectUnit" asp-for="IdentitasAsisten.ID_UNIT">
+                            <option value="">-- Pilih Unit --</option>
+                            @foreach (var unit in Model.UnitsList)
+                            {
+                                <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                            }
+                        </select>
+
                         <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
+                    </div>
+
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.NO_REKENING" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.NO_REKENING" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.NO_REKENING" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.NAMA_REKENING" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.NAMA_REKENING" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.NAMA_REKENING" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.NAMA_BANK" class="control-label"></label>
+                        <input asp-for="IdentitasAsisten.NAMA_BANK" class="form-control" />
+                        <span asp-validation-for="IdentitasAsisten.NAMA_BANK" class="text-danger"></span>
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
@@ -64,8 +93,13 @@
                 <th>ID Asisten</th>
                 <th>ID Tahun Akademik</th>
                 <th>NPM</th>
+                @*<th>NAMA</th>*@
                 <th>NO SEMESTER</th>
                 <th>ID UNIT</th>
+                <th>NAMA UNIT</th>
+                <th>NO REKENING</th>
+                <th>NAMA REKENING</th>
+                <th>NAMA BANK</th>
                 <th>BUTTON</th>
             </tr>
         </thead>
@@ -78,6 +112,10 @@
                     <td>@identitasAsisten.NPM</td>
                     <td>@identitasAsisten.NO_SEMESTER</td>
                     <td>@identitasAsisten.ID_UNIT</td>
+                    <td>@identitasAsisten.NAMA_UNIT</td>
+                    <td>@identitasAsisten.NO_REKENING</td>
+                    <td>@identitasAsisten.NAMA_REKENING</td>
+                    <td>@identitasAsisten.NAMA_BANK</td>
                     <td>
                         <div class="d-flex">
                             <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#editModal-@(identitasAsisten.ID_ASISTEN)" id="submit">Edit</button>
@@ -123,6 +161,21 @@
                                         <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
                                     </div>
                                     <div class="form-group">
+                                        <label asp-for="IdentitasAsisten.NO_REKENING" class="control-label"></label>
+                                        <input asp-for="IdentitasAsisten.NO_REKENING" class="form-control" value="@identitasAsisten.NO_REKENING" />
+                                        <span asp-validation-for="IdentitasAsisten.NO_REKENING" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasAsisten.NAMA_REKENING" class="control-label"></label>
+                                        <input asp-for="IdentitasAsisten.NAMA_REKENING" class="form-control" value="@identitasAsisten.NAMA_REKENING" />
+                                        <span asp-validation-for="IdentitasAsisten.NAMA_REKENING" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasAsisten.NAMA_BANK" class="control-label"></label>
+                                        <input asp-for="IdentitasAsisten.NAMA_BANK" class="form-control" value="@identitasAsisten.NAMA_BANK" />
+                                        <span asp-validation-for="IdentitasAsisten.NAMA_BANK" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
                                         <input type="submit" value="Save" class="btn btn-primary" />
                                     </div>
                                 }
@@ -158,7 +211,6 @@
                         </div>
                     </div>
                 </div>
-
             }
         </tbody>
     </table>
@@ -203,6 +255,18 @@
                                 <label>ID Unit</label>
                                 <span class="form-control">@item.ID_UNIT</span>
                             </div>
+                            <div class="form-group">
+                                <label>NO Rekening</label>
+                                <span class="form-control">@item.NO_REKENING</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Nama Rekening</label>
+                                <span class="form-control">@item.NAMA_REKENING</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Nama BANK</label>
+                                <span class="form-control">@item.NAMA_BANK</span>
+                            </div>
                             <button type="button" class="btn btn-secondary btn-sm w-100" data-dismiss="modal">Close</button>
                         </div>
                     </div>
@@ -218,10 +282,16 @@
     <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function () {
             $('#dataTable').DataTable();
         });
+
+        $(document).ready(function () {
+            $('#selectUnit').select2();
+        });
+
     </script>
 }
 
