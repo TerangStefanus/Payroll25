@@ -24,7 +24,8 @@ namespace Payroll25.Controllers
             {
                 IdentitasAsistenList = DAO.ShowIdentitasAssisten(),
                 IdentitasAsisten = new IdentitasAsistenModel(),
-                UnitsList = (List<IdentitasAsistenModel>)DAO.GetUnit()
+                UnitsList = (List<IdentitasAsistenModel>)DAO.GetUnit(),
+                JenisAsistenList = (List<IdentitasAsistenModel>)DAO.GetJenisAsisten()
             };
 
             return View(viewModel);
@@ -100,6 +101,11 @@ namespace Payroll25.Controllers
                 if (string.IsNullOrEmpty(viewModel.IdentitasAsisten.NAMA_BANK))
                 {
                     errors.Add("NAMA_BANK harus diisi.");
+                }
+
+                if (viewModel.IdentitasAsisten.ID_JENIS_ASISTEN == 0)
+                {
+                    errors.Add("ID Jenis Asisten harus diisi.");
                 }
 
 

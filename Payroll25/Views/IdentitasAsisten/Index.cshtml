@@ -4,6 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+
 <head>
     <!-- Referensi ke DataTables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
@@ -80,6 +81,20 @@
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                        <label asp-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="control-label"></label>
+
+                        <select class="form-control form-control-lg" asp-for="IdentitasAsisten.ID_JENIS_ASISTEN">
+                            <option value="">-- Pilih Jenis Asisten --</option>
+                            @foreach (var jenis in Model.JenisAsistenList)
+                            {
+                                <option value="@jenis.ID_JENIS_ASISTEN">@jenis.JENIS</option>
+                            }
+                        </select>
+
+                        <span asp-validation-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
                         <input type="submit" value="Create" class="btn btn-primary" />
                     </div>
                 }
@@ -93,13 +108,14 @@
                 <th>ID Asisten</th>
                 <th>ID Tahun Akademik</th>
                 <th>NPM</th>
-                @*<th>NAMA</th>*@
+                <th>NAMA_MHS</th>
                 <th>NO SEMESTER</th>
                 <th>ID UNIT</th>
                 <th>NAMA UNIT</th>
                 <th>NO REKENING</th>
                 <th>NAMA REKENING</th>
                 <th>NAMA BANK</th>
+                <th>JENIS ASISTEN</th>
                 <th>BUTTON</th>
             </tr>
         </thead>
@@ -110,6 +126,7 @@
                     <td>@identitasAsisten.ID_ASISTEN</td>
                     <td>@identitasAsisten.ID_TAHUN_AKADEMIK</td>
                     <td>@identitasAsisten.NPM</td>
+                    <td>@identitasAsisten.NAMA_MHS</td>
                     <td>@identitasAsisten.NO_SEMESTER</td>
                     <td>@identitasAsisten.ID_UNIT</td>
                     <td>@identitasAsisten.NAMA_UNIT</td>
@@ -155,11 +172,28 @@
                                         <input asp-for="IdentitasAsisten.NPM" class="form-control" value="@identitasAsisten.NPM" />
                                         <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
                                     </div>
+
                                     <div class="form-group">
                                         <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
-                                        <input asp-for="IdentitasAsisten.ID_UNIT" class="form-control" value="@identitasAsisten.ID_UNIT" />
+
+                                        <select class="form-control form-control-lg" id="selectUnit" asp-for="IdentitasAsisten.ID_UNIT">
+                                            @for (int i = 0; i < Model.UnitsList.Count; i++)
+                                            {
+                                                var unit = Model.UnitsList[i];
+                                                if (identitasAsisten.ID_UNIT == unit.ID_UNIT)
+                                                {
+                                                    <option value="@unit.ID_UNIT" selected>@unit.NAMA_UNIT</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                                                }
+                                            }
+                                        </select>
+
                                         <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
                                     </div>
+
                                     <div class="form-group">
                                         <label asp-for="IdentitasAsisten.NO_REKENING" class="control-label"></label>
                                         <input asp-for="IdentitasAsisten.NO_REKENING" class="form-control" value="@identitasAsisten.NO_REKENING" />
@@ -175,6 +209,28 @@
                                         <input asp-for="IdentitasAsisten.NAMA_BANK" class="form-control" value="@identitasAsisten.NAMA_BANK" />
                                         <span asp-validation-for="IdentitasAsisten.NAMA_BANK" class="text-danger"></span>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="control-label"></label>
+
+                                        <select class="form-control form-control-lg" asp-for="IdentitasAsisten.ID_JENIS_ASISTEN">
+                                            @foreach (var jenis in Model.JenisAsistenList)
+                                            {
+                                                if (Model.IdentitasAsisten.ID_JENIS_ASISTEN == jenis.ID_JENIS_ASISTEN)
+                                                {
+                                                    <option value="@jenis.ID_JENIS_ASISTEN" selected>@jenis.JENIS</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@jenis.ID_JENIS_ASISTEN">@jenis.JENIS</option>
+                                                }
+                                            }
+                                        </select>
+
+                                        <span asp-validation-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="text-danger"></span>
+                                    </div>
+
+
                                     <div class="form-group">
                                         <input type="submit" value="Save" class="btn btn-primary" />
                                     </div>
@@ -289,7 +345,9 @@
         });
 
         $(document).ready(function () {
-            $('#selectUnit').select2();
+            $('#selectUnit').select2({
+                width: 'resolve'  
+            });
         });
 
     </script>

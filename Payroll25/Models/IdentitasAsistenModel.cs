@@ -12,7 +12,7 @@ namespace Payroll25.Models
 
         public string NPM { get; set; }
 
-        //TODO TAMBAHKAN NAMA LENGKAP
+        public string NAMA_MHS { get; set; }
 
         public int ID_UNIT { get; set; }
 
@@ -24,6 +24,10 @@ namespace Payroll25.Models
 
         public string NAMA_BANK { get; set; }
 
+        public int ID_JENIS_ASISTEN { get; set; }
+
+        public string JENIS { get; set; }
+
     }
 
     public class IndexViewModel
@@ -31,6 +35,7 @@ namespace Payroll25.Models
         public IEnumerable<IdentitasAsistenModel> IdentitasAsistenList { get; set; }
         public IdentitasAsistenModel IdentitasAsisten { get; set; }
         public List<IdentitasAsistenModel> UnitsList { get; set; }
+        public List<IdentitasAsistenModel> JenisAsistenList { get; set; }
     }
 
 

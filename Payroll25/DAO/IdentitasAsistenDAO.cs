@@ -20,13 +20,17 @@ namespace Payroll25.DAO
                                 [PAYROLL].[payroll].[TBL_ASISTEN].ID_TAHUN_AKADEMIK, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NO_SEMESTER, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NPM,
-	                            [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT,
-	                            [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
+	                            MHS.nama_mhs AS NAMA_MHS,
+                                [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT,
+                                [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NO_REKENING, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_REKENING, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK
                                 FROM [PAYROLL].[siatmax].[MST_UNIT]
-                                INNER JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
+                                INNER JOIN [PAYROLL].[payroll].[TBL_ASISTEN] 
+                                    ON [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
+                                INNER JOIN [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS
+                                    ON [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
                                 ORDER BY [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN DESC;";
                                 
 
@@ -77,9 +81,9 @@ namespace Payroll25.DAO
                     conn.Open();
 
                     var query = @"INSERT INTO payroll.TBL_ASISTEN 
-                                (ID_TAHUN_AKADEMIK, NO_SEMESTER, NPM, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK) 
+                                (ID_TAHUN_AKADEMIK, NO_SEMESTER, NPM, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK,ID_JENIS_ASISTEN) 
                                 VALUES 
-                                (@ID_Tahun_Akademik, @no_Semester, @npm, @ID_Unit , @no_Rekening, @nama_Rekening, @nama_Bank )";
+                                (@ID_Tahun_Akademik, @no_Semester, @npm, @ID_Unit , @no_Rekening, @nama_Rekening, @nama_Bank, @ID_Jenis_Asisten)";
 
                     var parameters = new
                     {
@@ -89,7 +93,8 @@ namespace Payroll25.DAO
                         ID_Unit = viewModel.IdentitasAsisten.ID_UNIT,
                         no_Rekening = viewModel.IdentitasAsisten.NO_REKENING,
                         nama_Rekening = viewModel.IdentitasAsisten.NAMA_REKENING,
-                        nama_Bank = viewModel.IdentitasAsisten.NAMA_BANK
+                        nama_Bank = viewModel.IdentitasAsisten.NAMA_BANK,
+                        ID_Jenis_Asisten = viewModel.IdentitasAsisten.ID_JENIS_ASISTEN
                     };
 
                     conn.Execute(query, parameters);
@@ -118,7 +123,8 @@ namespace Payroll25.DAO
                                   ID_UNIT = @ID_Unit,
                                   NO_REKENING = @no_Rekening,
                                   NAMA_REKENING = @nama_Rekening,
-                                  NAMA_BANK = @nama_Bank
+                                  NAMA_BANK = @nama_Bank,
+                                  ID_JENIS_ASISTEN =  @ID_Jenis_Asisten
                                   WHERE ID_ASISTEN = @userID;";
 
                     var parameters = new
@@ -130,7 +136,8 @@ namespace Payroll25.DAO
                         ID_Unit = viewModel.IdentitasAsisten.ID_UNIT,
                         no_Rekening = viewModel.IdentitasAsisten.NO_REKENING,
                         nama_Rekening = viewModel.IdentitasAsisten.NAMA_REKENING,
-                        nama_Bank = viewModel.IdentitasAsisten.NAMA_BANK
+                        nama_Bank = viewModel.IdentitasAsisten.NAMA_BANK,
+                        ID_Jenis_Asisten = viewModel.IdentitasAsisten.ID_JENIS_ASISTEN
                     };
 
                     conn.Execute(query, parameters);
@@ -180,6 +187,34 @@ namespace Payroll25.DAO
                                  [ID_UNIT], 
                                  [NAMA_UNIT] 
                                  FROM [PAYROLL].[siatmax].[MST_UNIT];";
+
+                    var data = conn.Query<IdentitasAsistenModel>(query, parameters).ToList();
+
+                    return data;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+        public IEnumerable<IdentitasAsistenModel> GetJenisAsisten()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var parameters = new DynamicParameters();
+
+                    var query = @"SELECT 
+                                 [ID_JENIS_ASISTEN],
+                                 [JENIS]
+                                 FROM [PAYROLL].[payroll].[REF_JENIS_ASISTEN];";
 
                     var data = conn.Query<IdentitasAsistenModel>(query, parameters).ToList();
 
