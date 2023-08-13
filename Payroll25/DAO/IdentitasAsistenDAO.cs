@@ -20,17 +20,20 @@ namespace Payroll25.DAO
                                 [PAYROLL].[payroll].[TBL_ASISTEN].ID_TAHUN_AKADEMIK, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NO_SEMESTER, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NPM,
-	                            MHS.nama_mhs AS NAMA_MHS,
+                                MHS.nama_mhs AS NAMA_MHS,
                                 [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT,
                                 [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NO_REKENING, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_REKENING, 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK
+                                [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK,
+                                REF.JENIS AS JENIS
                                 FROM [PAYROLL].[siatmax].[MST_UNIT]
                                 INNER JOIN [PAYROLL].[payroll].[TBL_ASISTEN] 
                                     ON [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
                                 INNER JOIN [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS
                                     ON [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
+                                INNER JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] AS REF
+                                    ON [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = REF.ID_JENIS_ASISTEN
                                 ORDER BY [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN DESC;";
                                 
 
