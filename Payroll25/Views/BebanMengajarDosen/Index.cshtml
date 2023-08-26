@@ -1,0 +1,97 @@
+﻿@model BebanMengajarDosenModel.BebanMengajarDosenViewModel
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Beban Mengajar Dosen</title>
+    <!-- Referensi ke DataTables dan Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="my-4">Beban Mengajar Dosen</h1>
+
+        <div class="border border-5 p-3 mb-4">
+            <h3>Tambah Beban Mengajar</h3>
+            <!-- TODO -->
+            <!-- Form tambah beban mengajar bisa ditambahkan di sini -->
+        </div>
+
+        <div>
+            <!-- TODO -->
+            <!-- Tambahkan sebuah pencarian berdasarkan NPP -->
+        </div>
+       
+        <!-- Tabel data beban mengajar -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Total SKS</th>
+                    <th>...</th> <!-- Anda bisa tambahkan kolom lain sesuai kebutuhan -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.BebanMengajarDosenList)
+                {
+                    <tr>
+                        <td>@item.NAMA</td>
+                        <td data-id="@item.ID_BEBAN_MENGAJAR" class="editable-cell">@item.TOTAL_SKS</td>
+                        <!-- Anda bisa tambahkan kolom lain sesuai kebutuhan -->
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button id="updateBtn">Simpan</button>
+
+
+
+    </div>
+</body>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+    <script>
+        var updatedData = [];
+
+        $(document).ready(function () {
+            $(".editable-cell").dblclick(function () {
+                var originalValue = $(this).text();
+                $(this).html(`<input type='text' value='${originalValue}' />`);
+                $(this).children().first().focus();
+            });
+
+            $("body").on("blur", ".editable-cell > input", function () {
+                var value = $(this).val();
+                var cell = $(this).parent();
+                cell.html(value);
+
+                var id = cell.attr('data-id');
+                updatedData.push({
+                    ID_BEBAN_MENGAJAR: id,
+                    TOTAL_SKS: value
+                });
+            });
+
+            $("#updateBtn").click(function () {
+                $.post('/BebanMengajarDosen/UpdateBebanMengajar', updatedData, function (response) {
+                    if (response.status) {
+                        alert('Data berhasil diupdate');
+                        location.reload();
+                    } else {
+                        alert('Data gagal diupdate');
+                    }
+                });
+            });
+        });
+    </script>
+
+}
+
+
+
