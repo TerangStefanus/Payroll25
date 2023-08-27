@@ -24,21 +24,31 @@
         </div>
        
         <!-- Tabel data beban mengajar -->
-        <table class="table">
+        <table class="table" id="dataTable">
             <thead>
                 <tr>
-                    <th>Nama</th>
-                    <th>Total SKS</th>
-                    <th>...</th> <!-- Anda bisa tambahkan kolom lain sesuai kebutuhan -->
+                    <th>NO</th>
+                    <th>NAMA</th>
+                    <th>NPP</th>
+                    <th>TAHUN SEMESTER</th>
+                    <th>BEBAN GELAR</th>
+                    <th>JUMLAH</th>
+                    <th>TARIF</th>
+                    <th>TOTAL PERHITUNGAN</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model.BebanMengajarDosenList)
                 {
                     <tr>
+                        <td>1</td>
                         <td>@item.NAMA</td>
+                        <td>@item.NPP</td>
+                        <td>@item.ID_TAHUN_AKADEMIK</td>
+                        <td>@item.BEBAN_GELAR</td>
                         <td data-id="@item.ID_BEBAN_MENGAJAR" class="editable-cell">@item.TOTAL_SKS</td>
-                        <!-- Anda bisa tambahkan kolom lain sesuai kebutuhan -->
+                        <td>@item.TARIF</td>
+                        <td class="total-perhitungan">0</td>
                     </tr>
                 }
             </tbody>
@@ -78,17 +88,36 @@
                 });
             });
 
+
             $("#updateBtn").click(function () {
-                $.post('/BebanMengajarDosen/UpdateBebanMengajar', updatedData, function (response) {
-                    if (response.status) {
-                        alert('Data berhasil diupdate');
-                        location.reload();
-                    } else {
-                        alert('Data gagal diupdate');
+                console.log(updatedData);
+                $.ajax({
+                    url: '/BebanMengajarDosen/UpdateBebanMengajar',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil diupdate');
+                            location.reload();
+                        } else {
+                            alert('Data gagal diupdate');
+                        }
                     }
                 });
             });
+
+            $('#dataTable tbody tr').each(function () {
+                var totalSKS = $(this).find(".editable-cell").text();
+                var tarif = $(this).children().eq(6).text();
+                var totalPerhitungan = parseInt(totalSKS) * parseInt(tarif);
+                $(this).children().eq(7).text(totalPerhitungan);
+            });
+
         });
+
+       
+
     </script>
 
 }

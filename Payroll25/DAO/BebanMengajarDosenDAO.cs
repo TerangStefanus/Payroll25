@@ -61,8 +61,9 @@ namespace Payroll25.DAO
             {
                 try
                 {
-                    var query = @"UPDATE [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
-                                SET [TOTAL_SKS] = @TOTAL_SKS
+                    var query = @"UPDATE [payroll].[TBL_BEBAN_MENGAJAR]
+                                SET 
+                                [TOTAL_SKS] = @TOTAL_SKS
                                 WHERE ID_BEBAN_MENGAJAR = @ID_BEBAN_MENGAJAR";
 
                     return conn.Execute(query, model);

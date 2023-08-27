@@ -48,7 +48,7 @@ namespace Payroll25.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateBebanMengajar(List<BebanMengajarDosenModel> model)
+        public IActionResult UpdateBebanMengajar([FromBody] List<BebanMengajarDosenModel> model)
         {
             DBOutput data = new DBOutput();
             var success = 0;
