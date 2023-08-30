@@ -16,6 +16,30 @@
             <h3>Tambah Beban Mengajar</h3>
             <!-- TODO -->
             <!-- Form tambah beban mengajar bisa ditambahkan di sini -->
+            <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertBebanMengajar", "BebanMengajarDosen")">
+                <div class="mb-3">
+                    <label for="NPP" class="form-label">NPP</label>
+                    <input type="text" class="form-control" id="NPP" name="NPP">
+                </div>
+
+                <div class="mb-3">
+                    <label for="ID_TAHUN_AKADEMIK" class="form-label">ID TAHUN AKADEMIK</label>
+                    <input type="text" class="form-control" id="ID_TAHUN_AKADEMIK" name="ID_TAHUN_AKADEMIK">
+                </div>
+
+                <div class="mb-3">
+                    <label for="NO_SEMESTER" class="form-label">NO SEMESTER</label>
+                    <input type="text" class="form-control" id="NO_SEMESTER" name="NO_SEMESTER">
+                </div>
+
+                <div class="mb-3">
+                    <label for="TOTAL_SKS" class="form-label">JUMLAH</label>
+                    <input type="number" class="form-control" id="TOTAL_SKS" name="TOTAL_SKS">
+                </div>
+                <!-- ... -->
+                <button id="btnTambah" class="btn btn-primary">Tambah</button>
+            </form>
+
         </div>
 
         <div>
@@ -88,7 +112,7 @@
                 });
             });
 
-
+            // Untuk melakukan update menggunakan ajax
             $("#updateBtn").click(function () {
                 console.log(updatedData);
                 $.ajax({
@@ -107,6 +131,7 @@
                 });
             });
 
+            //Untuk menampilkan Total Perhitungan
             $('#dataTable tbody tr').each(function () {
                 var totalSKS = $(this).find(".editable-cell").text();
                 var tarif = $(this).children().eq(6).text();
@@ -114,10 +139,36 @@
                 $(this).children().eq(7).text(totalPerhitungan);
             });
 
+            //Untuk melakukan insert dalam database menggunakan ajax
+            $("#btnTambah").click(function (event) {
+                event.preventDefault(); // 
+
+                var formData = {
+                    NPP: $("#NPP").val(),
+                    ID_TAHUN_AKADEMIK: $("#ID_TAHUN_AKADEMIK").val(),
+                    NO_SEMESTER: $("#NO_SEMESTER").val(),
+                    TOTAL_SKS: $("#TOTAL_SKS").val()
+                };
+
+                $.ajax({
+                    url: '/BebanMengajarDosen/InsertBebanMengajar',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil ditambahkan');
+                            location.reload();
+                        } else {
+                            alert('Data gagal ditambahkan');
+                        }
+                    }
+                });
+            });
+
         });
 
        
-
     </script>
 
 }

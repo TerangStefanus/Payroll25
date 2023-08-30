@@ -55,6 +55,44 @@ namespace Payroll25.DAO
             }
         }
 
+        public int InsertBebanMengajar(BebanMengajarDosenModel model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
+                                ([ID_TAHUN_AKADEMIK],[NO_SEMESTER],[NPP],[TOTAL_SKS],[BEBAN_STRUKTURAL],[KELEBIHAN_BEBAN],[TGL_AWAL_SK],[TGL_AKHIR_SK])
+                                VALUES
+                                (@ID_TAHUN_AKADEMIK,@NO_SEMESTER,@NPP,@TOTAL_SKS,@BEBAN_STRUKTURAL,@KELEBIHAN_BEBAN,@TGL_AWAL_SK,@TGL_AKHIR_SK)";
+
+                    var parameters = new
+                    {
+                        ID_TAHUN_AKADEMIK = model.ID_TAHUN_AKADEMIK,
+                        NO_SEMESTER = model.NO_SEMESTER,
+                        NPP = model.NPP,
+                        TOTAL_SKS = model.TOTAL_SKS,
+                        BEBAN_STRUKTURAL = (int?)null, // Set null
+                        KELEBIHAN_BEBAN = (int?)null, // Set null
+                        TGL_AWAL_SK = DateTime.Now, // Set to current time
+                        TGL_AKHIR_SK = DateTime.Now.AddMonths(5) // Set to 5 months from now
+                    };
+
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
         public int UpdateBebanMengajar(List<BebanMengajarDosenModel> model)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -80,6 +118,8 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+
 
 
 

@@ -48,6 +48,26 @@ namespace Payroll25.Controllers
         }
 
         [HttpPost]
+        public IActionResult InsertBebanMengajar([FromBody] BebanMengajarDosenModel model)
+        {
+            DBOutput data = new DBOutput();
+            var success = DAO.InsertBebanMengajar(model);
+
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = "Insert berhasil!";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = "Insert gagal!";
+            }
+
+            return Json(data);
+        }
+
+        [HttpPost]
         public IActionResult UpdateBebanMengajar([FromBody] List<BebanMengajarDosenModel> model)
         {
             DBOutput data = new DBOutput();
@@ -57,12 +77,12 @@ namespace Payroll25.Controllers
             if (success != 0)
             {
                 data.status = true;
-                data.pesan = " berhasil ";
+                data.pesan = " Update berhasil ";
             }
             else
             {
                 data.status = false;
-                data.pesan = " gagal";
+                data.pesan = " Update gagal";
             }
 
             return Json(data);
