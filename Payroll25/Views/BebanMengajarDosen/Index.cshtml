@@ -1,5 +1,9 @@
 ﻿@model BebanMengajarDosenModel.BebanMengajarDosenViewModel
 
+@{
+    int counter = 0;
+}
+
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Beban Mengajar Dosen</title>
@@ -9,47 +13,67 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container mt-5">
         <h1 class="my-4">Beban Mengajar Dosen</h1>
 
-        <div class="border border-5 p-3 mb-4">
-            <h3>Tambah Beban Mengajar</h3>
-            <!-- TODO -->
-            <!-- Form tambah beban mengajar bisa ditambahkan di sini -->
-            <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertBebanMengajar", "BebanMengajarDosen")">
-                <div class="mb-3">
-                    <label for="NPP" class="form-label">NPP</label>
-                    <input type="text" class="form-control" id="NPP" name="NPP">
-                </div>
+        <div class="row">
+            <!-- Sub-container untuk Tambah Beban Mengajar -->
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <h3 style="padding-bottom: 25px;">
+                    Tambah Beban Mengajar
+                </h3>
+                <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertBebanMengajar", "BebanMengajarDosen")">
+                    <div class="mb-3">
+                        <label for="NPP" class="form-label">NPP</label>
+                        <input type="text" class="form-control" id="NPP" name="NPP">
+                    </div>
 
-                <div class="mb-3">
-                    <label for="ID_TAHUN_AKADEMIK" class="form-label">ID TAHUN AKADEMIK</label>
-                    <input type="text" class="form-control" id="ID_TAHUN_AKADEMIK" name="ID_TAHUN_AKADEMIK">
-                </div>
+                    <div class="mb-3">
+                        <label for="ID_TAHUN_AKADEMIK" class="form-label">ID TAHUN AKADEMIK</label>
+                        <input type="text" class="form-control" id="ID_TAHUN_AKADEMIK" name="ID_TAHUN_AKADEMIK">
+                    </div>
 
-                <div class="mb-3">
-                    <label for="NO_SEMESTER" class="form-label">NO SEMESTER</label>
-                    <input type="text" class="form-control" id="NO_SEMESTER" name="NO_SEMESTER">
-                </div>
+                    <div class="mb-3">
+                        <label for="NO_SEMESTER" class="form-label">NO SEMESTER</label>
+                        <input type="text" class="form-control" id="NO_SEMESTER" name="NO_SEMESTER">
+                    </div>
 
-                <div class="mb-3">
-                    <label for="TOTAL_SKS" class="form-label">JUMLAH</label>
-                    <input type="number" class="form-control" id="TOTAL_SKS" name="TOTAL_SKS">
-                </div>
-                <!-- ... -->
-                <button id="btnTambah" class="btn btn-primary">Tambah</button>
-            </form>
+                    <div class="mb-3">
+                        <label for="TOTAL_SKS" class="form-label">JUMLAH</label>
+                        <input type="number" class="form-control" id="TOTAL_SKS" name="TOTAL_SKS">
+                    </div>
+                    <button id="btnTambah" class="btn btn-primary">Tambah</button>
+                </form>
+            </div>
 
+            <!-- Sub-container untuk Pencarian berdasarkan NPP dan Tahun -->
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <h3 style="padding-bottom: 15px;">
+                    Pencarian
+                </h3>
+                <form id="searchForm" method="get" action="@Url.Action("Index", "BebanMengajarDosen")">
+                    <div>
+                        <h3>Cari Berdasarkan NPP</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan NPP">
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Cari Berdasarkan Tahun</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="TAHUNFilter" name="TAHUNFilter" value="@Model.TAHUNFilter" placeholder="Masukkan Tahun">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">Cari</button>
+                </form>
+            </div>
         </div>
 
-        <div>
-            <!-- TODO -->
-            <!-- Tambahkan sebuah pencarian berdasarkan NPP -->
-        </div>
-       
         <!-- Tabel data beban mengajar -->
-        <table class="table" id="dataTable">
-            <thead>
+        <table class="table mt-3" id="dataTable">
+            <thead style="background-color: #8FA0C7">
                 <tr>
                     <th>NO</th>
                     <th>NAMA</th>
@@ -62,27 +86,33 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.BebanMengajarDosenList)
+                @if (Model.BebanMengajarDosenList != null)
                 {
-                    <tr>
-                        <td>1</td>
-                        <td>@item.NAMA</td>
-                        <td>@item.NPP</td>
-                        <td>@item.ID_TAHUN_AKADEMIK</td>
-                        <td>@item.BEBAN_GELAR</td>
-                        <td data-id="@item.ID_BEBAN_MENGAJAR" class="editable-cell">@item.TOTAL_SKS</td>
-                        <td>@item.TARIF</td>
-                        <td class="total-perhitungan">0</td>
-                    </tr>
+                    @foreach (var item in Model.BebanMengajarDosenList)
+                    {
+                        counter++;
+                        <tr>
+                            <td>@counter</td>
+                            <td>@item.NAMA</td>
+                            <td>@item.NPP</td>
+                            <td>@item.ID_TAHUN_AKADEMIK</td>
+                            <td>@item.BEBAN_GELAR</td>
+                            <td data-id="@item.ID_BEBAN_MENGAJAR" class="editable-cell">@item.TOTAL_SKS</td>
+                            <td>@item.TARIF</td>
+                            <td class="total-perhitungan">0</td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
 
-        <button id="updateBtn">Simpan</button>
-
-
+        @if (Model.BebanMengajarDosenList != null && Model.BebanMengajarDosenList.Any())
+        {
+            <button id="updateBtn" class="btn btn-success mt-3">Simpan</button>
+        }
 
     </div>
+
 </body>
 
 @section Scripts {
@@ -131,7 +161,7 @@
                 });
             });
 
-            //Untuk menampilkan Total Perhitungan
+            //Untuk menampilkan Total Perhitungan   
             $('#dataTable tbody tr').each(function () {
                 var totalSKS = $(this).find(".editable-cell").text();
                 var tarif = $(this).children().eq(6).text();
@@ -164,6 +194,22 @@
                         }
                     }
                 });
+            });
+
+            $('#dataTable').DataTable({
+                "pageLength": 20, // Menampilkan 10 baris per halaman
+                "lengthChange": false, // Sembunyikan dropdown untuk mengubah jumlah baris per halaman
+                "info": true, // Tampilkan info jumlah total baris
+                "pagingType": "full_numbers", // Tampilkan navigasi paginasi lengkap
+                "language": {
+                    "search": "Cari:",
+                    "paginate": {
+                        "first": "Awal",
+                        "last": "Akhir",
+                        "next": ">",
+                        "previous": "<"
+                    }
+                }
             });
 
         });

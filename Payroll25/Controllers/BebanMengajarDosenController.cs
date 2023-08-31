@@ -20,23 +20,22 @@ namespace Payroll25.Controllers
         }
 
         // GET: BebanMengajarDosenController    
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string NPPFilter = null, int? TAHUNFilter = null)
         {
+            if (TAHUNFilter == 0)
+            {
+                TAHUNFilter = null;
+            }
+
             try
             {
-                var bebanMengajarDosen = await DAO.ShowBebanMengajarAsync();
+                var bebanMengajarDosenList = await DAO.ShowBebanMengajarAsync(NPPFilter, TAHUNFilter) ?? new List<BebanMengajarDosenModel>();
 
-                if (bebanMengajarDosen == null)
+                var viewModel = new BebanMengajarDosenModel.BebanMengajarDosenViewModel
                 {
-                    return NotFound("Data tidak ditemukan."); // 404 status code
-                }
-
-                // Kemas objek tunggal ke dalam list
-                var bebanMengajarDosenList = new List<BebanMengajarDosenModel> { bebanMengajarDosen };
-
-                var viewModel = new BebanMengajarDosenViewModel
-                {
-                    BebanMengajarDosenList = bebanMengajarDosenList
+                    BebanMengajarDosenList = bebanMengajarDosenList,
+                    NPPFilter = NPPFilter,
+                    TAHUNFilter = TAHUNFilter
                 };
 
                 return View(viewModel);
@@ -45,7 +44,9 @@ namespace Payroll25.Controllers
             {
                 return StatusCode(500, $"Terjadi kesalahan saat mengambil data: {ex.Message}");
             }
+
         }
+
 
         [HttpPost]
         public IActionResult InsertBebanMengajar([FromBody] BebanMengajarDosenModel model)

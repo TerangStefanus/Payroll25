@@ -25,6 +25,7 @@
             public IEnumerable<BebanMengajarDosenModel> BebanMengajarDosenList { get; set; }
             public BebanMengajarDosenModel BebanMengajarDosen { get; set; }
             public string NPPFilter { get; set; }
+            public int? TAHUNFilter { get; set; }
         }
 
     }
