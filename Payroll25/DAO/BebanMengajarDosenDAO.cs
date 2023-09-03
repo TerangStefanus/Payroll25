@@ -11,12 +11,12 @@
     {
         public class BebanMengajarDosenDAO
         {
-        public async Task<IEnumerable<BebanMengajarDosenModel>> ShowBebanMengajarAsync(string NPPFilter = null, int? TAHUNFilter = null)
+        public async Task<IEnumerable<BebanMengajarDosenModel>> ShowBebanMengajarAsync(string NPPFilter = null, int? TAHUNFilter = null, string NAMAFilter = null)
         {
             var connectionString = DBkoneksi.payrollkoneksi;
 
             // Jika keduanya tidak disediakan, kembalikan daftar kosong dengan segera
-            if (string.IsNullOrEmpty(NPPFilter) && !TAHUNFilter.HasValue)
+            if (string.IsNullOrEmpty(NPPFilter) && !TAHUNFilter.HasValue && string.IsNullOrEmpty(NAMAFilter))
             {
                 return new List<BebanMengajarDosenModel>();
             }
@@ -61,6 +61,12 @@
                     {
                         query += " AND BM.ID_TAHUN_AKADEMIK = @TAHUNFilter";
                         parameters.Add("@TAHUNFilter", TAHUNFilter);
+                    }
+
+                    if (!string.IsNullOrEmpty(NAMAFilter))
+                    {
+                        query += " AND K.NAMA LIKE @NAMAFilter";
+                        parameters.Add("@NAMAFilter", $"%{NAMAFilter}%");
                     }
 
                     return await conn.QueryAsync<BebanMengajarDosenModel>(query, parameters);

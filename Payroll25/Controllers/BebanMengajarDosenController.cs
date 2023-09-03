@@ -20,7 +20,7 @@ namespace Payroll25.Controllers
         }
 
         // GET: BebanMengajarDosenController    
-        public async Task<IActionResult> Index(string NPPFilter = null, int? TAHUNFilter = null)
+        public async Task<IActionResult> Index(string NPPFilter = null, int? TAHUNFilter = null, string NAMAFilter = null)
         {
             if (TAHUNFilter == 0)
             {
@@ -29,13 +29,14 @@ namespace Payroll25.Controllers
 
             try
             {
-                var bebanMengajarDosenList = await DAO.ShowBebanMengajarAsync(NPPFilter, TAHUNFilter) ?? new List<BebanMengajarDosenModel>();
+                var bebanMengajarDosenList = await DAO.ShowBebanMengajarAsync(NPPFilter, TAHUNFilter,NAMAFilter) ?? new List<BebanMengajarDosenModel>();
 
                 var viewModel = new BebanMengajarDosenModel.BebanMengajarDosenViewModel
                 {
                     BebanMengajarDosenList = bebanMengajarDosenList,
                     NPPFilter = NPPFilter,
-                    TAHUNFilter = TAHUNFilter
+                    TAHUNFilter = TAHUNFilter,
+                    NAMAFilter = NAMAFilter,
                 };
 
                 return View(viewModel);

@@ -26,6 +26,7 @@
             public BebanMengajarDosenModel BebanMengajarDosen { get; set; }
             public string NPPFilter { get; set; }
             public int? TAHUNFilter { get; set; }
+            public string NAMAFilter { get; set; }
         }
 
     }
