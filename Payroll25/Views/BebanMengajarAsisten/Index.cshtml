@@ -10,6 +10,11 @@
     <!-- Referensi ke DataTables dan Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <style>
+        .editable-cell:hover {
+            cursor: pointer; /* Ubah penunjuk mouse menjadi tangan (pointer) saat dihover */
+        }
+    </style>
 </head>
 
 <body>
@@ -22,12 +27,11 @@
                 <h3 style="padding-bottom: 25px;">
                     Tambah Beban Mengajar
                 </h3>
-                </h3>
                 <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertBebanMengajarAsisten", "BebanMengajarAsisten")">
 
                     <div class="mb-3">
-                        <label class="control-label" >Tahun</label>
-                        <select class="form-control" id="tahunInput" >
+                        <label class="control-label">Tahun</label>
+                        <select class="form-control" id="tahunInput">
                             @{
                                 var currentYear = DateTime.Now.Year;
                                 for (var Year = currentYear; Year >= 2019; Year--)
@@ -109,7 +113,7 @@
                     <th>VAKASI</th>
                     <th>JUMLAH</th>
                     <th>TARIF</th>
-                    <th>TOTAL PERHITUNGAN</th> 
+                    <th>TOTAL PERHITUNGAN</th>
                 </tr>
             </thead>
             <tbody>
@@ -124,7 +128,7 @@
                             <td>@item.NPM</td>
                             <td>@item.JENIS_ASISTEN</td>
                             <td>@item.VAKASI</td>
-                            <td data-id="@item.ID_VAKASI" class="editable-cell">@item.JUMLAH</td>
+                            <td data-id="@item.ID_VAKASI" class="editable-cell" title="Edit">@item.JUMLAH</td>
                             <td>@item.TARIF</td>
                             <td class="total-perhitungan">0</td>
                         </tr>
@@ -152,10 +156,11 @@
 
         $(document).ready(function () {
 
-            //Untuk membuat cell atau column di tabel bisa di edit 
+            //Untuk membuat cell atau column di tabel bisa di edit
             $(".editable-cell").dblclick(function () {
                 var originalValue = $(this).text();
                 $(this).html(`<input type='text' value='${originalValue}' />`);
+                $(this).addClass('active'); // Tambahkan kelas "active" saat sel aktif
                 $(this).children().first().focus();
             });
 
@@ -164,7 +169,7 @@
                 var value = $(this).val();
                 var cell = $(this).parent();
                 cell.html(value);
-
+                cell.removeClass('active'); // Hapus kelas "active" saat sel tidak aktif
                 var id = cell.attr('data-id');
                 updatedData.push({
                     ID_VAKASI: id,
@@ -264,7 +269,6 @@
             });
         }
 
-
         // Panggil getCariData saat perubahan pada dropdown tahunInput
         $("#tahunInput").change(function () {
             getCariData();
@@ -277,6 +281,3 @@
 
     </script>
 }
-
-
-
