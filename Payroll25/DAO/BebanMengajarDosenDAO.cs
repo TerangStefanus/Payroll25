@@ -26,11 +26,11 @@
                 try
                 {
                     await conn.OpenAsync();
-                    var query = @"SELECT TOP 200
+                    var query = @"SELECT TOP 1000
                         BM.ID_BEBAN_MENGAJAR, 
                         K.NAMA, 
                         BM.NPP, 
-                        BM.ID_TAHUN_AKADEMIK, 
+                        BM.ID_TAHUN_AKADEMIK,
                         BM.NO_SEMESTER, 
                         BM.TOTAL_SKS,
                         TP.NAMA_TARIF_PAYROLL AS BEBAN_GELAR, 
@@ -41,29 +41,25 @@
                             [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR] AS BM
                         INNER JOIN 
                             [PAYROLL].[simka].[MST_KARYAWAN] AS K ON BM.NPP = K.NPP
-                        LEFT JOIN 
-                            [PAYROLL].[simka].[MST_TARIF_PAYROLL] AS TP ON K.ID_REF_JBTN_AKADEMIK = TP.ID_REF_JBTN_AKADEMIK";
+                        JOIN 
+                            [PAYROLL].[simka].[MST_TARIF_PAYROLL] AS TP ON K.ID_REF_JBTN_AKADEMIK = TP.ID_REF_JBTN_AKADEMIK 
+                        JOIN
+                            [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] AS KP ON TP.ID_KOMPONEN_GAJI = KP.ID_KOMPONEN_GAJI 
+                        JOIN
+                            [PAYROLL].[simka].[REF_JENJANG] AS RJ ON K.PENDIDIKAN_TERAKHIR = RJ.DESKRIPSI AND RJ.ID_REF_JENJANG = TP.ID_REF_JENJANG
+                        WHERE KP.ID_KOMPONEN_GAJI = 77 ";
 
                     Dictionary<string, object> parameters = new Dictionary<string, object>();
 
                     if (!string.IsNullOrEmpty(NPPFilter))
                     {
-                        query += " WHERE BM.NPP = @NPPFilter";
+                        query += " AND BM.NPP = @NPPFilter";
                         parameters.Add("@NPPFilter", NPPFilter);
                     }
 
                     if (TAHUNFilter.HasValue)
                     {
-                        if (!string.IsNullOrEmpty(NPPFilter))
-                        {
-                            query += " AND";
-                        }
-                        else
-                        {
-                            query += " WHERE";
-                        }
-
-                        query += " BM.ID_TAHUN_AKADEMIK = @TAHUNFilter";
+                        query += " AND BM.ID_TAHUN_AKADEMIK = @TAHUNFilter";
                         parameters.Add("@TAHUNFilter", TAHUNFilter);
                     }
 
@@ -82,80 +78,71 @@
             }
         }
 
-
-
-
         public int InsertBebanMengajar(BebanMengajarDosenModel model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                try
                 {
-                    try
-                    {
-                        var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
-                                    ([ID_TAHUN_AKADEMIK],[NO_SEMESTER],[NPP],[TOTAL_SKS],[BEBAN_STRUKTURAL],[KELEBIHAN_BEBAN],[TGL_AWAL_SK],[TGL_AKHIR_SK])
-                                    VALUES
-                                    (@ID_TAHUN_AKADEMIK,@NO_SEMESTER,@NPP,@TOTAL_SKS,@BEBAN_STRUKTURAL,@KELEBIHAN_BEBAN,@TGL_AWAL_SK,@TGL_AKHIR_SK)";
+                    var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
+                                ([ID_TAHUN_AKADEMIK],[NO_SEMESTER],[NPP],[TOTAL_SKS],[BEBAN_STRUKTURAL],[KELEBIHAN_BEBAN],[TGL_AWAL_SK],[TGL_AKHIR_SK])
+                                VALUES
+                                (@ID_TAHUN_AKADEMIK,@NO_SEMESTER,@NPP,@TOTAL_SKS,@BEBAN_STRUKTURAL,@KELEBIHAN_BEBAN,@TGL_AWAL_SK,@TGL_AKHIR_SK)";
 
-                        var parameters = new
-                        {
-                            ID_TAHUN_AKADEMIK = model.ID_TAHUN_AKADEMIK,
-                            NO_SEMESTER = model.NO_SEMESTER,
-                            NPP = model.NPP,
-                            TOTAL_SKS = model.TOTAL_SKS,
-                            BEBAN_STRUKTURAL = (int?)null, // Set null
-                            KELEBIHAN_BEBAN = (int?)null, // Set null
-                            TGL_AWAL_SK = DateTime.Now, // Set to current time
-                            TGL_AKHIR_SK = DateTime.Now.AddMonths(5) // Set to 5 months from now
-                        };
+                    var parameters = new
+                    {
+                        ID_TAHUN_AKADEMIK = model.ID_TAHUN_AKADEMIK,
+                        NO_SEMESTER = model.NO_SEMESTER,
+                        NPP = model.NPP,
+                        TOTAL_SKS = model.TOTAL_SKS,
+                        BEBAN_STRUKTURAL = (int?)null, // Set null
+                        KELEBIHAN_BEBAN = (int?)null, // Set null
+                        TGL_AWAL_SK = DateTime.Now, // Set to current time
+                        TGL_AKHIR_SK = DateTime.Now.AddMonths(5) // Set to 5 months from now
+                    };
 
-                        return conn.Execute(query, parameters);
-                    }
-                    catch (SqlException sqlEx)
-                    {
-                        Console.WriteLine($"SQL Error: {sqlEx.Message}");
-                        return 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"An error occurred: {ex.Message}");
-                        throw;
-                    }
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
                 }
             }
+        }
 
-            public int UpdateBebanMengajar(List<BebanMengajarDosenModel> model)
+        public int UpdateBebanMengajar(List<BebanMengajarDosenModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                try
                 {
-                    try
-                    {
-                        var query = @"UPDATE [payroll].[TBL_BEBAN_MENGAJAR]
-                                    SET 
-                                    [TOTAL_SKS] = @TOTAL_SKS
-                                    WHERE ID_BEBAN_MENGAJAR = @ID_BEBAN_MENGAJAR";
+                    var query = @"UPDATE [payroll].[TBL_BEBAN_MENGAJAR]
+                                SET 
+                                [TOTAL_SKS] = @TOTAL_SKS
+                                WHERE ID_BEBAN_MENGAJAR = @ID_BEBAN_MENGAJAR";
 
-                        return conn.Execute(query, model);
-                    }
-                    catch (SqlException sqlEx)
-                    {
-                        Console.WriteLine($"SQL Error: {sqlEx.Message}");
-                        return 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"An error occurred: {ex.Message}");
-                        throw;
-                    }
+                    return conn.Execute(query, model);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
                 }
             }
+        }
 
-
-
-
-
-
-
-
+            // Buat Fungsi Delete 
 
         }
 

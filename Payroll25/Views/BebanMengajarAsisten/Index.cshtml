@@ -1,0 +1,282 @@
+﻿@model BebanMengajarAsistenModel.BebanMengajarAsistenViewModel
+
+@{
+    int counter = 0;
+}
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Beban Mengajar Asisten</title>
+    <!-- Referensi ke DataTables dan Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="my-4">Beban Mengajar Asisten</h1>
+
+        <div class="row">
+            <!-- Sub-container untuk Tambah Beban Mengajar -->
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <h3 style="padding-bottom: 25px;">
+                    Tambah Beban Mengajar
+                </h3>
+                </h3>
+                <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertBebanMengajarAsisten", "BebanMengajarAsisten")">
+
+                    <div class="mb-3">
+                        <label class="control-label" >Tahun</label>
+                        <select class="form-control" id="tahunInput" >
+                            @{
+                                var currentYear = DateTime.Now.Year;
+                                for (var Year = currentYear; Year >= 2019; Year--)
+                                {
+                                    <option value="@Year">@Year</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ID_BULAN_GAJI" class="form-label">ID BULAN GAJI</label>
+                        <select class="form-control" name="ID_BULAN_GAJI" id="bulanGajiDropdown">
+                            <option value="">Pilih ID Bulan Gaji</option>
+                        </select>
+                    </div>
+
+                    @* <div class="mb-3">
+                    <label for="ID_BULAN_GAJI" class="form-label">ID BULAN GAJI</label>
+                    <input type="text" class="form-control" id="ID_BULAN_GAJI" name="ID_BULAN_GAJI">
+                    </div>*@
+
+                    <div class="mb-3">
+                        <label for="NPP" class="form-label">NPM</label>
+                        <input type="text" class="form-control" id="NPP" name="NPP">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JUMLAH" class="form-label">JUMLAH</label>
+                        <input type="number" class="form-control" id="JUMLAH" name="JUMLAH">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="DESKRIPSI" class="form-label">DESKRIPSI</label>
+                        <input type="text" class="form-control" id="DESKRIPSI" name="DESKRIPSI">
+                    </div>
+
+                    <button id="btnTambah" class="btn btn-primary">Tambah</button>
+                </form>
+            </div>
+
+            <!-- Sub-container untuk Pencarian berdasarkan NPP dan Tahun -->
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+
+                <h3 style="padding-bottom: 15px;">
+                    Pencarian
+                </h3>
+
+                <form id="searchForm" method="get" action="@Url.Action("Index", "BebanMengajarAsisten")">
+
+                    <div>
+                        <h3>Cari Berdasarkan NPP</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="NPMFilter" name="NPMFilter" value="@Model.NPMFilter" placeholder="Masukkan NPM">
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Cari Berdasarkan NAMA</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">Cari</button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Tabel data beban mengajar -->
+        <table class="table mt-3" id="dataTable">
+            <thead style="background-color: #8FA0C7">
+                <tr>
+                    <th>NO</th>
+                    <th>NAMA ASISTEN</th>
+                    <th>NPM</th>
+                    <th>JENIS ASISTEN</th>
+                    <th>VAKASI</th>
+                    <th>JUMLAH</th>
+                    <th>TARIF</th>
+                    <th>TOTAL PERHITUNGAN</th> 
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.BebanMengajarAsistenList != null)
+                {
+                    @foreach (var item in Model.BebanMengajarAsistenList)
+                    {
+                        counter++;
+                        <tr>
+                            <td>@counter</td>
+                            <td>@item.NAMA_ASISTEN</td>
+                            <td>@item.NPM</td>
+                            <td>@item.JENIS_ASISTEN</td>
+                            <td>@item.VAKASI</td>
+                            <td data-id="@item.ID_VAKASI" class="editable-cell">@item.JUMLAH</td>
+                            <td>@item.TARIF</td>
+                            <td class="total-perhitungan">0</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (Model.BebanMengajarAsistenList != null && Model.BebanMengajarAsistenList.Any())
+        {
+            <button id="updateBtn" class="btn btn-success mt-3">Simpan</button>
+        }
+
+    </div>
+
+</body>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+    <script>
+        var updatedData = [];
+
+        $(document).ready(function () {
+
+            //Untuk membuat cell atau column di tabel bisa di edit 
+            $(".editable-cell").dblclick(function () {
+                var originalValue = $(this).text();
+                $(this).html(`<input type='text' value='${originalValue}' />`);
+                $(this).children().first().focus();
+            });
+
+            // Untuk mengupdate data column
+            $("body").on("blur", ".editable-cell > input", function () {
+                var value = $(this).val();
+                var cell = $(this).parent();
+                cell.html(value);
+
+                var id = cell.attr('data-id');
+                updatedData.push({
+                    ID_VAKASI: id,
+                    JUMLAH: value
+                });
+            });
+
+            // Untuk melakukan update menggunakan ajax
+            $("#updateBtn").click(function () {
+                console.log(updatedData);
+                $.ajax({
+                    url: '/BebanMengajarAsisten/UpdateBebanMengajarAsisten',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil diupdate');
+                            location.reload();
+                        } else {
+                            alert('Data gagal diupdate');
+                        }
+                    }
+                });
+            });
+
+            //⚠️ Untuk menampilkan Total Perhitungan ⚠️
+            $('#dataTable tbody tr').each(function () {
+                var jumlah = $(this).find(".editable-cell").text();
+                var tarif = $(this).children().eq(6).text();
+                var totalPerhitungan = parseInt(jumlah) * parseInt(tarif);
+                $(this).children().eq(7).text(totalPerhitungan);
+            });
+
+
+
+            //⚠️ Untuk melakukan insert dalam database menggunakan ajax ⚠️
+            $("#btnTambah").click(function (event) {
+                event.preventDefault(); //
+
+                var formData = {
+                    NPP: $("#NPP").val(),
+                    ID_BULAN_GAJI: $("#bulanGajiDropdown").val(),
+                    JUMLAH: $("#JUMLAH").val(),
+                    DESKRIPSI: $("#DESKRIPSI").val()
+                };
+
+                $.ajax({
+                    url: '/BebanMengajarAsisten/InsertBebanMengajarAsisten',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil ditambahkan');
+                            location.reload();
+                        } else {
+                            alert('Data gagal ditambahkan');
+                        }
+                    }
+                });
+            });
+
+            $('#dataTable').DataTable({
+                "pageLength": 20, // Menampilkan 10 baris per halaman
+                "lengthChange": false, // Sembunyikan dropdown untuk mengubah jumlah baris per halaman
+                "info": true, // Tampilkan info jumlah total baris
+                "pagingType": "full_numbers", // Tampilkan navigasi paginasi lengkap
+                "language": {
+                    "search": "Cari:",
+                    "paginate": {
+                        "first": "Awal",
+                        "last": "Akhir",
+                        "next": ">",
+                        "previous": "<"
+                    }
+                }
+            });
+
+        });
+
+        // Dalam fungsi getCariData, isi dropdown bulanGajiDropdown berdasarkan tahun yang dipilih
+        function getCariData() {
+            var tahun = $("#tahunInput").val();
+            $.get("/BebanMengajarAsisten/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
+                console.log("Data yang diterima dari server:", data); // Menampilkan data yang diterima di konsol
+                var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                for (var i = 0; i < data.length; i++) {
+                    options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + " - " + namaBulan[i] + "</option>";
+                }
+                $("#bulanGajiDropdown").html(options);
+            }).done(function () {
+                console.log("Pengambilan data selesai.");
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log("Gagal mengambil data:", textStatus, errorThrown);
+            });
+        }
+
+
+        // Panggil getCariData saat perubahan pada dropdown tahunInput
+        $("#tahunInput").change(function () {
+            getCariData();
+        });
+
+        // Panggil getCariData sekali saat halaman dimuat
+        $(document).ready(function () {
+            getCariData();
+        });
+
+    </script>
+}
+
+
+

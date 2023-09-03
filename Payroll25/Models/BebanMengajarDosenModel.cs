@@ -29,7 +29,7 @@
         }
 
     }
-
+    
     public class DBOutput
     {
         public bool status { get; set; }
