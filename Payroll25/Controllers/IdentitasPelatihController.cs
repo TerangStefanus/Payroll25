@@ -18,7 +18,7 @@ namespace Payroll25.Controllers
             DAO = new IdentitasPelatihDAO();
         }
 
-        // GET: IdentitasAsisten
+        // GET: IdentitasPelatih
         public IActionResult Index()
         {
             var viewModel = new IdentitasPelatihViewModel
@@ -113,6 +113,39 @@ namespace Payroll25.Controllers
             }
 
             viewModel.IdentitasPelatihList = DAO.ShowIdentitasPelatih();
+            return View("Index", viewModel);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditDetails(IdentitasPelatihViewModel viewModel, int ID_Pelatih)
+        {
+            try
+            {
+                bool updateResult = DAO.UpdateIdentitasPelatih(viewModel, ID_Pelatih);
+
+                if (updateResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menyimpan ke database.");
+                }
+            }
+
+            catch (Exception)
+            {
+                // Handle the exception
+                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
+            }
+
+            // If the execution reaches this point, there was an error, so return the view with the updated ModelState
             return View("Index", viewModel);
         }
 

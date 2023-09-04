@@ -22,9 +22,6 @@
     <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
         <div class="row">
             <div class="col-sm-6" style="margin-top: 20px;">
-               @* TODO
-               Tambahkan Form untuk Insert Identitas Pelatih *@
-
                 @using (Html.BeginForm("Create", "IdentitasPelatih", FormMethod.Post))
                 {
                     @Html.AntiForgeryToken()
@@ -136,6 +133,91 @@
 
                 <!-- TODO -->
                 <!-- Modal Edit -->
+
+                <div class="modal fade" id="editModal-@(identitasPelatih.ID_PELATIH)" tabindex="-1" role="dialog" aria-labelledby="editModalLabel-@(identitasPelatih.ID_PELATIH)" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel-@(identitasPelatih.ID_PELATIH)">Edit Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                @using (Html.BeginForm("EditDetails", "IdentitasPelatih", new { ID_Pelatih = identitasPelatih.ID_PELATIH }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.NPP" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.NPP" class="form-control" value="@identitasPelatih.NPP" />
+                                        <span asp-validation-for="IdentitasPelatih.NPP" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.NAMA" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.NAMA" class="form-control" value="@identitasPelatih.NAMA" />
+                                        <span asp-validation-for="IdentitasPelatih.NAMA" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="form-control" value="@identitasPelatih.ID_TAHUN_AKADEMIK" />
+                                        <span asp-validation-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.NO_SEMESTER" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.NO_SEMESTER" class="form-control" value="@identitasPelatih.NO_SEMESTER" />
+                                        <span asp-validation-for="IdentitasPelatih.NO_SEMESTER" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.ID_UNIT" class="control-label"></label>
+
+                                        <select class="form-control form-control-lg" id="selectUnit" asp-for="IdentitasPelatih.ID_UNIT">
+                                            @for (int i = 0; i < Model.UnitsList.Count; i++)
+                                            {
+                                                var unit = Model.UnitsList[i];
+                                                if (identitasPelatih.ID_UNIT == unit.ID_UNIT)
+                                                {
+                                                    <option value="@unit.ID_UNIT" selected>@unit.NAMA_UNIT</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                                                }
+                                            }
+                                        </select>
+
+                                        <span asp-validation-for="IdentitasPelatih.ID_UNIT" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.NO_REKENING" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.NO_REKENING" class="form-control" value="@identitasPelatih.NO_REKENING" />
+                                        <span asp-validation-for="IdentitasPelatih.NO_REKENING" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.NAMA_REKENING" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.NAMA_REKENING" class="form-control" value="@identitasPelatih.NAMA_REKENING" />
+                                        <span asp-validation-for="IdentitasPelatih.NAMA_REKENING" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="IdentitasPelatih.NAMA_BANK" class="control-label"></label>
+                                        <input asp-for="IdentitasPelatih.NAMA_BANK" class="form-control" value="@identitasPelatih.NAMA_BANK" />
+                                        <span asp-validation-for="IdentitasPelatih.NAMA_BANK" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="submit" value="Save" class="btn btn-primary" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- TODO -->
                 <!-- Modal Delete -->
