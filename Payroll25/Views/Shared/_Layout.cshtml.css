@@ -46,3 +46,21 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+/* CSS untuk menempatkan Logout di pojok kiri paling bawah sidebar */
+.sidebar {
+    display: grid;
+    grid-template-rows: 1fr auto; /* Bagian atas fleksibel, Logout di bagian bawah */
+    height: 100%;
+}
+
+.nav-sidebar {
+    overflow-y: auto; /* Aktifkan overflow jika konten melebihi tinggi sidebar */
+}
+
+.nav-item.logout {
+    grid-row: 2; /* Letakkan Logout di baris kedua */
+}
+
+
+

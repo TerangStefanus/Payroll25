@@ -120,30 +120,45 @@
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a href="/BebanMengajar/Index" class="nav-link">
                                 <i class="nav-icon fas fa-clipboard-list"></i>
                                 <p>
                                     Beban Mengajar
                                 </p>
                             </a>
-                        </li>
+                        </li> *@
+
                         <li class="nav-item">
-                            <a href="/BebanMengajarDosen/Index" class="nav-link">
-                                <i class="nav-icon fas fa-clipboard-list"></i>
+
+                            <a href="" class="nav-link">
+                                <i class="nav-icon fas fa-copy"></i>
                                 <p>
-                                    Beban Mengajar Dosen
+                                    Beban Mengajar
+                                    <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
+
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="/BebanMengajarDosen/Index" class="nav-link">
+                                        <i class="nav-icon fas fa-clipboard-list"></i>
+                                        <p>Beban Dosen</p>
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="/BebanMengajarAsisten/Index" class="nav-link">
+                                        <i class="nav-icon fas fa-clipboard-list"></i>
+                                        <p>Beban Asisten</p>
+                                    </a>
+                                </li>
+                            </ul>
+
                         </li>
-                        <li class="nav-item">
-                            <a href="/BebanMengajarAsisten/Index" class="nav-link">
-                                <i class="nav-icon fas fa-clipboard-list"></i>
-                                <p>
-                                    Beban Mengajar Asisten
-                                </p>
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a href="/TunjanganPengabdian/Index" class="nav-link">
                                 <i class="nav-icon fas fa-hands-helping"></i>
@@ -152,6 +167,7 @@
                                 </p>
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a href="" class="nav-link">
                                 <i class="nav-icon fas fa-award"></i>
@@ -161,36 +177,36 @@
                                 </p>
                             </a>
 
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/HonorUjian/Index" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Honor Ujian</p>
-                                    </a>
-                                </li>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="/HonorUjian/Index" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Honor Ujian</p>
+                                </a>
+                            </li>
 
-                            </ul>
+                        </ul>
 
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/HonorPendadaran/Index" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Honor Pendadaran</p>
-                                    </a>
-                                </li>
-
-                            </ul>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="/HonorPendadaran/Index" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Honor Pendadaran</p>
+                                </a>
+                            </li>
+                        </ul>
                             
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="/HonorPascaSarjana/Index" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Mengajar Pasca Sarjana</p>
-                                    </a>
-                                </li>
-                           </ul>
-                         
-                        <li class="nav-item">
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="/HonorPascaSarjana/Index" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Mengajar Pasca Sarjana</p>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <!-- Logout -->
+                        <li class="nav-item logout">
                             <a href="/Account/Logout" class="nav-link">
                                 <i class="nav-icon fas fa-sign-out-alt"></i>
                                 <p>
@@ -198,6 +214,8 @@
                                 </p>
                             </a>
                         </li>
+
+
 
                     </ul>
                 </nav>
