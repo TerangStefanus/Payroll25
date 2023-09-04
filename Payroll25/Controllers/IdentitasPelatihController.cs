@@ -149,6 +149,34 @@ namespace Payroll25.Controllers
             return View("Index", viewModel);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(IdentitasPelatihViewModel viewModel, int ID_Pelatih)
+        {
+            try
+            {
+                bool updateResult = DAO.DeleteIdentitasPelatih(viewModel, ID_Pelatih);
+
+                if (updateResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menghapus Data.");
+                }
+            }
+
+            catch (Exception)
+            {
+                // Handle Error
+                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
+            }
+
+            // Ketika Data di eksekusi pada point ini maka terjadi error 
+            return View("Index", viewModel);
+        }
+
 
 
 

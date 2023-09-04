@@ -153,7 +153,30 @@ namespace Payroll25.DAO
             }
         }
 
-        
+        public bool DeleteIdentitasPelatih(IdentitasPelatihViewModel viewModel, int ID_Pelatih)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"DELETE FROM payroll.TBL_PELATIH
+                                  WHERE ID_PELATIH = @userID;";
+
+                    var parameters = new { userID = ID_Pelatih };
+
+                    conn.Execute(query, parameters);
+
+                    return true; // Successfully executed the update operation
+
+                }
+                catch (Exception)
+                {
+                    return false; // Failed to execute the update operation
+                }
+            }
+        }
+
+
 
 
     }
