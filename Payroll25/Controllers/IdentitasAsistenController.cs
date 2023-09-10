@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CsvHelper.Configuration;
+using CsvHelper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Payroll25.DAO;
 using Payroll25.Models;
 using System.Dynamic;
+using System.Globalization;
 using System.Reflection;
 using System.Security.Cryptography;
+
 
 namespace Payroll25.Controllers
 {
@@ -213,6 +217,56 @@ namespace Payroll25.Controllers
             // Ketika Data di eksekusi pada point ini maka terjadi error 
             return View("Index", viewModel);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UploadCSV(IFormFile CsvFile)
+        {
+            var result = new { success = false, errorMessage = string.Empty };
+
+            if (CsvFile == null || CsvFile.Length == 0)
+            {
+                result = new { success = false, errorMessage = "File tidak ditemukan" };
+                return Json(result);
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(CsvFile.OpenReadStream()))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                {
+                    var records = csv.GetRecords<IdentitasAsistenModel>().ToList();
+
+                    var uploadResult = DAO.UploadAndInsertCSV(CsvFile); // Memanggil metode ini dengan parameter yang benar
+
+                    if (uploadResult.Item1)
+                    {
+                        TempData["success"] = "Berhasil mengunggah dan memproses CSV!";
+                    }
+                    else
+                    {
+                        TempData["error"] = "Gagal mengunggah dan memproses CSV.";
+                        if (uploadResult.Item2.Any())
+                        {
+                            TempData["validationErrors"] = string.Join(", ", uploadResult.Item2);
+                        }
+                    }
+                }
+
+                result = new { success = true, errorMessage = string.Empty };
+            }
+            catch (Exception ex)
+            {
+                result = new { success = false, errorMessage = "Gagal memproses file CSV: " + ex.Message };
+            }
+
+            return Json(result);
+        }
+
+
+
+
+
 
 
 

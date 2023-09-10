@@ -1,7 +1,11 @@
-﻿using Dapper;
+﻿using CsvHelper.Configuration;
+using CsvHelper;
+using Dapper;
 using Payroll25.Models;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Security.Cryptography;
+using Newtonsoft.Json;
 
 namespace Payroll25.DAO
 {
@@ -15,7 +19,7 @@ namespace Payroll25.DAO
                 {
                     var parameters = new DynamicParameters();
 
-                    var query = @"SELECT 
+                    var query = @"SELECT DISTINCT
                                 [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].ID_TAHUN_AKADEMIK, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NO_SEMESTER, 
@@ -27,13 +31,20 @@ namespace Payroll25.DAO
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_REKENING, 
                                 [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK,
                                 REF.JENIS AS JENIS
-                                FROM [PAYROLL].[siatmax].[MST_UNIT]
-                                INNER JOIN [PAYROLL].[payroll].[TBL_ASISTEN] 
-                                    ON [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
-                                INNER JOIN [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS
-                                    ON [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
-                                INNER JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] AS REF
-                                    ON [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = REF.ID_JENIS_ASISTEN
+                                FROM 
+                                [PAYROLL].[siatmax].[MST_UNIT]
+                                INNER JOIN 
+                                [PAYROLL].[payroll].[TBL_ASISTEN] 
+                                ON 
+                                [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
+                                INNER JOIN 
+                                [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS
+                                ON 
+                                [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
+                                INNER JOIN 
+                                [PAYROLL].[payroll].[REF_JENIS_ASISTEN] AS REF
+                                ON 
+                                [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = REF.ID_JENIS_ASISTEN
                                 ORDER BY [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN DESC;";
                                 
 
@@ -233,6 +244,85 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+        public (bool, List<string>) UploadAndInsertCSV(IFormFile csvFile)
+        {
+            var errorMessages = new List<string>();
+            try
+            {
+                using (var stream = csvFile.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    conn.Open();
+                    var transaction = conn.BeginTransaction();
+
+                    try
+                    {
+                        var records = csv.GetRecords<IdentitasAsistenModel>().ToList();
+                        var validRecords = records.Where(record =>
+                            record.ID_TAHUN_AKADEMIK != null &&
+                            record.NO_SEMESTER != null &&
+                            !string.IsNullOrEmpty(record.NPM) &&
+                            record.ID_UNIT != null &&
+                            !string.IsNullOrEmpty(record.NO_REKENING) &&
+                            !string.IsNullOrEmpty(record.NAMA_REKENING) &&
+                            !string.IsNullOrEmpty(record.NAMA_BANK) &&
+                            record.ID_JENIS_ASISTEN != null
+                        ).ToList();
+
+                        var invalidRecords = records.Except(validRecords).ToList();
+
+                        foreach (var invalidRecord in invalidRecords)
+                        {
+                            errorMessages.Add($"Record dengan NPM {invalidRecord.NPM} memiliki data yang tidak valid atau tidak lengkap.");
+                        }
+
+                        foreach (var record in validRecords)
+                        {
+                            var insertQuery = @"INSERT INTO payroll.TBL_ASISTEN 
+                                                (ID_TAHUN_AKADEMIK, NO_SEMESTER, NPM, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK, ID_JENIS_ASISTEN) 
+                                                VALUES 
+                                                (@ID_Tahun_Akademik, @no_Semester, @npm, @ID_Unit , @no_Rekening, @nama_Rekening, @nama_Bank, @ID_Jenis_Asisten)";
+
+                            conn.Execute(insertQuery, record, transaction);
+                        }
+
+                        transaction.Commit();
+                        return (true, errorMessages);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine("Error: " + ex.Message);
+                        errorMessages.Add(ex.Message);
+                        return (false, errorMessages);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                errorMessages.Add(ex.Message);
+                return (false, errorMessages);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     }

@@ -20,88 +20,113 @@
         <h3>Tambah Identitas Asisten</h3>
     </div>
 
-    <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
-        <div class="row">
-            <div class="col-sm-6" style="margin-top: 20px;">
-                @using (Html.BeginForm("Create", "IdentitasAsisten", FormMethod.Post))
-                {
-                    @Html.AntiForgeryToken()
+        <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
+            <div class="row">
+                <div class="col-sm-6" style="margin-top: 20px;">
+                    @using (Html.BeginForm("Create", "IdentitasAsisten", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="form-control" />
-                        <span asp-validation-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="text-danger"></span>
-                    </div>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="control-label"></label>
+                            <input asp-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="form-control" />
+                            <span asp-validation-for="IdentitasAsisten.ID_TAHUN_AKADEMIK" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.NO_SEMESTER" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.NO_SEMESTER" class="form-control" />
-                        <span asp-validation-for="IdentitasAsisten.NO_SEMESTER" class="text-danger"></span>
-                    </div>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.NO_SEMESTER" class="control-label"></label>
+                            <input asp-for="IdentitasAsisten.NO_SEMESTER" class="form-control" />
+                            <span asp-validation-for="IdentitasAsisten.NO_SEMESTER" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.NPM" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.NPM" class="form-control" />
-                        <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
-                    </div>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.NPM" class="control-label"></label>
+                            <input asp-for="IdentitasAsisten.NPM" class="form-control" />
+                            <span asp-validation-for="IdentitasAsisten.NPM" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.ID_UNIT" class="control-label"></label>
 
-                        <select class="form-control form-control-lg" id="selectUnit" asp-for="IdentitasAsisten.ID_UNIT">
-                            <option value="">-- Pilih Unit --</option>
-                            @foreach (var unit in Model.UnitsList)
-                            {
-                                <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
-                            }
-                        </select>
+                            <select class="form-control form-control-lg" id="selectUnit" asp-for="IdentitasAsisten.ID_UNIT">
+                                <option value="">-- Pilih Unit --</option>
+                                @foreach (var unit in Model.UnitsList)
+                                {
+                                    <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                                }
+                            </select>
 
-                        <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
-                    </div>
+                            <span asp-validation-for="IdentitasAsisten.ID_UNIT" class="text-danger"></span>
+                        </div>
 
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.NO_REKENING" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.NO_REKENING" class="form-control" />
-                        <span asp-validation-for="IdentitasAsisten.NO_REKENING" class="text-danger"></span>
-                    </div>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.NO_REKENING" class="control-label"></label>
+                            <input asp-for="IdentitasAsisten.NO_REKENING" class="form-control" />
+                            <span asp-validation-for="IdentitasAsisten.NO_REKENING" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.NAMA_REKENING" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.NAMA_REKENING" class="form-control" />
-                        <span asp-validation-for="IdentitasAsisten.NAMA_REKENING" class="text-danger"></span>
-                    </div>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.NAMA_REKENING" class="control-label"></label>
+                            <input asp-for="IdentitasAsisten.NAMA_REKENING" class="form-control" />
+                            <span asp-validation-for="IdentitasAsisten.NAMA_REKENING" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.NAMA_BANK" class="control-label"></label>
-                        <input asp-for="IdentitasAsisten.NAMA_BANK" class="form-control" />
-                        <span asp-validation-for="IdentitasAsisten.NAMA_BANK" class="text-danger"></span>
-                    </div>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.NAMA_BANK" class="control-label"></label>
+                            <input asp-for="IdentitasAsisten.NAMA_BANK" class="form-control" />
+                            <span asp-validation-for="IdentitasAsisten.NAMA_BANK" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="control-label"></label>
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label asp-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="control-label"></label>
 
-                        <select class="form-control form-control-lg" asp-for="IdentitasAsisten.ID_JENIS_ASISTEN">
-                            <option value="">-- Pilih Jenis Asisten --</option>
-                            @foreach (var jenis in Model.JenisAsistenList)
-                            {
-                                <option value="@jenis.ID_JENIS_ASISTEN">@jenis.JENIS</option>
-                            }
-                        </select>
+                            <select class="form-control form-control-lg" asp-for="IdentitasAsisten.ID_JENIS_ASISTEN">
+                                <option value="">-- Pilih Jenis Asisten --</option>
+                                @foreach (var jenis in Model.JenisAsistenList)
+                                {
+                                    <option value="@jenis.ID_JENIS_ASISTEN">@jenis.JENIS</option>
+                                }
+                            </select>
 
-                        <span asp-validation-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="text-danger"></span>
-                    </div>
+                            <span asp-validation-for="IdentitasAsisten.ID_JENIS_ASISTEN" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <input type="submit" value="Create" class="btn btn-primary" />
-                    </div>
-                }
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
 
+        <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
+            <div class="row">
+                <div class="col-sm-6" style="margin-top: 20px;">
+                    @using (Html.BeginForm("UploadCSV", "IdentitasAsisten", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <label for="csvFile">Select CSV File</label>
+                            <input type="file" name="CsvFile" id="csvFile" class="form-control" accept=".csv" />
+                            @Html.ValidationMessageFor(model => model.CsvFile, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
+                            <input type="submit" value="Upload" class="btn btn-primary" id="uploadButton" />
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    
+    
     <table class="table" id="dataTable">
         <thead style="background-color: #8FA0C7">
             <tr>
@@ -338,7 +363,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -351,16 +375,39 @@
                 "scrollCollapse": true, // Mengatur tinggi tabel tetap sama saat tabel kosong
                 "order": [[0, "desc"]] // Mengurutkan data berdasarkan kolom pertama secara ascending
             });
-        });
 
-        $(document).ready(function () {
             $('#selectUnit').select2({
-                width: 'resolve'  
+                width: 'resolve'
+            });
+
+            $('#uploadButton').click(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData();
+                formData.append('CsvFile', $('#csvFile')[0].files[0]);
+
+                $.ajax({
+                    url: '@Url.Action("UploadCSV", "IdentitasAsisten")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result.success) {
+                            alert('Berhasil mengunggah dan memproses CSV!');
+                        } else {
+                            alert('Gagal memproses CSV: ' + result.errorMessage);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Terjadi kesalahan saat mengunggah: ' + error);
+                    }
+                });
             });
         });
-
     </script>
 }
+
 
 
 
