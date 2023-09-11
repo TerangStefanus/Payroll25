@@ -12,9 +12,24 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <style>
         .editable-cell:hover {
-            cursor: pointer; /* Ubah penunjuk mouse menjadi tangan (pointer) saat dihover */
+            cursor: pointer; /* Ubah penunjuk mouse menjadi tangan saat dihover */
+        }
+
+        .dataTables_wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table.dataTable {
+            width: 100%;
+            margin: 0 auto;
+            clear: both;
+            border-collapse: separate;
+            border-spacing: 0;
+            white-space: nowrap; /* Ini akan mencegah baris dari wrapping dan memastikan bahwa seluruh baris akan scrollable */
         }
     </style>
+
 </head>
 
 <body>
@@ -33,16 +48,21 @@
                 </h3>
 
                 <form id="searchForm" method="get" action="@Url.Action("Index", "KelolaTarif")">
-
                     <div>
-                        <h3>Cari Berdasarkan NAMA</h3>
+                        <h3>Cari Komponen Gaji</h3>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
+                            <select class="form-control" id="NAMAFilter" name="NAMAFilter">
+                                @foreach (var item in ViewBag.KomponenGajiList)
+                                {
+                                    <option value="@item.KOMPONEN_GAJI">@item.KOMPONEN_GAJI</option>
+                                }
+                            </select>
                         </div>
                     </div>
 
                     <button class="btn btn-primary" type="submit">Cari</button>
                 </form>
+
 
             </div>
         </div>
@@ -52,17 +72,17 @@
             <thead style="background-color: #8FA0C7">
                 <tr>
                     <th>NO</th>
-                    <th>ID_MST_TARIF_PAYROLL</th>
-                    <th>ID_REF_JBTN_AKADEMIK</th>
-                    <th>ID_REF_STRUKTURAL</th>
-                    <th>ID_REF_GOLONGAN</th>
-                    <th>ID_REF_FUNGSIONAL</th>
-                    <th>ID_REF_JENJANG</th>
-                    <th>NAMA_TARIF_PAYROLL</th>
+                    <th>ID MST TARIF_PAYROLL</th>
+                    <th>ID REF JBTN_AKADEMIK</th>
+                    <th>ID REF STRUKTURAL</th>
+                    <th>ID REF GOLONGAN</th>
+                    <th>ID REF FUNGSIONAL</th>
+                    <th>ID REF JENJANG</th>
+                    <th>NAMA TARIF PAYROLL</th>
                     <th>NOMINAL</th>
                     <th>JENIS</th>
-                    <th>JENJANG_KELAS</th>
-                    <th>ID_KOMPONEN_GAJI</th>
+                    <th>JENJANG KELAS</th>
+                    <th>ID_KOMPONEN GAJI</th>
 
                 </tr>
             </thead>
@@ -101,7 +121,6 @@
 </body>
 
 
-
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
@@ -112,7 +131,7 @@
 
         $(document).ready(function () {
 
-            //Untuk membuat cell atau column di tabel bisa di edit
+            // Untuk membuat cell atau column di tabel bisa di edit
             $(".editable-cell").dblclick(function () {
                 var originalValue = $(this).text();
                 $(this).html(`<input type='text' value='${originalValue}' />`);
@@ -121,79 +140,40 @@
             });
 
             // Untuk mengupdate data column
-            // $("body").on("blur", ".editable-cell > input", function () {
-            //     var value = $(this).val();
-            //     var cell = $(this).parent();
-            //     cell.html(value);
-            //     cell.removeClass('active'); // Hapus kelas "active" saat sel tidak aktif
-            //     var id = cell.attr('data-id');
-            //     updatedData.push({
-            //         ID_VAKASI: id,
-            //         JUMLAH: value
-            //     });
-            // });
-
-
+            $("body").on("blur", ".editable-cell > input", function () {
+                var value = $(this).val();
+                var cell = $(this).parent();
+                cell.html(value);
+                cell.removeClass('active'); // Hapus kelas "active" saat sel tidak aktif
+                var id = cell.attr('data-id');
+                updatedData.push({
+                    ID_MST_TARIF_PAYROLL: id,
+                    NOMINAL: value
+                });
+            });
 
             // Untuk melakukan update menggunakan ajax
-            // $("#updateBtn").click(function () {
-            //     console.log(updatedData);
-            //     $.ajax({
-            //         url: '/BebanMengajarAsisten/UpdateBebanMengajarAsisten',
-            //         type: 'POST',
-            //         contentType: 'application/json',
-            //         data: JSON.stringify(updatedData),
-            //         success: function (response) {
-            //             if (response.status) {
-            //                 alert('Data berhasil diupdate');
-            //                 location.reload();
-            //             } else {
-            //                 alert('Data gagal diupdate');
-            //             }
-            //         }
-            //     });
-            // });
-
-
-            //⚠️ Untuk menampilkan Total Perhitungan ⚠️
-            // $('#dataTable tbody tr').each(function () {
-            //     var jumlah = $(this).find(".editable-cell").text();
-            //     var tarif = $(this).children().eq(6).text();
-            //     var totalPerhitungan = parseInt(jumlah) * parseInt(tarif);
-            //     $(this).children().eq(7).text(totalPerhitungan);
-            // });
-
-
-
-            //⚠️ Untuk melakukan insert dalam database menggunakan ajax ⚠️
-            // $("#btnTambah").click(function (event) {
-            //     event.preventDefault(); //
-
-            //     var formData = {
-            //         NPP: $("#NPP").val(),
-            //         ID_BULAN_GAJI: $("#bulanGajiDropdown").val(),
-            //         JUMLAH: $("#JUMLAH").val(),
-            //         DESKRIPSI: $("#DESKRIPSI").val()
-            //     };
-
-            //     $.ajax({
-            //         url: '/BebanMengajarAsisten/InsertBebanMengajarAsisten',
-            //         type: 'POST',
-            //         contentType: 'application/json',
-            //         data: JSON.stringify(formData),
-            //         success: function (response) {
-            //             if (response.status) {
-            //                 alert('Data berhasil ditambahkan');
-            //                 location.reload();
-            //             } else {
-            //                 alert('Data gagal ditambahkan');
-            //             }
-            //         }
-            //     });
-            // });
+            $("#updateBtn").click(function () {
+                console.log(updatedData);
+                $.ajax({
+                    url: '/KelolaTarif/UpdateTarif',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil diupdate');
+                            location.reload();
+                        } else {
+                            alert('Data gagal diupdate');
+                        }
+                    }
+                });
+            });
 
             $('#dataTable').DataTable({
-                "pageLength": 20, // Menampilkan 10 baris per halaman
+                "scrollX": true, // Ini akan menambahkan scroll horizontal
+                "pageLength": 10, // Menampilkan 10 baris per halaman
                 "lengthChange": false, // Sembunyikan dropdown untuk mengubah jumlah baris per halaman
                 "info": true, // Tampilkan info jumlah total baris
                 "pagingType": "full_numbers", // Tampilkan navigasi paginasi lengkap
@@ -208,8 +188,7 @@
                 }
             });
 
+
         });
-
-
     </script>
 }

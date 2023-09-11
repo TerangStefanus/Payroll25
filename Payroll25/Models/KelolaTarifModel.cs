@@ -17,7 +17,7 @@
 
         // -------- CODE INPUT FORM -------- \\
 
-
+        public string KOMPONEN_GAJI { get; set; } // Menampung nilai untuk dropdown
 
         public class KelolaTarifViewModel
         {
@@ -25,7 +25,6 @@
             public KelolaTarifModel KelolaTarif { get; set; }
             public string NAMAFilter { get; set; }
         }
-
 
 
     }

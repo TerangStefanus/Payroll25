@@ -18,6 +18,7 @@ namespace Payroll25.Controllers
             try
             {
                 var kelolaTarifList = await DAO.ShowKelolaTarifAsync(NAMAFilter) ?? new List<KelolaTarifModel>();
+                var komponenGajiList = await DAO.GetKomponenGaji();
 
                 var viewModel = new KelolaTarifModel.KelolaTarifViewModel
                 {
@@ -25,15 +26,37 @@ namespace Payroll25.Controllers
                     NAMAFilter = NAMAFilter
                 };
 
+                ViewBag.KomponenGajiList = komponenGajiList;
+
                 return View(viewModel);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Terjadi kesalahan saat mengambil data : {ex.Message}");
             }
-
         }
 
+
+        [HttpPost]
+        public IActionResult UpdateTarif([FromBody] List<KelolaTarifModel> model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
+
+            success = DAO.UpdateKelolaTarif(model);
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = " Update berhasil ";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = " Update gagal";
+            }
+
+            return Json(data);
+        }
 
 
 
