@@ -133,14 +133,29 @@ namespace Payroll25.DAO
             }
         }
 
+        public int DeleteHonorPendadaran(List<HonorPendadaranModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"DELETE FROM [payroll].[TBL_VAKASI]
+                                WHERE ID_VAKASI = @ID_VAKASI";
 
-
-
-
-
-
-
-
+                    return conn.Execute(query, model);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
 
         // Support untuk Dropdown Insert Komponen Gaji
         public async Task<IEnumerable<HonorPendadaranModel>> GetKomponenGaji()

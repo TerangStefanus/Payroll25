@@ -81,6 +81,32 @@ namespace Payroll25.Controllers
             return Json(data);
         }
 
+        [HttpPost]
+        public IActionResult DeleteHonorPendadaran([FromBody] List<HonorPendadaranModel> model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
+
+            success = DAO.DeleteHonorPendadaran(model);
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = " Delete data berhasil ";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = " Delete data gagal";
+            }
+
+            return Json(data);
+        }
+
+
+
+
+
+
         [HttpGet]
         public async Task<IActionResult> GetBulanGajiDropdown(int tahun)
         {
