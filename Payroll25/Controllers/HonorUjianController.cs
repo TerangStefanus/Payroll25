@@ -18,33 +18,92 @@ namespace Payroll25.Controllers
             DAO = new HonorUjianDAO();
         }
 
-        // GET: HonorUjianController
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string NPPFilter = null, string NAMAFilter = null)
         {
             try
             {
-                var viewModel = new HonorUjianViewModel
+                var honoUjianList = await DAO.ShowHonorUjianAsync(NPPFilter, NAMAFilter) ?? new List<HonorUjianModel>();
+                var komponenGajiList = await DAO.GetKomponenGaji();
+
+                ViewBag.KomponenGajiList = komponenGajiList; // Set data to ViewBag
+
+                var viewModel = new HonorUjianModel.HonorUjianViewModel
                 {
-                    HonorUjianList = await DAO.ShowHonorUjianAsync(),
-                    HonorUjian = new HonorUjianModel()
+                    HonorUjianList = honoUjianList,
+                    NPPFilter = NPPFilter,
+                    NAMAFilter = NAMAFilter
                 };
 
                 return View(viewModel);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Handle exceptions here
-                return StatusCode(500);
+                return StatusCode(500, $"Terjadi kesalahan saat mengambil data : {ex.Message}");
             }
         }
 
-        // GET: HonorUjianController/Details/5
-        public ActionResult Details(int id)
+        [HttpPost]
+        public IActionResult InsertHonorUjian([FromBody] HonorUjianModel model)
         {
-            return View();
+            DBOutput data = new DBOutput();
+            var success = DAO.InsertHonorUjian(model);
+
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = "Insert berhasil!";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = "Insert gagal!";
+            }
+
+            return Json(data);
         }
 
-        // Metode untuk mengirimkan ID Bulan Gaji berdasarkan input Tahun ke view dalam bentuk dropdown
+        [HttpPost]
+        public IActionResult UpdateHonorUjian([FromBody] List<HonorUjianModel> model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
+
+            success = DAO.UpdateHonorUjian(model);
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = " Update berhasil ";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = " Update gagal";
+            }
+
+            return Json(data);
+        }
+
+        [HttpPost]
+        public IActionResult DeleteHonorUjian([FromBody] List<HonorUjianModel> model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
+
+            success = DAO.DeleteHonorUjian(model);
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = " Delete data berhasil ";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = " Delete data gagal";
+            }
+
+            return Json(data);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetBulanGajiDropdown(int tahun)
         {
@@ -64,129 +123,8 @@ namespace Payroll25.Controllers
             }
         }
 
-        // POST: TunjanganPengabdian/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(HonorUjianViewModel viewModel)
-        {
-            if (viewModel == null)
-            {
-                viewModel = new HonorUjianViewModel();
-            }
-            else if (viewModel != null)
-            {
-                var errors = new List<string>();
 
-                if (viewModel.HonorUjian.ID_KOMPONEN_GAJI == 0)
-                {
-                    errors.Add("ID Komponen Gaji harus diisi.");
 
-                }
 
-                if (viewModel.HonorUjian.ID_BULAN_GAJI == 0)
-                {
-                    errors.Add("ID BULAN GAJI harus diisi.");
-
-                }
-
-                if (string.IsNullOrEmpty(viewModel.HonorUjian.NPP))
-                {
-                    errors.Add("NPP harus diisi.");
-
-                }
-
-                if (viewModel.HonorUjian.JUMLAH == 0)
-                {
-                    errors.Add("Masukan Jumlah harus diisi.");
-                }
-
-                if (errors.Count == 0)
-                {
-                    // Melakukan insert Identitas Asisten ke database menggunakan objek viewModel
-                    bool insertResult = await Task.Run(() => DAO.InsertVakasi(viewModel));
-
-                    if (insertResult)
-                    {
-                        return RedirectToAction("Index");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, "TERJADI KESALAHAN SAAT MENYIMPAN DATA PADA DATABASE.");
-                    }
-                }
-                else
-                {
-                    foreach (var error in errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error);
-                    }
-                }
-
-            }
-            else
-            {
-                return BadRequest("Data tidak valid. Mohon isi formulir dengan benar.");
-            }
-
-            // Gunakan await dan .Result untuk mendapatkan hasil dari metode asynchronous
-            viewModel.HonorUjianList = await DAO.ShowHonorUjianAsync();
-            return View("Index", viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EditDetails(HonorUjianViewModel viewModel, int ID_Vakasi)
-        {
-            try
-            {
-                bool updateResult = DAO.UpdateVakasiHonor(viewModel, ID_Vakasi);
-
-                if (updateResult)
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menyimpan ke database.");
-                }
-            }
-
-            catch (Exception)
-            {
-                // Handle the exception
-                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
-            }
-
-            // If the execution reaches this point, there was an error, so return the view with the updated ModelState
-            return View("Index", viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(HonorUjianViewModel viewModel, int ID_Vakasi)
-        {
-            try
-            {
-                bool updateResult = DAO.DeleteVakasiHonor(viewModel, ID_Vakasi);
-
-                if (updateResult)
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Terjadi kesalahan saat menghapus Data.");
-                }
-            }
-
-            catch (Exception)
-            {
-                // Handle Error
-                ModelState.AddModelError("", "Terjadi Error saat update details. Tolong Coba Lagi."); // Menambahkan pesan error ke ModelState
-            }
-
-            // Ketika Data di eksekusi pada point ini maka terjadi error 
-            return View("Index", viewModel);
-        }
     }
 }

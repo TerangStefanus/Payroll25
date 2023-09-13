@@ -294,6 +294,16 @@
                 }
             });
 
+            $("body").on("change", ".komponen-gaji-cell select", function () {
+                var newValue = $(this).val();
+                var cell = $(this).closest('td');
+                var id = cell.attr('data-id');
+                var columnName = cell.attr('data-column-name');
+
+                // Memperbarui data yang telah diubah
+                updateData(id, columnName, newValue);
+            });
+
             // Event handler untuk blur pada input atau select dalam sel yang aktif
             $("body").on("blur", ".active > input", function () {
                 var value = $(this).val();

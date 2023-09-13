@@ -20,24 +20,26 @@ namespace Payroll25.DAO
                 try
                 {
                     await conn.OpenAsync();
-                    var query = @"SELECT
-                                TBL_VAKASI.ID_VAKASI,
-                                MST_KARYAWAN.NPP,
-                                MST_KARYAWAN.NAMA,
-                                MST_KOMPONEN_GAJI.KOMPONEN_GAJI,
-                                TBL_VAKASI.JUMLAH,
-                                MST_TARIF_PAYROLL.NOMINAL,
-                                CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS TANGGAL
-                                FROM 
-                                    PAYROLL.simka.MST_KARYAWAN
-                                JOIN 
-                                    PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                                JOIN 
-                                    PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
-                                JOIN
-                                    PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
-                                WHERE 
-                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 140 AND 174";
+                            var query = @"SELECT DISTINCT
+                                        TBL_VAKASI.ID_VAKASI,
+                                        MST_KARYAWAN.NPP,
+                                        MST_KARYAWAN.NAMA,
+                                        MST_KOMPONEN_GAJI.KOMPONEN_GAJI,
+                                        TBL_VAKASI.JUMLAH,
+                                        MST_TARIF_PAYROLL.NOMINAL,
+                                        CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS TANGGAL
+                                        FROM 
+                                            PAYROLL.simka.MST_KARYAWAN
+                                        JOIN 
+                                            PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                                        JOIN 
+                                            PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                                        JOIN
+                                            PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
+                                        WHERE 
+                                            MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 140 AND 174 
+                                        OR 
+                                            MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 190 AND 197 ";
 
                     Dictionary<string, object> parameters = new Dictionary<string, object>();
 
@@ -167,7 +169,9 @@ namespace Payroll25.DAO
                                 [ID_KOMPONEN_GAJI],
                                 [KOMPONEN_GAJI]
                                 FROM [PAYROLL].[payroll].[MST_KOMPONEN_GAJI]
-                                WHERE ID_KOMPONEN_GAJI BETWEEN 140 AND 174;";
+                                WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 140 AND 174 
+                                OR 
+                                MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 190 AND 197";
 
                     var data = await conn.QueryAsync<HonorPendadaranModel>(query);
 
