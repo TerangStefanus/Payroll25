@@ -102,11 +102,6 @@ namespace Payroll25.Controllers
             return Json(data);
         }
 
-
-
-
-
-
         [HttpGet]
         public async Task<IActionResult> GetBulanGajiDropdown(int tahun)
         {

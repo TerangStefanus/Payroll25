@@ -7,6 +7,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Honor Pendadaran</title>
+
     <!-- Referensi ke DataTables dan Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -43,7 +44,7 @@
             <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
                 
                 <h3 style="padding-bottom: 25px;">
-                    Tambah Beban Mengajar
+                    Tambah Vakasi Pendadaran
                 </h3>
 
                 <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertHonorPendadaran", "HonorPendadaran")">
@@ -149,8 +150,11 @@
                         counter++;
                         <tr>
                             <td>@counter</td>
+
                             <td data-id="@item.ID_VAKASI" data-column-name="NPP" class="editable-cell" title="Edit">@item.NPP</td>
+
                             <td>@item.NAMA</td>
+
                             <td data-id="@item.ID_VAKASI" data-column-name="ID_KOMPONEN_GAJI" class="komponen-gaji-cell editable-cell" title="Edit">
                                 <select class='form-control select2' data-id="@item.ID_VAKASI" data-column-name="ID_KOMPONEN_GAJI">
                                     @foreach (var komponen in (IEnumerable<Payroll25.Models.HonorPendadaranModel>)ViewBag.KomponenGajiList)
@@ -160,9 +164,13 @@
                                     }
                                 </select>
                             </td>
+
                             <td data-id="@item.ID_VAKASI" data-column-name="JUMLAH" class="editable-cell" title="Edit">@item.JUMLAH</td>
+
                             <td>@item.NOMINAL</td>
+
                             <td>@item.TANGGAL</td>
+
                             <td><button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_VAKASI)">Hapus</button></td>
                         </tr>
                     }

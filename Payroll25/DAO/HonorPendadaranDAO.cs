@@ -6,7 +6,6 @@ namespace Payroll25.DAO
 {
     public class HonorPendadaranDAO
     {
- 
         public async Task<IEnumerable<HonorPendadaranModel>> ShowHonorPendadaranAsync(string NPPFilter = null, string NAMAFilter = null)
         {
             var connectionString = DBkoneksi.payrollkoneksi;
