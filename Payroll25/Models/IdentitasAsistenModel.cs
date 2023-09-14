@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
 using System.ComponentModel.DataAnnotations.Schema;
+using CsvHelper.Configuration;
 
 namespace Payroll25.Models
 {
@@ -68,6 +69,23 @@ namespace Payroll25.Models
         [FileExtensions(Extensions = "csv", ErrorMessage = "Please upload a valid CSV file.")]
         public IFormFile CsvFile { get; set; }
     }
+
+    public class IdentitasAsistenModelMap : ClassMap<IdentitasAsistenModel>
+    {
+        public IdentitasAsistenModelMap()
+        {
+            Map(m => m.ID_TAHUN_AKADEMIK).Name("ID_TAHUN_AKADEMIK");
+            Map(m => m.NO_SEMESTER).Name("NO_SEMESTER");
+            Map(m => m.NPM).Name("NPM");
+            Map(m => m.NAMA_MHS).Name("NAMA_MHS");
+            Map(m => m.ID_UNIT).Name("ID_UNIT");
+            Map(m => m.NO_REKENING).Name("NO_REKENING");
+            Map(m => m.NAMA_REKENING).Name("NAMA_REKENING");
+            Map(m => m.NAMA_BANK).Name("NAMA_BANK");
+            Map(m => m.ID_JENIS_ASISTEN).Name("ID_JENIS_ASISTEN");
+        }
+    }
+
 
 
 

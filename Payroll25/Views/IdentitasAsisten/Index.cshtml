@@ -103,6 +103,7 @@
         </div>
 
         <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
+            <a href="@Url.Action("DownloadCSV", "IdentitasAsisten")" class="btn btn-primary">Download CSV</a>
             <div class="row">
                 <div class="col-sm-6" style="margin-top: 20px;">
                     @using (Html.BeginForm("UploadCSV", "IdentitasAsisten", FormMethod.Post, new { enctype = "multipart/form-data" }))

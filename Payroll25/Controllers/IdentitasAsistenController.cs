@@ -14,7 +14,7 @@ namespace Payroll25.Controllers
 {
     public class IdentitasAsistenController : Controller
     {
-        IdentitasAsistenDAO DAO;
+        private readonly IdentitasAsistenDAO DAO;
 
         public IdentitasAsistenController()
         {
@@ -181,8 +181,6 @@ namespace Payroll25.Controllers
             return View("Index", viewModel);
         } 
 
-
-
         // GET: IdentitasAsistenController/Delete/5
         public ActionResult Delete(int id)
         {
@@ -262,6 +260,51 @@ namespace Payroll25.Controllers
 
             return Json(result);
         }
+
+        public IActionResult DownloadCSV()
+        {
+            try
+            {
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture){};
+ 
+                using var memoryStream = new MemoryStream();
+                using var streamWriter = new StreamWriter(memoryStream);
+                using var csvWriter = new CsvWriter(streamWriter, config);
+                csvWriter.Context.RegisterClassMap<IdentitasAsistenModelMap>();
+
+                var templateRecord = new IdentitasAsistenModel
+                {
+                    ID_TAHUN_AKADEMIK = 0,
+                    NO_SEMESTER =0,
+                    NPM = "Isi NPM disini", 
+                    NAMA_MHS = "Isi NAMA disini",
+                    ID_UNIT = 0,
+                    NO_REKENING = "Isi NOMER disini",
+                    NAMA_REKENING = "Isi REKENING disini",
+                    NAMA_BANK = "Isi BANK disini",
+                    ID_JENIS_ASISTEN = 0,
+                };
+
+                var templateList = new List<IdentitasAsistenModel> { templateRecord };
+
+                csvWriter.WriteRecords(templateList);
+
+                streamWriter.Flush();
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                return File(memoryStream.ToArray(), "text/csv", "IdentitasAsisten_Template.csv");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Terjadi kesalahan saat mencoba mendownload CSV: " + ex.Message);
+            }
+        }
+
+
+
+
+
+
 
 
 
