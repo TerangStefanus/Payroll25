@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CsvHelper.Configuration;
+using CsvHelper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Payroll25.DAO;
 using Payroll25.Models;
 using System.Dynamic;
+using System.Globalization;
 using System.Reflection;
 using System.Security.Cryptography;
 using static Payroll25.Models.IdentitasPelatihModel;
@@ -175,6 +178,88 @@ namespace Payroll25.Controllers
 
             // Ketika Data di eksekusi pada point ini maka terjadi error 
             return View("Index", viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadCSV(IFormFile CsvFile)
+        {
+            var result = new { success = false, errorMessage = string.Empty };
+
+            if (CsvFile == null || CsvFile.Length == 0)
+            {
+                result = new { success = false, errorMessage = "File tidak ditemukan" };
+                return Json(result);
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(CsvFile.OpenReadStream()))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                {
+                    var records = csv.GetRecords<IdentitasPelatihModel>().ToList();
+
+                    var uploadResult = DAO.UploadAndInsertCSV(CsvFile); 
+
+                    if (uploadResult.Item1)
+                    {
+                        TempData["success"] = "Berhasil mengunggah dan memproses CSV!";
+                    }
+                    else
+                    {
+                        TempData["error"] = "Gagal mengunggah dan memproses CSV.";
+                        if (uploadResult.Item2.Any())
+                        {
+                            TempData["validationErrors"] = string.Join(", ", uploadResult.Item2);
+                        }
+                    }
+                }
+
+                result = new { success = true, errorMessage = string.Empty };
+            }
+            catch (Exception ex)
+            {
+                result = new { success = false, errorMessage = "Gagal memproses file CSV: " + ex.Message };
+            }
+
+            return Json(result);
+        }
+
+        public IActionResult DownloadCSV()
+        {
+            try
+            {
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture) { };
+
+                using var memoryStream = new MemoryStream();
+                using var streamWriter = new StreamWriter(memoryStream);
+                using var csvWriter = new CsvWriter(streamWriter, config);
+                csvWriter.Context.RegisterClassMap<IdentitasPelatihModelMap>();
+
+                var templateRecord = new IdentitasPelatihModel
+                {
+                    ID_TAHUN_AKADEMIK = 0,
+                    NO_SEMESTER = 0,
+                    NPP = "Isi NPM disini",
+                    NAMA = "Isi NAMA disini",
+                    ID_UNIT = 0,
+                    NO_REKENING = "Isi NOMER disini",
+                    NAMA_REKENING = "Isi REKENING disini",
+                    NAMA_BANK = "Isi BANK disini",
+                };
+
+                var templateList = new List<IdentitasPelatihModel> { templateRecord };
+
+                csvWriter.WriteRecords(templateList);
+
+                streamWriter.Flush();
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                return File(memoryStream.ToArray(), "text/csv", "IdentitasPelatih_Template.csv");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Terjadi kesalahan saat mencoba mendownload CSV: " + ex.Message);
+            }
         }
 
 

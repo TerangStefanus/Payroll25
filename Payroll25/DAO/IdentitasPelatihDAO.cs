@@ -1,7 +1,10 @@
-﻿using Dapper;
+﻿using CsvHelper.Configuration;
+using CsvHelper;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Payroll25.Models;
 using System.Data.SqlClient;
+using System.Globalization;
 using static Payroll25.Models.IdentitasPelatihModel;
 
 namespace Payroll25.DAO
@@ -176,6 +179,69 @@ namespace Payroll25.DAO
             }
         }
 
+        public (bool, List<string>) UploadAndInsertCSV(IFormFile csvFile)
+        {
+            var errorMessages = new List<string>();
+            try
+            {
+                using (var stream = csvFile.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    conn.Open();
+                    var transaction = conn.BeginTransaction();
+
+                    try
+                    {
+                        var records = csv.GetRecords<IdentitasPelatihModel>().ToList();
+                        var validRecords = records.Where(record =>
+                            !string.IsNullOrEmpty(record.NPP) &&
+                            !string.IsNullOrEmpty(record.NAMA) &&
+                            record.ID_TAHUN_AKADEMIK != null &&
+                            record.NO_SEMESTER != null &&
+                            record.ID_UNIT != null &&
+                            !string.IsNullOrEmpty(record.NO_REKENING) &&
+                            !string.IsNullOrEmpty(record.NAMA_REKENING) &&
+                            !string.IsNullOrEmpty(record.NAMA_BANK) 
+                        ).ToList();
+
+                        var invalidRecords = records.Except(validRecords).ToList();
+
+                        foreach (var invalidRecord in invalidRecords)
+                        {
+                            errorMessages.Add($"Record dengan NPP {invalidRecord.NPP} memiliki data yang tidak valid atau tidak lengkap.");
+                        }
+
+                        foreach (var record in validRecords)
+                        {
+                            var insertQuery = @"INSERT INTO [payroll].[TBL_PELATIH] 
+                                                (NPP, NAMA, ID_TAHUN_AKADEMIK, NO_SEMESTER, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK) 
+                                                VALUES 
+                                                (@NPP, @NAMA, @ID_TAHUN_AKADEMIK, @NO_SEMESTER, @ID_UNIT , @NO_REKENING, @NAMA_REKENING, @NAMA_BANK)";
+
+                            conn.Execute(insertQuery, record, transaction);
+                        }
+
+                        transaction.Commit();
+                        return (true, errorMessages);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine("Error: " + ex.Message);
+                        errorMessages.Add(ex.Message);
+                        return (false, errorMessages);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                errorMessages.Add(ex.Message);
+                return (false, errorMessages);
+            }
+        }
 
 
 
