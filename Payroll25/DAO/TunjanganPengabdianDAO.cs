@@ -7,77 +7,182 @@ namespace Payroll25.DAO
 {
     public class TunjanganPengabdianDAO
     {
-        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync()
+        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync(string NPPFilter = null, string NAMAFilter = null)
+        {
+            var connectionString = DBkoneksi.payrollkoneksi;
+
+            if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter))
+            {
+                return new List<TunjanganPengabdianModel>();
+            }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    await conn.OpenAsync();
+                    var query = @"SELECT DISTINCT
+                                TBL_VAKASI.ID_VAKASI,
+                                MST_KARYAWAN.NPP,
+                                MST_KARYAWAN.NAMA,
+                                MST_KOMPONEN_GAJI.KOMPONEN_GAJI,
+                                TBL_VAKASI.JUMLAH,
+                                MST_TARIF_PAYROLL.NOMINAL,
+                                CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS TANGGAL
+                                FROM 
+                                    PAYROLL.simka.MST_KARYAWAN
+                                JOIN 
+                                    PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                                JOIN 
+                                    PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                                JOIN
+                                    PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
+                                WHERE 
+                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 198 AND 201 ";
+
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+                    if (!string.IsNullOrEmpty(NPPFilter))
+                    {
+                        query += " AND MST_KARYAWAN.NPP = @NPPFilter";
+                        parameters.Add("@NPPFilter", NPPFilter);
+                    }
+
+                    if (!string.IsNullOrEmpty(NAMAFilter))
+                    {
+                        query += " AND MST_KARYAWAN.NAMA LIKE @NAMAFilter";
+                        parameters.Add("@NAMAFilter", $"%{NAMAFilter}%");
+                    }
+
+                    return await conn.QueryAsync<TunjanganPengabdianModel>(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        public int InsertTunjanganPengabdian(TunjanganPengabdianModel model)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
                 try
                 {
-                    var parameters = new DynamicParameters();
+                    var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_VAKASI]
+                                ([ID_KOMPONEN_GAJI],[ID_BULAN_GAJI],[NPP],[JUMLAH],[DATE_INSERTED],[DESKRIPSI])
+                                VALUES
+                                (@ID_KOMPONEN_GAJI,@ID_BULAN_GAJI,@NPP,@JUMLAH,@DATE_INSERTED,@DESKRIPSI)";
 
-                    var query = @"SELECT
-                                 TBL_VAKASI.ID_VAKASI,
-                                 MST_KARYAWAN.NPP,
-	                             TBL_VAKASI.ID_BULAN_GAJI,
-	                             TBL_VAKASI.JUMLAH AS Jml_Hadir,
-                                 CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS Tgl_buat,
-	                             TBL_VAKASI.DESKRIPSI
-                                 FROM 
-                                    PAYROLL.simka.MST_KARYAWAN
-                                 JOIN 
-                                    PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                                 JOIN 
-                                    PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
-                                 WHERE 
-                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 74";
+                    var parameters = new
+                    {
+                        ID_KOMPONEN_GAJI = model.ID_KOMPONEN_GAJI,
+                        ID_BULAN_GAJI = model.ID_BULAN_GAJI,
+                        NPP = model.NPP,
+                        JUMLAH = model.JUMLAH,
+                        DATE_INSERTED = DateTime.Now, // Set to current time
+                        DESKRIPSI = model.DESKRIPSI
+                    };
 
-                    var data = conn.Query<TunjanganPengabdianModel>(query, parameters).ToList();
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
 
-                    return data;
+        public int UpdateTunjanganPengabdian(List<TunjanganPengabdianModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"UPDATE [payroll].[TBL_VAKASI]
+                                SET
+                                [NPP] = @NPP,
+                                [ID_KOMPONEN_GAJI] = @ID_KOMPONEN_GAJI,
+                                [JUMLAH] = @JUMLAH
+                                WHERE ID_VAKASI = @ID_VAKASI";
+
+                    return conn.Execute(query, model);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        public int DeleteTunjanganPengabdian(List<TunjanganPengabdianModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"DELETE FROM [payroll].[TBL_VAKASI]
+                                WHERE ID_VAKASI = @ID_VAKASI";
+
+                    return conn.Execute(query, model);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        // Support untuk Dropdown Insert Komponen Gaji
+        public async Task<IEnumerable<TunjanganPengabdianModel>> GetKomponenGaji()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"SELECT 
+                                [ID_KOMPONEN_GAJI],
+                                [KOMPONEN_GAJI]
+                                FROM [PAYROLL].[payroll].[MST_KOMPONEN_GAJI]
+                                WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 198 AND 201 ";
+
+                    var data = await conn.QueryAsync<TunjanganPengabdianModel>(query);
+
+                    return data.ToList();
                 }
                 catch (Exception)
                 {
                     // Handle exceptions here
-                    return null;
+                    return Enumerable.Empty<TunjanganPengabdianModel>();
                 }
             }
         }
 
-        public bool InsertVakasi(TunjanganPengabdianModel.TunjanganViewModel viewModel)
-        {
-            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-            {
-                try
-                {
-                    conn.Open();
-
-                    var query = @"INSERT INTO payroll.TBL_VAKASI
-                                    (ID_KOMPONEN_GAJI, ID_BULAN_GAJI,NPP, JUMLAH, DATE_INSERTED,DESKRIPSI) 
-                                    VALUES 
-                                    (@ID_KOMPONEN_GAJI, @ID_BULAN_GAJI, @NPP, @JUMLAH,@DATE_INSERTED,@DESKRIPSI)";
-
-                    var parameters = new
-                    {
-                        ID_KOMPONEN_GAJI = viewModel.TunjanganPengabdian.ID_KOMPONEN_GAJI,
-                        ID_BULAN_GAJI = viewModel.TunjanganPengabdian.ID_BULAN_GAJI,
-                        NPP = viewModel.TunjanganPengabdian.NPP,
-                        JUMLAH = viewModel.TunjanganPengabdian.JUMLAH,
-                        DATE_INSERTED = DateTime.Now,
-                        DESKRIPSI = viewModel.TunjanganPengabdian.DESKRIPSI
-                    };
-
-                    conn.Execute(query, parameters);
-
-                    return true; // Berhasil melakukan insert
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error: " + ex.Message);
-                    return false; // Gagal melakukan insert
-                }
-            }
-        }
-
+        // Support untuk Dropdown Insert ID_BULAN_GAJI
         public async Task<IEnumerable<TunjanganPengabdianModel>> GetBulanGaji(int tahun = 0)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -109,64 +214,9 @@ namespace Payroll25.DAO
             }
         }
 
-        public bool UpdateVakasiTunjangan(TunjanganPengabdianModel.TunjanganViewModel viewModel, int ID_Vakasi)
-        {
-            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-            {
-                try
-                {
-                    var query = @"UPDATE payroll.TBL_VAKASI
-                                 SET 
-                                 ID_BULAN_GAJI = @ID_BULAN_GAJI, 
-                                 JUMLAH = @JUMLAH, 
-                                 DATE_INSERTED = @DATE_INSERTED, 
-                                 DESKRIPSI = @DESKRIPSI
-                                 WHERE ID_VAKASI = @userID;";
 
-                    var parameters = new
-                    {
-                        userID = ID_Vakasi,
-                        //ID_KOMPONEN_GAJI = viewModel.TunjanganPengabdian.ID_KOMPONEN_GAJI,
-                        ID_BULAN_GAJI = viewModel.TunjanganPengabdian.ID_BULAN_GAJI,
-                        JUMLAH = viewModel.TunjanganPengabdian.JUMLAH,
-                        DATE_INSERTED = DateTime.Now,
-                        DESKRIPSI = viewModel.TunjanganPengabdian.DESKRIPSI
-                    };
 
-                    conn.Execute(query, parameters);
 
-                    return true; // Successfully executed the update operation
-
-                }
-                catch (Exception)
-                {
-                    return false; // Failed to execute the update operation
-                }
-            }
-        }
-
-        public bool DeleteVakasiTunjangan(TunjanganPengabdianModel.TunjanganViewModel viewModel, int ID_Vakasi)
-        {
-            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-            {
-                try
-                {
-                    var query = @"DELETE FROM payroll.TBL_VAKASI
-                                  WHERE ID_VAKASI = @userID;";
-
-                    var parameters = new { userID = ID_Vakasi };
-
-                    conn.Execute(query, parameters);
-
-                    return true; // Successfully executed the update operation
-
-                }
-                catch (Exception)
-                {
-                    return false; // Failed to execute the update operation
-                }
-            }
-        }
 
 
     }

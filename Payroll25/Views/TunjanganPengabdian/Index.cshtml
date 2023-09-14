@@ -1,267 +1,392 @@
-﻿@model TunjanganPengabdianModel.TunjanganViewModel
+﻿@model TunjanganPengabdianModel.TunjanganPengabdianViewModel
 
-@section styles {
-    <style>
-        div.dataTables_wrapper div.dataTables_length, div.dataTables_wrapper div.dataTables_info {
-            text-align: left;
-        }
-
-        table.table-bordered thead > tr > th {
-            border: 1px solid black;
-            background-color: #8fa0c7;
-        }
-
-        table.table-bordered tbody > tr > td {
-            border: 1px solid;
-            border-top: 0px;
-        }
-
-        .dataTables_length select {
-            font-size: 15px;
-        }
-
-        table.table-bordered tbody > tr > td, table.table-bordered tbody > tr > td > input {
-            vertical-align: middle;
-            text-align: center;
-            align-content: center;
-            align-items: center;
-        }
-    </style>
+@{
+    int counter = 0;
 }
 
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Tunjangan Pengabdian</title>
+
     <!-- Referensi ke DataTables dan Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <style>
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-drop {
+            width: 100% !important;
+        }
+
+        .select2-search {
+            width: 100% !important;
+        }
+
+            .select2-search input {
+                width: 100% !important;
+            }
+
+        .editable-cell:hover {
+            cursor: pointer; /* Ubah penunjuk mouse menjadi tangan (pointer) saat dihover */
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container mt-5">
         <h1 class="my-4">Tunjangan Pengabdian</h1>
 
-        <div class="border border-5" style="margin-bottom: 30px; padding: 10px">
-            <h3>Tambah Vakasi</h3>
-            <div class="row">
-                <div class="col-sm-6" style="margin-top: 20px;">
-                    @using (Html.BeginForm("Create", "TunjanganPengabdian", FormMethod.Post))
-                    {
-                        @Html.AntiForgeryToken()
+        <!-- Insert data-->
+        <div class="row">
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <h3 style="padding-bottom: 25px;">
+                    Tambah Vakasi Tunjangan Pengabdian
+                </h3>
 
-                        <div class="form-group row">
-                            <div class="col-sm-6 mx-auto">
-                                <label class="control-label" style="margin-left: 20px;">Tahun</label>
-                                <select class="form-control" id="tahunInput" style="margin-left: 20px;">
-                                    @{
-                                        var currentYear = DateTime.Now.Year;
-                                        for (var Year = currentYear; Year >= 2019; Year--)
-                                        {
-                                            <option value="@Year">@Year</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
+                <form id="bebanMengajarForm" method="post" action="@Url.Action("InsertTunjanganPengabdian", "TunjanganPengabdian")">
 
-                            <div class="col-sm-6 mx-auto">
-                                <label asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="control-label" style="margin-left: 20px;"></label>
-                                <select asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="form-control" id="bulanGajiDropdown" style="margin-left: 20px;">
-                                    <option value="">Pilih ID Bulan Gaji</option>
-                                    @foreach (var bulanGaji in Model.TunjanganPengabdianList)
-                                    {
-                                        <option value="@bulanGaji.ID_BULAN_GAJI">@bulanGaji.ID_BULAN_GAJI</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="TunjanganPengabdian.ID_BULAN_GAJI" class="text-danger"></span>
-                            </div>
+                    <div class="mb-3">
+                        <label class="control-label">Tahun</label>
+                        <select class="form-control" id="tahunInput">
+                            @{
+                                var currentYear = DateTime.Now.Year;
+                                for (var Year = currentYear; Year >= 2019; Year--)
+                                {
+                                    <option value="@Year">@Year</option>
+                                }
+                            }
+                        </select>
+                    </div>
 
+                    <div class="mb-3">
+                        <label for="ID_BULAN_GAJI" class="form-label">BULAN GAJI</label>
+                        <select class="form-control" name="ID_BULAN_GAJI" id="bulanGajiDropdown">
+                            <option value="">Pilih Bulan</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ID_KOMPONEN_GAJI" class="form-label">KOMPONEN GAJI</label>
+                        <select class="form-control" name="ID_KOMPONEN_GAJI" id="komponenGajiDropdown">
+                            <option value="">Pilih Komponen Gaji</option>
+                            @foreach (var item in (IEnumerable<Payroll25.Models.TunjanganPengabdianModel>)ViewBag.KomponenGajiList)
+                            {
+                                <option value="@item.ID_KOMPONEN_GAJI">@item.KOMPONEN_GAJI</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="NPP" class="form-label">NPP</label>
+                        <input type="text" class="form-control" id="NPP" name="NPP">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JUMLAH" class="form-label">JUMLAH</label>
+                        <input type="number" class="form-control" id="JUMLAH" name="JUMLAH">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="DESKRIPSI" class="form-label">DESKRIPSI</label>
+                        <input type="text" class="form-control" id="DESKRIPSI" name="DESKRIPSI">
+                    </div>
+
+                    <button id="btnTambah" class="btn btn-primary">Tambah</button>
+                </form>
+            </div>
+
+            <!-- Sub-container untuk Pencarian berdasarkan NPP dan Tahun -->
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+
+                <h3 style="padding-bottom: 15px;">
+                    Pencarian
+                </h3>
+
+                <form id="searchForm" method="get" action="@Url.Action("Index", "TunjanganPengabdian")">
+
+                    <div>
+                        <h3>Cari Berdasarkan NPP</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan NPP">
                         </div>
+                    </div>
 
-
-                        <div class="form-group" style="width: 670px; padding-left: 20px; padding-top: 10px;">
-                            <label asp-for="TunjanganPengabdian.NPP" class="control-label"></label>
-                            <input asp-for="TunjanganPengabdian.NPP" class="form-control" id="nppInput" />
-                            <span asp-validation-for="TunjanganPengabdian.NPP" class="text-danger"></span>
+                    <div>
+                        <h3>Cari Berdasarkan NAMA</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
                         </div>
+                    </div>
 
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <label asp-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="control-label"></label>
-                            <select asp-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="form-control">
- @*                               <option value="">Pilih Komponen Gaji</option>*@
-                                <option value="74">74 - Tunjangan Pengabdian</option>
-                            </select>
-                            <span asp-validation-for="TunjanganPengabdian.ID_KOMPONEN_GAJI" class="text-danger"></span>
-                        </div>
+                    <button class="btn btn-primary" type="submit">Cari</button>
+                </form>
 
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <label asp-for="TunjanganPengabdian.JUMLAH" class="control-label"></label>
-                            <input asp-for="TunjanganPengabdian.JUMLAH" class="form-control" />
-                            <span asp-validation-for="TunjanganPengabdian.JUMLAH" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <label asp-for="TunjanganPengabdian.DESKRIPSI" class="control-label"></label>
-                            <input asp-for="TunjanganPengabdian.DESKRIPSI" class="form-control" />
-                            <span asp-validation-for="TunjanganPengabdian.DESKRIPSI" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                            <input type="submit" value="Create" class="btn btn-primary" />
-                        </div>
-                    }
-                </div>
             </div>
         </div>
 
-        <!-- Tabel data tunjangan pengabdian  -->
-        <table class="table" id="dataTable">
+        <!-- Tabel data  -->
+        <table class="table mt-3" id="dataTable">
             <thead style="background-color: #8FA0C7">
                 <tr>
-                    <th>ID VAKASI</th>
+                    <th>NO</th>
                     <th>NPP</th>
-                    <th>ID_BULAN_ID</th>
-                    <th>JUMLAH HADIR</th>
-                    <th>TGL BUAT</th>
-                    <th>DESKRIPSI</th>
+                    <th>NAMA</th>
+                    <th>KOMPONEN GAJI</th>
+                    <th>JUMLAH</th>
+                    <th>TARIF</th>
+                    <th>TANGGAL</th>
                     <th>BUTTON</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var tunjanganPengabdian in Model.TunjanganPengabdianList)
+                @if (Model.TunjanganPengabdianList != null)
                 {
-                    <tr>
-                        <td>@tunjanganPengabdian.ID_VAKASI</td>
-                        <td>@tunjanganPengabdian.NPP</td>
-                        <td>@tunjanganPengabdian.ID_BULAN_GAJI</td>
-                        <td>@tunjanganPengabdian.Jml_Hadir</td>
-                        <td>@tunjanganPengabdian.Tgl_buat</td>
-                        <td>@tunjanganPengabdian.DESKRIPSI</td>
-                        <td>
-                            <div class="d-flex">
-                                <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#editModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Edit</button>
-                                <button type="button" class="btn btn-danger mr-2" data-toggle="modal" data-target="#deleteModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Delete</button>
-                                @*<button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#detailModal-@(tunjanganPengabdian.ID_VAKASI)" id="submit">Detail</button>*@
-                            </div>
-                        </td>
-                    </tr>
+                    @foreach (var item in Model.TunjanganPengabdianList)
+                    {
+                        counter++;
+                        <tr>
+                            <td>@counter</td>
 
-                    <!-- Modal Edit/Update bisa ditambahkan di sini -->
-                    <div class="modal fade" id="editModal-@(tunjanganPengabdian.ID_VAKASI)" tabindex="-1" role="dialog" aria-labelledby="editModalLabel-@(tunjanganPengabdian.ID_VAKASI)" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel-@(tunjanganPengabdian.ID_VAKASI)">Edit Details</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    @using (Html.BeginForm("EditDetails", "TunjanganPengabdian", new { ID_Vakasi = tunjanganPengabdian.ID_VAKASI }, FormMethod.Post))
+                            <td data-id="@item.ID_VAKASI" data-column-name="NPP" class="editable-cell" title="Edit">@item.NPP</td>
+
+                            <td>@item.NAMA</td>
+
+                            <td data-id="@item.ID_VAKASI" data-column-name="ID_KOMPONEN_GAJI" class="komponen-gaji-cell editable-cell" title="Edit">
+                                <select class='form-control select2' data-id="@item.ID_VAKASI" data-column-name="ID_KOMPONEN_GAJI">
+                                    @foreach (var komponen in (IEnumerable<Payroll25.Models.TunjanganPengabdianModel>)ViewBag.KomponenGajiList)
                                     {
-                                        @Html.AntiForgeryToken()
-                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                                        <div class="form-group">
-                                            <label asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="control-label"></label>
-                                            <input asp-for="TunjanganPengabdian.ID_BULAN_GAJI" class="form-control" value="@tunjanganPengabdian.ID_BULAN_GAJI" />
-                                            <span asp-validation-for="TunjanganPengabdian.ID_BULAN_GAJI" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="TunjanganPengabdian.JUMLAH" class="control-label"></label>
-                                            <input asp-for="TunjanganPengabdian.JUMLAH" class="form-control" value="@tunjanganPengabdian.Jml_Hadir" />
-                                            <span asp-validation-for="TunjanganPengabdian.JUMLAH" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="TunjanganPengabdian.DESKRIPSI" class="control-label"></label>
-                                            <input asp-for="TunjanganPengabdian.DESKRIPSI" class="form-control" value="@tunjanganPengabdian.DESKRIPSI" />
-                                            <span asp-validation-for="TunjanganPengabdian.DESKRIPSI" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="submit" value="Save" class="btn btn-primary" />
-                                        </div>
+                                        var selectedAttribute = komponen.KOMPONEN_GAJI == item.KOMPONEN_GAJI ? "selected" : "";
+                                        @Html.Raw($"<option value=\"{komponen.ID_KOMPONEN_GAJI}\" {selectedAttribute}>{komponen.KOMPONEN_GAJI}</option>")
                                     }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                </select>
+                            </td>
 
-                    <!-- Modal Delete bisa ditambahkan di sini -->
-                    <div class="modal fade" id="deleteModal-@(tunjanganPengabdian.ID_VAKASI)" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-@(tunjanganPengabdian.ID_VAKASI)" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-@(tunjanganPengabdian.ID_VAKASI)">Delete Confirmation</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
+                            <td data-id="@item.ID_VAKASI" data-column-name="JUMLAH" class="editable-cell" title="Edit">@item.JUMLAH</td>
 
-                                    <!-- Data passed is displayed in this part of the modal body -->
-                                    <input type="text" placeholder="NPP" name="NPP" class="form-control" id="NPP" value="@tunjanganPengabdian.NPP" hidden>
-                                    <p>Apakah Anda Yakin akan menghapus data Vakasi Tunjangan Pengabdian dengan @tunjanganPengabdian.NPP ini?</p>
+                            <td>@item.NOMINAL</td>
 
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    <form asp-action="Delete" asp-route-ID_Vakasi="@tunjanganPengabdian.ID_VAKASI" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                            <td>@item.TANGGAL</td>
+
+                            <td><button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_VAKASI)">Hapus</button></td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
+
+        @if (Model.TunjanganPengabdianList != null && Model.TunjanganPengabdianList.Any())
+        {
+            <button id="updateBtn" class="btn btn-success mt-3">Simpan</button>
+        }
+
+
     </div>
 </body>
 
+
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
     <script>
 
-        $(document).ready(function () {
-            $('#dataTable').DataTable();
-            $('#showButton').click(function () {
-                $('#searchForm').submit();
-            });
-        });
-
-        //document.getElementById('showButton').addEventListener('click', function () {
-        //    var tbody = document.getElementById('dataTable').querySelector('tbody');
-        //    if (tbody.style.display === 'none') {
-        //        tbody.style.display = 'table-row-group';
-        //    } else {
-        //        tbody.style.display = 'none';
-        //    }
-        //});
-
-        function getCariData() {
-            var tahun = $("#tahunInput").val();
-
-            $.get("/TunjanganPengabdian/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
-                var options = "<option value=''>Pilih ID Bulan Gaji</option>";
-                var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                for (var i = 0; i < data.length; i++) {
-                    options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + " - " + namaBulan[i] + "</option>";
-                }
-                $("#bulanGajiDropdown").html(options);
-            });
-
+        function deleteRow(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                $.ajax({
+                    url: '/TunjanganPengabdian/DeleteTunjanganPengabdian',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify([{ ID_VAKASI: id }]), // Mengirimkan ID dalam format JSON
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil dihapus');
+                            location.reload(); // Memuat ulang halaman untuk memperbarui tampilan tabel
+                        } else {
+                            alert('Penghapusan data gagal');
+                        }
+                    }
+                });
+            }
         }
 
-        $("#tahunInput").change(function () {
+        $(document).ready(function () {
+
+
+            var updatedData = [];
+
+            // Data komponen gaji dari ViewBag
+            var komponenGajiData = @Html.Raw(Json.Serialize(ViewBag.KomponenGajiList));
+
+            // Menginisialisasi plugin select2
+            $('.select2').select2({
+                width: '100%'
+            });
+
+            // Menginisialisasi DataTable
+            $('#dataTable').DataTable();
+
+            // Event handler untuk tombol tambah
+            $("#btnTambah").click(function (event) {
+                event.preventDefault();
+                // Mengumpulkan data dari form
+                var formData = {
+                    NPP: $("#NPP").val(),
+                    ID_BULAN_GAJI: $("#bulanGajiDropdown").val(),
+                    ID_KOMPONEN_GAJI: $("#komponenGajiDropdown").val(),
+                    JUMLAH: $("#JUMLAH").val(),
+                    DESKRIPSI: $("#DESKRIPSI").val()
+                };
+
+                // Mengirim data ke server untuk ditambahkan
+                $.ajax({
+                    url: '/TunjanganPengabdian/InsertTunjanganPengabdian',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil ditambahkan');
+                            location.reload();
+                        } else {
+                            alert('Data gagal ditambahkan');
+                        }
+                    }
+                });
+            });
+
+            // Fungsi untuk mengubah sel menjadi dropdown
+            function convertCellToDropdown(cell, data) {
+                var originalValue = cell.text();
+                var dropdown = $("<select class='form-control select2'></select>");
+                data.forEach(function (item) {
+                    var option = $("<option></option>").attr("value", item.ID_KOMPONEN_GAJI).text(item.KOMPONEN_GAJI);
+                    if (item.KOMPONEN_GAJI === originalValue) {
+                        option.attr("selected", "selected");
+                    }
+                    dropdown.append(option);
+                });
+                cell.html(dropdown);
+                cell.addClass('active');
+                $('.select2').select2({
+                    width: '100%'
+                });
+                cell.find('.select2').focus();
+            }
+
+            // Event handler untuk double click pada sel yang dapat diedit
+            $("body").on("dblclick", ".editable-cell", function () {
+                var cell = $(this);
+                var originalValue = cell.text();
+                var id = cell.attr('data-id');
+                var columnName = cell.attr('data-column-name');
+
+                // Jika kolom adalah NPP atau JUMLAH, ubah menjadi input text
+                if (columnName === "NPP" || columnName === "JUMLAH") {
+                    var input = $("<input type='text' />").val(originalValue);
+                    cell.html(input);
+                    cell.addClass('active');
+                    input.focus();
+                }
+            });
+
+            $("body").on("change", ".komponen-gaji-cell select", function () {
+                var newValue = $(this).val();
+                var cell = $(this).closest('td');
+                var id = cell.attr('data-id');
+                var columnName = cell.attr('data-column-name');
+
+                // Memperbarui data yang telah diubah
+                updateData(id, columnName, newValue);
+            });
+
+            // Event handler untuk blur pada input atau select dalam sel yang aktif
+            $("body").on("blur", ".active > input", function () {
+                var value = $(this).val();
+                var cell = $(this).parent();
+                cell.html(value);
+                cell.removeClass('active');
+                var id = cell.attr('data-id');
+                var columnName = cell.attr('data-column-name');
+
+                // Memperbarui data yang telah diubah
+                updateData(id, columnName, value);
+            });
+
+            // Fungsi untuk memperbarui data yang telah diubah
+            function updateData(id, columnName, value) {
+                var existingData = updatedData.find(data => data.ID_VAKASI === id);
+                if (existingData) {
+                    existingData[columnName] = value;
+                } else {
+                    var newData = { ID_VAKASI: id };
+                    newData[columnName] = value;
+
+                    // Mendapatkan baris yang berisi sel yang sedang diedit
+                    var row = $(`[data-id='${id}']`).closest('tr');
+
+                    // Mendapatkan nilai dari sel lain dalam baris yang sama
+                    newData['NPP'] = row.find('[data-column-name="NPP"]').text();
+                    newData['JUMLAH'] = row.find('[data-column-name="JUMLAH"]').text();
+                    newData['ID_KOMPONEN_GAJI'] = row.find('[data-column-name="ID_KOMPONEN_GAJI"] select').val();
+
+                    // Menambahkan data baru ke array
+                    updatedData.push(newData);
+                }
+            }
+
+            // Event handler untuk tombol update
+            $("#updateBtn").click(function () {
+                console.log(updatedData);
+                // Mengirim data yang diupdate ke server
+                $.ajax({
+                    url: '/TunjanganPengabdian/UpdateTunjanganPengabdian',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil diupdate');
+                            location.reload();
+                        } else {
+                            alert('Data gagal diupdate');
+                        }
+                    }
+                });
+            });
+
+
+
+            // Fungsi untuk mendapatkan data bulan gaji berdasarkan tahun
+            function getCariData() {
+                var tahun = $("#tahunInput").val();
+                $.get("/TunjanganPengabdian/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
+                    console.log("Data yang diterima dari server:", data);
+                    var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                    var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    for (var i = 0; i < data.length; i++) {
+                        options += "<option value='" + data[i].id_bulan + "'>" + namaBulan[i] + "</option>";
+                    }
+                    $("#bulanGajiDropdown").html(options);
+                }).done(function () {
+                    console.log("Pengambilan data selesai.");
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log("Gagal mengambil data:", textStatus, errorThrown);
+                });
+            }
+
+            // Event handler untuk perubahan pada input tahun
+            $("#tahunInput").change(function () {
+                getCariData();
+            });
+
+            // Memanggil fungsi getCariData saat halaman dimuat
             getCariData();
         });
-
     </script>
 }

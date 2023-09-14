@@ -22,14 +22,14 @@ namespace Payroll25.Controllers
         {
             try
             {
-                var honoUjianList = await DAO.ShowHonorUjianAsync(NPPFilter, NAMAFilter) ?? new List<HonorUjianModel>();
+                var honorUjianList = await DAO.ShowHonorUjianAsync(NPPFilter, NAMAFilter) ?? new List<HonorUjianModel>();
                 var komponenGajiList = await DAO.GetKomponenGaji();
 
                 ViewBag.KomponenGajiList = komponenGajiList; // Set data to ViewBag
 
-                var viewModel = new HonorUjianModel.HonorUjianViewModel
+                var viewModel = new HonorUjianModel.HonorUjianViewModel 
                 {
-                    HonorUjianList = honoUjianList,
+                    HonorUjianList = honorUjianList,
                     NPPFilter = NPPFilter,
                     NAMAFilter = NAMAFilter
                 };
