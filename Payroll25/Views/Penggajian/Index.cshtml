@@ -107,12 +107,19 @@
                     }
                 }
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5">Total</td>
+                    <td id="totalValue">0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+
         </table>
 
 
     </div>
 </body>
-
 
 @section Scripts {
 
@@ -124,10 +131,26 @@
     <script>
         $(document).ready(function () {
             $('#dataTable').DataTable();
+            calculateTotal(); // Memanggil fungsi ini setelah inisialisasi DataTable
         });
+
+        function calculateTotal() {
+            var total = 0;
+            $('#dataTable tbody tr').each(function () {
+                var value = $(this).find('td:nth-child(6)').text();
+                if (value) {
+                    total += parseFloat(value);
+                }
+            });
+            $('#totalValue').text(total.toFixed(2));
+        }
 
         function deleteRow(id) {
             // Implementasi logika penghapusan
+            // ...
+            // Setelah menghapus baris, ulangi perhitungan total:
+            calculateTotal();
         }
     </script>
 }
+
