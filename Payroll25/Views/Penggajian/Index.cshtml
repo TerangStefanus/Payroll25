@@ -1,0 +1,133 @@
+﻿@model PenggajianModel.PenggajianViewModel
+
+@{
+    int counter = 0;
+}
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Halaman Penggajian</title>
+
+    <!-- Referensi ke DataTables dan Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+   
+    <style>
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-drop {
+            width: 100% !important;
+        }
+
+        .select2-search {
+            width: 100% !important;
+        }
+
+        .select2-search input {
+            width: 100% !important;
+        }
+
+        .editable-cell:hover {
+            cursor: pointer; /* Ubah penunjuk mouse menjadi tangan (pointer) saat dihover */
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <div class="container mt-5">
+        <h1 class="my-4">Tambah Data Penggajian</h1>
+
+        <!-- Insert data-->
+
+        <h1 class="my-4">Cari Data</h1>
+
+        <!-- Search data Hitung Gaji -->
+
+        <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+
+            <h3 style="padding-bottom: 15px;">
+                Pencarian
+            </h3>
+
+            <form id="searchForm" method="get" action="@Url.Action("Index", "Penggajian")">
+
+                <div>
+                    <h3>Cari Berdasarkan NPP</h3>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan NPP">
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Cari Berdasarkan NAMA</h3>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Cari</button>
+            </form>
+
+        </div>
+        
+
+        <!-- Tabel data Hitung Gaji -->
+        <table class="table mt-3" id="dataTable">
+            <thead style="background-color: #8FA0C7">
+                <tr>
+                    <th>NO</th>
+                    <th>NPP</th>
+                    <th>NAMA KOMPONEN GAJI</th>
+                    <th>JUMLAH</th>
+                    <th>TARIF</th>
+                    <th>TOTAL PERHITUNGAN</th>
+                    <th>BUTTON</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.PenggajianList != null)
+                {
+                    @foreach (var item in Model.PenggajianList)
+                    {
+                        counter++;
+                        <tr>
+                            <td>@counter</td>
+                            <td>@item.NPP</td>
+                            <td>@item.NAMA_KOMPONEN_GAJI</td>
+                            <td>@item.JUMLAH</td>
+                            <td>@item.TARIF</td>
+                            <td>@(item.JUMLAH * item.TARIF)</td> <!-- Perhitungan total -->
+                            <td><button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_PENGGAJIAN)">Hapus</button></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+</body>
+
+
+@section Scripts {
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable();
+        });
+
+        function deleteRow(id) {
+            // Implementasi logika penghapusan
+        }
+    </script>
+}
