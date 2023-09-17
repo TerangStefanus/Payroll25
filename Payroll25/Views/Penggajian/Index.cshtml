@@ -33,25 +33,122 @@
         .editable-cell:hover {
             cursor: pointer; /* Ubah penunjuk mouse menjadi tangan (pointer) saat dihover */
         }
+
     </style>
 
 </head>
+
 
 
 <body>
     <div class="container mt-5">
         <h1 class="my-4">Tambah Data Penggajian</h1>
 
-        <!-- Insert data-->
+        <!-- Insert data -->
+        <div class="row">
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
 
-        <h1 class="my-4">Cari Data</h1>
+                <h3 style="padding-bottom: 25px;">
+                    Tambah Data Penggajian
+                </h3>
 
-        <!-- Search data Hitung Gaji -->
+                <form id="penggajianForm" method="post" action="@Url.Action("InsertKontrakPenggajianData", "Penggajian")">
 
+                    <div class="mb-3">
+                        <label for="NPP" class="form-label">NPP</label>
+                        <input type="text" class="form-control" id="NPP" name="NPP">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="control-label">Tahun</label>
+                        <select class="form-control" id="tahunInput">
+                            @{
+                                var currentYear = DateTime.Now.Year;
+                                for (var Year = currentYear; Year >= 2019; Year--)
+                                {
+                                    <option value="@Year">@Year</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ID_BULAN_GAJI" class="form-label">BULAN GAJI</label>
+                        <select class="form-control" name="ID_BULAN_GAJI" id="bulanGajiDropdown">
+                            <option value="">Pilih Bulan</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="NAMA" class="form-label">NAMA</label>
+                        <input type="text" class="form-control" id="NAMA" name="NAMA">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="STATUS_KEPEGAWAIAN" class="form-label">STATUS KEPEGAWAIAN</label>
+                        <input type="text" class="form-control" id="STATUS_KEPEGAWAIAN" name="STATUS_KEPEGAWAIAN">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="MASA_KERJA_RIIL" class="form-label">MASA KERJA RIIL</label>
+                        <input type="number" class="form-control" id="MASA_KERJA_RIIL" name="MASA_KERJA_RIIL">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="MASA_KERJA_GOL" class="form-label">MASA KERJA GOL</label>
+                        <input type="number" class="form-control" id="MASA_KERJA_GOL" name="MASA_KERJA_GOL">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JBT_STRUKTURAL" class="form-label">JBT STRUKTURAL</label>
+                        <input type="text" class="form-control" id="JBT_STRUKTURAL" name="JBT_STRUKTURAL">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JBT_AKADEMIK" class="form-label">JBT AKADEMIK</label>
+                        <input type="text" class="form-control" id="JBT_AKADEMIK" name="JBT_AKADEMIK">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JBT_FUNGSIONAL" class="form-label">JBT FUNGSIONAL</label>
+                        <input type="text" class="form-control" id="JBT_FUNGSIONAL" name="JBT_FUNGSIONAL">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="PANGKAT" class="form-label">PANGKAT</label>
+                        <input type="text" class="form-control" id="PANGKAT" name="PANGKAT">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="GOLONGAN" class="form-label">GOLONGAN</label>
+                        <input type="text" class="form-control" id="GOLONGAN" name="GOLONGAN">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JENJANG" class="form-label">JENJANG</label>
+                        <input type="text" class="form-control" id="JENJANG" name="JENJANG">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="NO_TABUNGAN" class="form-label">NO TABUNGAN</label>
+                        <input type="text" class="form-control" id="NO_TABUNGAN" name="NO_TABUNGAN">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="NPWP" class="form-label">NPWP</label>
+                        <input type="text" class="form-control" id="NPWP" name="NPWP">
+                    </div>
+
+                    <button id="btnTambah" class="btn btn-primary">Tambah</button>
+                </form>
+            </div>
+
+
+        <!-- Search data Penggajiam -->
         <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
 
             <h3 style="padding-bottom: 15px;">
-                Pencarian
+                Pencarian Data Hitung Gaji
             </h3>
 
             <form id="searchForm" method="get" action="@Url.Action("Index", "Penggajian")">
@@ -63,18 +160,57 @@
                     </div>
                 </div>
 
-                <div>
-                    <h3>Cari Berdasarkan NAMA</h3>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
-                    </div>
+                @*  <div>
+                <h3>Cari Berdasarkan NAMA</h3>
+                <div class="input-group mb-3">
+                <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
                 </div>
+                </div> *@
 
                 <button class="btn btn-primary" type="submit">Cari</button>
             </form>
 
         </div>
-        
+
+        <!-- Tabel Data Penggajian Kontrak -->
+        <table class="table mt-3" >
+            <thead style="background-color: #8FA0C7">
+                <tr>
+                    <th>ID Penggajian</th>
+                    <th>NPP</th>
+                    <th>ID BULAN GAJI</th>
+                    <th>NAMA</th>
+                    <th>MASA KERJA RIIL</th>
+                    <th>PANGKAT</th>
+                    <th>GOLONGAN</th>
+                    <th>JENJANG</th>
+                    <th>NO TABUNGAN</th>
+                    <th>BUTTON</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.KontrakPenggajianList != null)
+                {
+                    foreach (var item in Model.KontrakPenggajianList)
+                    {
+                        <tr>
+                            <td data-id="@item.ID_PENGGAJIAN">@item.ID_PENGGAJIAN</td>
+                            <td data-id="@item.ID_PENGGAJIAN" data-column-name="NPP" class="editable-cell" title="Edit">@item.NPP</td>
+                            <td>@item.ID_BULAN_GAJI</td>
+                            <td data-id="@item.ID_PENGGAJIAN" data-column-name="NAMA" class="editable-cell" title="Edit">@item.NAMA</td>
+                            <td>@item.MASA_KERJA_RIIL</td>
+                            <td data-id="@item.ID_PENGGAJIAN" data-column-name="PANGKAT" class="editable-cell" title="Edit">@item.PANGKAT</td>
+                            <td data-id="@item.ID_PENGGAJIAN" data-column-name="GOLONGAN" class="editable-cell" title="Edit">@item.GOLONGAN</td>
+                            <td data-id="@item.ID_PENGGAJIAN" data-column-name="JENJANG" class="editable-cell" title="Edit">@item.JENJANG</td>
+                            <td data-id="@item.ID_PENGGAJIAN" data-column-name="NO_TABUNGAN" class="editable-cell" title="Edit">@item.NO_TABUNGAN</td>
+                            <td>
+                                <button id="updateBtn" class="btn btn-success mt-3">Simpan</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
 
         <!-- Tabel data Hitung Gaji -->
         <table class="table mt-3" id="dataTable">
@@ -82,6 +218,7 @@
                 <tr>
                     <th>NO</th>
                     <th>NPP</th>
+                    <th>ID KOMPONEN GAJI</th>
                     <th>NAMA KOMPONEN GAJI</th>
                     <th>JUMLAH</th>
                     <th>TARIF</th>
@@ -98,10 +235,11 @@
                         <tr>
                             <td>@counter</td>
                             <td>@item.NPP</td>
+                            <td>@item.ID_KOMPONEN_GAJI</td>
                             <td>@item.NAMA_KOMPONEN_GAJI</td>
                             <td>@item.JUMLAH</td>
                             <td>@item.TARIF</td>
-                            <td>@(item.JUMLAH * item.TARIF)</td> <!-- Perhitungan total -->
+                            <td>@(item.JUMLAH * item.TARIF)</td> 
                             <td><button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_PENGGAJIAN)">Hapus</button></td>
                         </tr>
                     }
@@ -111,6 +249,16 @@
                 <tr>
                     <td colspan="5">Total</td>
                     <td id="totalValue">0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="5">Pajak (3%)</td>
+                    <td id="taxValue">0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="5">Gaji Bersih</td>
+                    <td id="netSalary">0</td>
                     <td></td>
                 </tr>
             </tfoot>
@@ -130,20 +278,131 @@
 
     <script>
         $(document).ready(function () {
-            $('#dataTable').DataTable();
+            $('#dataTable, #kontrakPenggajianTable').DataTable(); // Inisialisasi kedua tabel
             calculateTotal(); // Memanggil fungsi ini setelah inisialisasi DataTable
         });
 
         function calculateTotal() {
             var total = 0;
             $('#dataTable tbody tr').each(function () {
-                var value = $(this).find('td:nth-child(6)').text();
+                var value = $(this).find('td:nth-child(7)').text();
                 if (value) {
                     total += parseFloat(value);
                 }
             });
+
+            var tax = total * 0.03; // Menghitung pajak 3%
+            var netSalary = total - tax; // Menghitung gaji bersih
+
             $('#totalValue').text(total.toFixed(2));
+            $('#taxValue').text(tax.toFixed(2));
+            $('#netSalary').text(netSalary.toFixed(2));
         }
+
+        // Event handler untuk tombol tambah
+        $("#btnTambah").click(function (event) {
+            event.preventDefault();
+            // Mengumpulkan data dari form
+            var formData = {
+                NPP: $("#NPP").val(),
+                ID_BULAN_GAJI: $("#bulanGajiDropdown").val(),
+                NAMA: $("#NAMA").val(),
+                STATUS_KEPEGAWAIAN: $("#STATUS_KEPEGAWAIAN").val(),
+                MASA_KERJA_RIIL: $("#MASA_KERJA_RIIL").val(),
+                MASA_KERJA_GOL: $("#MASA_KERJA_GOL").val(),
+                JBT_STRUKTURAL: $("#JBT_STRUKTURAL").val(),
+                JBT_AKADEMIK: $("#JBT_AKADEMIK").val(),
+                JBT_FUNGSIONAL: $("#JBT_FUNGSIONAL").val(),
+                PANGKAT: $("#PANGKAT").val(),
+                GOLONGAN: $("#GOLONGAN").val(),
+                JENJANG: $("#JENJANG").val(),
+                NO_TABUNGAN: $("#NO_TABUNGAN").val(),
+                NPWP: $("#NPWP").val()
+            };
+
+            // Mengirim data ke server untuk ditambahkan
+            $.ajax({
+                url: '/Penggajian/InsertKontrakPenggajianData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.status) {
+                        alert('Data berhasil ditambahkan');
+                        location.reload();
+                    } else {
+                        alert('Data gagal ditambahkan');
+                    }
+                }
+            });
+        });
+
+
+        var updatedData = {};
+
+        $(".editable-cell").dblclick(function () {
+            var originalValue = $(this).text();
+            $(this).html(`<input type='text' value='${originalValue}' />`);
+            $(this).children().first().focus();
+        });
+
+        $("body").on("blur", ".editable-cell > input", function () {
+            var value = $(this).val();
+            var cell = $(this).parent();
+            cell.html(value);
+
+            var row = cell.closest('tr');
+            var id = row.find('td[data-id]').attr('data-id'); // Mengambil ID_PENGGAJIAN
+            var columnName = cell.attr('data-column-name');
+
+            if (!updatedData[id]) {
+                updatedData[id] = {};
+            }
+            updatedData[id][columnName] = value;
+
+            // Menambahkan semua data lain dari baris ini ke objek updatedData
+            row.find('td').each(function () {
+                var column = $(this).attr('data-column-name');
+                if (column && !updatedData[id][column]) {
+                    updatedData[id][column] = $(this).text();
+                }
+            });
+
+            // Menambahkan ID_PENGGAJIAN ke objek updatedData
+            if (id && !updatedData[id]['ID_PENGGAJIAN']) {
+                updatedData[id]['ID_PENGGAJIAN'] = id;
+            }
+
+            // Menambahkan ID_BULAN_GAJI ke objek updatedData
+            var idBulanGaji = row.find('td:nth-child(3)').text();
+            if (idBulanGaji && !updatedData[id]['ID_BULAN_GAJI']) {
+                updatedData[id]['ID_BULAN_GAJI'] = idBulanGaji;
+            }
+        });
+
+
+
+        $("body").on("click", ".btn-success", function () {
+            console.log(updatedData);
+            var dataToUpdate = Object.values(updatedData);
+            $.ajax({
+                url: '/Penggajian/UpdateKontrakPenggajianData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToUpdate),
+                success: function (response) {
+                    if (response.status) {
+                        alert('Data berhasil diupdate');
+                        location.reload();
+                    } else {
+                        alert('Data gagal diupdate');
+                    }
+                }
+            });
+        });
+
+
+
 
         function deleteRow(id) {
             // Implementasi logika penghapusan
@@ -151,6 +410,39 @@
             // Setelah menghapus baris, ulangi perhitungan total:
             calculateTotal();
         }
+
+        function deleteKontrakRow(id) {
+            // Implementasi logika penghapusan untuk tabel penggajian kontrak
+            // ...
+        }
+
+        // Fungsi untuk mendapatkan data bulan gaji berdasarkan tahun
+        function getCariData() {
+            var tahun = $("#tahunInput").val();
+            $.get("/HonorPendadaran/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
+                console.log("Data yang diterima dari server:", data);
+                var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                for (var i = 0; i < data.length; i++) {
+                    options += "<option value='" + data[i].id_bulan + "'>" + namaBulan[i] + "</option>";
+                }
+                $("#bulanGajiDropdown").html(options);
+            }).done(function () {
+                console.log("Pengambilan data selesai.");
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log("Gagal mengambil data:", textStatus, errorThrown);
+            });
+        }
+
+        // Event handler untuk perubahan pada input tahun
+        $("#tahunInput").change(function () {
+            getCariData();
+        });
+
+        // Memanggil fungsi getCariData saat halaman dimuat
+        getCariData();
     </script>
+
 }
+
 

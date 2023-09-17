@@ -24,7 +24,7 @@ namespace Payroll25.Models
         public string STATUS_KEPEGAWAIAN { get; set; }
 
         [Optional]
-        public string MASA_KERJA_RILL { get; set; }
+        public string MASA_KERJA_RIIL { get; set; }
 
         [Optional]
         public string MASA_KERJA_GOL { get; set; }
@@ -62,16 +62,23 @@ namespace Payroll25.Models
         [Optional]
         public float? TARIF { get; set; }
 
+        [Optional]
+        public float? NOMINAL { get; set; }
+
 
         public class PenggajianViewModel
         {
             public IEnumerable<PenggajianModel> PenggajianList { get; set; }
+            public IEnumerable<PenggajianModel> KontrakPenggajianList { get; set; }
             public PenggajianModel Penggajian { get; set; }
             public string NPPFilter { get; set; }
             public string NAMAFilter { get; set; }
             public string UNITFilter { get; set; }
             public int BULANFilter { get; set; }
         }
+
+        public int GET_BULAN_GAJI { get; set; }
+        public int ID_KOMPONEN_GAJI { get;set; }
 
     }
 }

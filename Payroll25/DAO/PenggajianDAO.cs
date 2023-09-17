@@ -6,6 +6,140 @@ namespace Payroll25.DAO
 {
     public class PenggajianDAO
     {
+        public async Task<IEnumerable<PenggajianModel>> GetKontrakPenggajianDataAsync(string NPPFilter = null, string NAMAFilter = null)
+        {
+            var connectionString = DBkoneksi.payrollkoneksi;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    await conn.OpenAsync();
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@NPPFilter", NPPFilter);
+                    parameters.Add("@NAMAFilter", NAMAFilter);
+
+                    string query = @"SELECT 
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[ID_PENGGAJIAN],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[NPP],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[ID_BULAN_GAJI],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[NAMA],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[MASA_KERJA_RIIL],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[PANGKAT],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[GOLONGAN],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[JENJANG],
+                                    [PAYROLL].[payroll].[TBL_PENGGAJIAN].[NO_TABUNGAN]
+                                    FROM 
+                                        [PAYROLL].[payroll].[TBL_PENGGAJIAN]
+                                    INNER JOIN 
+                                        [PAYROLL].[simka].[MST_KARYAWAN]
+                                    ON 
+                                        [PAYROLL].[payroll].[TBL_PENGGAJIAN].[NPP] = [PAYROLL].[simka].[MST_KARYAWAN].[NPP]
+                                    WHERE 
+                                        [PAYROLL].[simka].[MST_KARYAWAN].[STATUS_KEPEGAWAIAN] = 'Kontrak' 
+                                        AND (@NPPFilter IS NULL OR [PAYROLL].[payroll].[TBL_PENGGAJIAN].[NPP] LIKE '%' + @NPPFilter + '%')
+                                        AND (@NAMAFilter IS NULL OR [PAYROLL].[payroll].[TBL_PENGGAJIAN].[NAMA] LIKE '%' + @NAMAFilter + '%')";
+
+                    if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter))
+                    {
+                        return new List<PenggajianModel>();
+                    }
+
+                    return await conn.QueryAsync<PenggajianModel>(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+
+        public int InsertKontrakPenggajianData(PenggajianModel model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"INSERT INTO  [PAYROLL].[payroll].[TBL_PENGGAJIAN]
+                                ([NPP],[ID_BULAN_GAJI],[NAMA],[STATUS_KEPEGAWAIAN],[MASA_KERJA_RIIL],[MASA_KERJA_GOL],[JBT_STRUKTURAL],
+                                [JBT_AKADEMIK],[JBT_FUNGSIONAL],[PANGKAT],[GOLONGAN],[JENJANG],[NO_TABUNGAN],[NPWP])
+                                VALUES
+                                (@NPP,@ID_BULAN_GAJI,@NAMA,@STATUS_KEPEGAWAIAN,@MASA_KERJA_RIIL,@MASA_KERJA_GOL,@JBT_STRUKTURAL,
+                                @JBT_AKADEMIK,@JBT_FUNGSIONAL,@PANGKAT,@GOLONGAN,@JENJANG,@NO_TABUNGAN,@NPWP)";
+
+                    var parameters = new
+                    {
+                        NPP = model.NPP,
+                        ID_BULAN_GAJI = model.ID_BULAN_GAJI,
+                        NAMA = model.NAMA,
+                        STATUS_KEPEGAWAIAN = model.STATUS_KEPEGAWAIAN,
+                        MASA_KERJA_RIIL = model.MASA_KERJA_RIIL,
+                        MASA_KERJA_GOL = model.MASA_KERJA_GOL,
+                        JBT_STRUKTURAL = model.JBT_STRUKTURAL,
+                        JBT_AKADEMIK = model.JBT_AKADEMIK,
+                        JBT_FUNGSIONAL = model.JBT_FUNGSIONAL,
+                        PANGKAT = model.PANGKAT,
+                        GOLONGAN = model.GOLONGAN,
+                        JENJANG = model.JENJANG,
+                        NO_TABUNGAN = model.NO_TABUNGAN,
+                        NPWP = model.NPWP,
+                    };
+
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        public int UpdateKontrakPenggajianData(List<PenggajianModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"UPDATE [payroll].[TBL_PENGGAJIAN]
+                                SET
+                                [NPP] = @NPP,
+                                [NAMA] = @NAMA,
+                                [PANGKAT] = @PANGKAT,
+                                [GOLONGAN] = @GOLONGAN,
+                                [JENJANG] = @JENJANG,
+                                [NO_TABUNGAN] = @NO_TABUNGAN,
+                                [ID_BULAN_GAJI] = @ID_BULAN_GAJI
+                                WHERE ID_PENGGAJIAN = @ID_PENGGAJIAN";
+
+                    return conn.Execute(query, model);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
 
         public async Task<IEnumerable<PenggajianModel>> GetPenggajianDataAsync(string NPPFilter = null)
         {
@@ -27,10 +161,11 @@ namespace Payroll25.DAO
                     SET @NPP = @NppParam;
 
                     SELECT 
-                        TBL_BEBAN_MENGAJAR.NPP, 
-                        MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
-                        TBL_BEBAN_MENGAJAR.TOTAL_SKS AS JUMLAH, 
-                        MST_TARIF_PAYROLL.NOMINAL AS TARIF
+                    TBL_BEBAN_MENGAJAR.NPP, 
+	                MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
+                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                    TBL_BEBAN_MENGAJAR.TOTAL_SKS AS JUMLAH, 
+                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
                     FROM 
                         [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
                     INNER JOIN 
@@ -48,10 +183,11 @@ namespace Payroll25.DAO
                     UNION ALL 
 
                     SELECT DISTINCT
-                        MST_KARYAWAN.NPP, 
-                        MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
-                        TBL_VAKASI.JUMLAH, 
-                        MST_TARIF_PAYROLL.NOMINAL AS TARIF
+                    MST_KARYAWAN.NPP,
+	                MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
+                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                    TBL_VAKASI.JUMLAH, 
+                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
                     FROM 
                         PAYROLL.simka.MST_KARYAWAN
                     JOIN 
@@ -85,6 +221,55 @@ namespace Payroll25.DAO
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Support untuk Dropdown Insert ID_BULAN_GAJI
+        public async Task<IEnumerable<PenggajianModel>> GetBulanGaji(int tahun = 0)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"SELECT 
+                                [ID_BULAN_GAJI]
+                                FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI]
+                                WHERE [ID_TAHUN] = @inputTahun";
+
+                    var parameters = new { inputTahun = tahun };
+
+                    var data = await conn.QueryAsync<int>(query, parameters);
+
+                    // Set nilai properti GET_BULAN_GAJI dengan data yang diperoleh dari database
+                    var result = data.Select(id_bulan => new PenggajianModel
+                    {
+                        GET_BULAN_GAJI = id_bulan
+                    });
+
+                    return result.ToList();
+                }
+                catch (Exception)
+                {
+                    // Handle exceptions here
+                    return Enumerable.Empty<PenggajianModel>();
+                }
+            }
+        }
 
 
 
