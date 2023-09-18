@@ -34,6 +34,25 @@
             cursor: pointer; /* Ubah penunjuk mouse menjadi tangan (pointer) saat dihover */
         }
 
+        .kontrakPenggajianTable_wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table.kontrakPenggajianTable thead th {
+            white-space: normal; /* Ini akan memungkinkan teks untuk wrap di dalam header */
+            text-align: center; /* Ini akan memusatkan teks di dalam header */
+        }
+
+        table.kontrakPenggajianTable {
+            width: 100%;
+            margin: 0 auto;
+            clear: both;
+            border-collapse: separate;
+            border-spacing: 0;
+            white-space: nowrap; /* Ini akan mencegah baris dari wrapping dan memastikan bahwa seluruh baris akan scrollable */
+        }
+
     </style>
 
 </head>
@@ -143,37 +162,38 @@
                 </form>
             </div>
 
+        
+            <!-- Search data Penggajiam -->
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
 
-        <!-- Search data Penggajiam -->
-        <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <h3 style="padding-bottom: 15px;">
+                    Pencarian Data Hitung Gaji
+                </h3>
 
-            <h3 style="padding-bottom: 15px;">
-                Pencarian Data Hitung Gaji
-            </h3>
+                <form id="searchForm" method="get" action="@Url.Action("Index", "Penggajian")">
 
-            <form id="searchForm" method="get" action="@Url.Action("Index", "Penggajian")">
-
-                <div>
-                    <h3>Cari Berdasarkan NPP</h3>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan NPP">
+                    <div>
+                        <h3>Cari Berdasarkan NPP</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan NPP">
+                        </div>
                     </div>
-                </div>
 
-                @*  <div>
-                <h3>Cari Berdasarkan NAMA</h3>
-                <div class="input-group mb-3">
-                <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
-                </div>
-                </div> *@
+                    @*  <div>
+                    <h3>Cari Berdasarkan NAMA</h3>
+                    <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="NAMAFilter" name="NAMAFilter" value="@Model.NAMAFilter" placeholder="Masukkan NAMA">
+                    </div>
+                    </div> *@
 
-                <button class="btn btn-primary" type="submit">Cari</button>
-            </form>
+                    <button class="btn btn-primary" type="submit">Cari</button>
+                </form>
 
+            </div>
         </div>
 
         <!-- Tabel Data Penggajian Kontrak -->
-        <table class="table mt-3" >
+        <table class="table mt-3" id="kontrakPenggajianTable">
             <thead style="background-color: #8FA0C7">
                 <tr>
                     <th>ID Penggajian</th>
@@ -205,12 +225,80 @@
                             <td data-id="@item.ID_PENGGAJIAN" data-column-name="NO_TABUNGAN" class="editable-cell" title="Edit">@item.NO_TABUNGAN</td>
                             <td>
                                 <button id="updateBtn" class="btn btn-success mt-3">Simpan</button>
+                                <button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_PENGGAJIAN)">Hapus</button>
                             </td>
                         </tr>
                     }
                 }
             </tbody>
         </table>
+
+        <div class="row">
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <h3 style="padding-bottom: 25px;">
+                    Tambah Detail Gaji
+                </h3>
+
+                <form id="penggajianForm" method="post" action="@Url.Action("InsertDetailPenggajian", "Penggajian")">
+
+
+                    <div class="mb-3">
+                        <label for="ID_PENGGAJIAN" class="form-label">ID PENGGAJIAN</label>
+                        <input type="number" class="form-control" id="ID_PENGGAJIAN" name="ID_PENGGAJIAN">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ID_KOMPONEN_GAJI" class="form-label">KOMPONEN GAJI</label>
+                        <select class="form-control" name="ID_KOMPONEN_GAJI" id="komponenGajiDropdown">
+                            <option value="">Pilih Komponen Gaji</option>
+                            @foreach (var item in (IEnumerable<Payroll25.Models.PenggajianModel>)ViewBag.KomponenGajiList)
+                            {
+                                <option value="@item.ID_KOMPONEN_GAJI">@item.KOMPONEN_GAJI</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="JUMLAH_SATUAN" class="form-label">JUMLAH SATUAN</label>
+                        <input type="number" class="form-control" id="JUMLAH_SATUAN" name="JUMLAH_SATUAN">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="NOMINAL" class="form-label">NOMINAL</label>
+                        <input type="number" class="form-control" id="NOMINAL" name="NOMINAL">
+                    </div>
+
+
+                    <button id="btnTambahDtl" class="btn btn-primary">Tambah</button>
+                </form>
+            </div>
+
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <a href="@Url.Action("DownloadCSV", "Penggajian")" class="btn btn-primary mb-3" style="margin-left: 10px; margin-top: 10px;">
+                    <i class="fas fa-file-csv"></i> Download CSV
+                </a>
+                <div class="row">
+                    <div class="col-sm-6 mt-3">
+                        @using (Html.BeginForm("UploadCSV", "Penggajian", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="form-group px-3 pt-2" style="width: 619px;">
+                                <label for="csvFile">Select CSV File</label>
+                                <input type="file" name="CsvFile" id="csvFile" class="form-control" accept=".csv" />
+                                @Html.ValidationMessageFor(model => model.CsvFile, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group px-3 pt-2" style="width: 670px;">
+                                <input type="submit" value="Upload" class="btn btn-primary" id="uploadButton" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Tabel data Hitung Gaji -->
         <table class="table mt-3" id="dataTable">
@@ -223,7 +311,6 @@
                     <th>JUMLAH</th>
                     <th>TARIF</th>
                     <th>TOTAL PERHITUNGAN</th>
-                    <th>BUTTON</th>
                 </tr>
             </thead>
             <tbody>
@@ -240,7 +327,6 @@
                             <td>@item.JUMLAH</td>
                             <td>@item.TARIF</td>
                             <td>@(item.JUMLAH * item.TARIF)</td> 
-                            <td><button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_PENGGAJIAN)">Hapus</button></td>
                         </tr>
                     }
                 }
@@ -277,10 +363,42 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 
     <script>
+
+        function deleteRow(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                $.ajax({
+                    url: '/Penggajian/DeleteKontrakPenggajianData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify([{ ID_PENGGAJIAN: id }]), // Mengirimkan ID dalam format JSON
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil dihapus');
+                            location.reload(); // Memuat ulang halaman untuk memperbarui tampilan tabel
+                        } else {
+                            alert('Penghapusan data gagal');
+                        }
+                    }
+                });
+            }
+        }
+
+
         $(document).ready(function () {
-            $('#dataTable, #kontrakPenggajianTable').DataTable(); // Inisialisasi kedua tabel
-            calculateTotal(); // Memanggil fungsi ini setelah inisialisasi DataTable
+            $('#dataTable').DataTable(); // Inisialisasi tabel pertama dengan semua fitur default
+
+            $('#kontrakPenggajianTable').DataTable({
+                searching: false, // Menonaktifkan kotak pencarian
+                paging: false,    // Menonaktifkan paginasi (next/prev)
+                info: false       // Menonaktifkan info "Menampilkan 1 to n of n entries"
+            });
+
+            calculateTotal();
+
+            var komponenGajiData = @Html.Raw(Json.Serialize(ViewBag.KomponenGajiList));
+
         });
+
 
         function calculateTotal() {
             var total = 0;
@@ -401,20 +519,63 @@
             });
         });
 
+        // Event handler untuk tombol tambah Detail ⚠️
+        $("#btnTambahDtl").click(function (event) {
+            event.preventDefault();
+            // Mengumpulkan data dari form
+            var formData = {
+                ID_PENGGAJIAN: $("#ID_PENGGAJIAN").val(),
+                ID_KOMPONEN_GAJI: $("#komponenGajiDropdown").val(),
+                JUMLAH_SATUAN: $("#JUMLAH_SATUAN").val(),
+                NOMINAL: $("#NOMINAL").val()
+            };
+
+            // Mengirim data ke server untuk ditambahkan
+            $.ajax({
+                url: '/Penggajian/InsertDetailPenggajian',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.status) {
+                        alert('Data berhasil ditambahkan');
+                        location.reload();
+                    } else {
+                        alert('Data gagal ditambahkan');
+                    }
+                }
+            });
+        });
+
+        // Event listener for the upload button to handle file uploads via AJAX ⚠️
+        $('#uploadButton').click(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData();
+            formData.append('CsvFile', $('#csvFile')[0].files[0]);
+
+            $.ajax({
+                url: '@Url.Action("UploadCSV", "Penggajian")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    if (result.success) {
+                        alert('Berhasil mengunggah dan memproses CSV!');
+                    } else {
+                        alert('Gagal memproses CSV: ' + result.errorMessage);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('Terjadi kesalahan saat mengunggah: ' + error);
+                }
+            });
+        });
 
 
 
-        function deleteRow(id) {
-            // Implementasi logika penghapusan
-            // ...
-            // Setelah menghapus baris, ulangi perhitungan total:
-            calculateTotal();
-        }
 
-        function deleteKontrakRow(id) {
-            // Implementasi logika penghapusan untuk tabel penggajian kontrak
-            // ...
-        }
 
         // Fungsi untuk mendapatkan data bulan gaji berdasarkan tahun
         function getCariData() {
@@ -441,6 +602,7 @@
 
         // Memanggil fungsi getCariData saat halaman dimuat
         getCariData();
+
     </script>
 
 }

@@ -1,6 +1,9 @@
-﻿using Dapper;
+﻿using CsvHelper.Configuration;
+using CsvHelper;
+using Dapper;
 using Payroll25.Models;
 using System.Data.SqlClient;
+using System.Globalization;
 
 namespace Payroll25.DAO
 {
@@ -140,6 +143,68 @@ namespace Payroll25.DAO
             }
         }
 
+        public int DeleteKontrakPenggajianData(List<PenggajianModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"DELETE FROM [payroll].[TBL_PENGGAJIAN]
+                                WHERE ID_PENGGAJIAN = @ID_PENGGAJIAN";
+
+                    return conn.Execute(query, model);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+
+        public int InsertDetailPenggajian(PenggajianModel model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"INSERT INTO  [PAYROLL].[payroll].[DTL_PENGGAJIAN]
+                                ([ID_PENGGAJIAN],[ID_KOMPONEN_GAJI],[JUMLAH_SATUAN],[NOMINAL])
+                                VALUES
+                                (@ID_PENGGAJIAN,@ID_KOMPONEN_GAJI,@JUMLAH_SATUAN,@NOMINAL)";
+
+                    var parameters = new
+                    {
+                        ID_PENGGAJIAN = model.ID_PENGGAJIAN,
+                        ID_KOMPONEN_GAJI = model.ID_KOMPONEN_GAJI,
+                        JUMLAH_SATUAN = model.JUMLAH_SATUAN,
+                        NOMINAL = model.NOMINAL
+                    };
+
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+
+
+
 
         public async Task<IEnumerable<PenggajianModel>> GetPenggajianDataAsync(string NPPFilter = null)
         {
@@ -166,16 +231,11 @@ namespace Payroll25.DAO
                     MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
                     TBL_BEBAN_MENGAJAR.TOTAL_SKS AS JUMLAH, 
                     MST_TARIF_PAYROLL.NOMINAL AS TARIF
-                    FROM 
-                        [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
-                    INNER JOIN 
-                        [PAYROLL].[simka].[MST_KARYAWAN] ON TBL_BEBAN_MENGAJAR.NPP = MST_KARYAWAN.NPP
-                    JOIN 
-                        [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_KARYAWAN.ID_REF_JBTN_AKADEMIK = MST_TARIF_PAYROLL.ID_REF_JBTN_AKADEMIK 
-                    JOIN
-                        [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI 
-                    JOIN
-                        [PAYROLL].[simka].[REF_JENJANG] ON MST_KARYAWAN.PENDIDIKAN_TERAKHIR = REF_JENJANG.DESKRIPSI AND REF_JENJANG.ID_REF_JENJANG = MST_TARIF_PAYROLL.ID_REF_JENJANG
+                    FROM [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
+                    INNER JOIN [PAYROLL].[simka].[MST_KARYAWAN] ON TBL_BEBAN_MENGAJAR.NPP = MST_KARYAWAN.NPP
+                    JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_KARYAWAN.ID_REF_JBTN_AKADEMIK = MST_TARIF_PAYROLL.ID_REF_JBTN_AKADEMIK 
+                    JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI 
+                    JOIN [PAYROLL].[simka].[REF_JENJANG] ON MST_KARYAWAN.PENDIDIKAN_TERAKHIR = REF_JENJANG.DESKRIPSI AND REF_JENJANG.ID_REF_JENJANG = MST_TARIF_PAYROLL.ID_REF_JENJANG
                     WHERE 
                         MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 77
                         AND TBL_BEBAN_MENGAJAR.NPP = @NPP
@@ -188,14 +248,10 @@ namespace Payroll25.DAO
                     MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
                     TBL_VAKASI.JUMLAH, 
                     MST_TARIF_PAYROLL.NOMINAL AS TARIF
-                    FROM 
-                        PAYROLL.simka.MST_KARYAWAN
-                    JOIN 
-                        PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                    JOIN 
-                        PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
-                    JOIN
-                        PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
+                    FROM PAYROLL.simka.MST_KARYAWAN
+                    JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                    JOIN PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                    JOIN PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
                     WHERE 
                         MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 78 AND 201 
                         AND MST_KARYAWAN.NPP = @NPP";
@@ -221,22 +277,65 @@ namespace Payroll25.DAO
         }
 
 
+        public (bool, List<string>) UploadAndInsertCSV(IFormFile csvFile)
+        {
+            var errorMessages = new List<string>();
+            try
+            {
+                using (var stream = csvFile.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    conn.Open();
+                    var transaction = conn.BeginTransaction();
 
+                    try
+                    {
+                        var records = csv.GetRecords<PenggajianModel>().ToList();
+                        var validRecords = records.Where(record =>
+                            record.ID_PENGGAJIAN != null &&
+                            record.ID_KOMPONEN_GAJI != null &&
+                            record.JUMLAH_SATUAN != null &&
+                            record.NOMINAL != null                             
+                        ).ToList();
 
+                        var invalidRecords = records.Except(validRecords).ToList();
 
+                        foreach (var invalidRecord in invalidRecords)
+                        {
+                            errorMessages.Add($"Record dengan ID PENGGAJIAN {invalidRecord.ID_PENGGAJIAN} memiliki data yang tidak valid atau tidak lengkap.");
+                        }
 
+                        foreach (var record in validRecords)
+                        {
+                            var insertQuery = @"INSERT INTO [PAYROLL].[payroll].[DTL_PENGGAJIAN]
+                                                ([ID_PENGGAJIAN],[ID_KOMPONEN_GAJI],[JUMLAH_SATUAN],[NOMINAL])
+                                                VALUES
+                                                (@ID_PENGGAJIAN,@ID_KOMPONEN_GAJI,@JUMLAH_SATUAN,@NOMINAL)";
 
+                            conn.Execute(insertQuery, record, transaction);
+                        }
 
-
-
-
-
-
-
-
-
-
-
+                        transaction.Commit();
+                        return (true, errorMessages);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine("Error: " + ex.Message);
+                        errorMessages.Add(ex.Message);
+                        return (false, errorMessages);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                errorMessages.Add(ex.Message);
+                return (false, errorMessages);
+            }
+        }
 
 
         // Support untuk Dropdown Insert ID_BULAN_GAJI
@@ -262,6 +361,31 @@ namespace Payroll25.DAO
                     });
 
                     return result.ToList();
+                }
+                catch (Exception)
+                {
+                    // Handle exceptions here
+                    return Enumerable.Empty<PenggajianModel>();
+                }
+            }
+        }
+
+        // Support untuk Dropdown Insert Komponen Gaji
+        public async Task<IEnumerable<PenggajianModel>> GetKomponenGaji()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"SELECT 
+                                [ID_KOMPONEN_GAJI],
+                                [KOMPONEN_GAJI]
+                                FROM [PAYROLL].[payroll].[MST_KOMPONEN_GAJI]
+                                WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 77 AND 201 ";
+
+                    var data = await conn.QueryAsync<PenggajianModel>(query);
+
+                    return data.ToList();
                 }
                 catch (Exception)
                 {

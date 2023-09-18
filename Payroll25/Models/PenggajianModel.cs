@@ -8,19 +8,20 @@ namespace Payroll25.Models
     public class PenggajianModel
     {
 
-        [Optional]
+        [Required]
+        [Name("ID_PENGGAJIAN")]
         public int? ID_PENGGAJIAN { get; set; }
         
-        [Required]
+        [Optional]
         public string NPP { get; set; }
 
-        [Required]
+        [Optional]
         public int? ID_BULAN_GAJI { get; set; }
 
-        [Required]
+        [Optional]
         public string NAMA { get; set; }
 
-        [Required]
+        [Optional]
         public string STATUS_KEPEGAWAIAN { get; set; }
 
         [Optional]
@@ -29,28 +30,28 @@ namespace Payroll25.Models
         [Optional]
         public string MASA_KERJA_GOL { get; set; }
 
-        [Required]
+        [Optional]
         public string JBT_STRUKTURAL { get; set; }
         
-        [Required]
+        [Optional]
         public string JBT_AKADEMIK { get; set; }
         
-        [Required]
+        [Optional]
         public string JBT_FUNGSIONAL { get; set; }
 
-        [Required]
+        [Optional]
         public string PANGKAT { get; set; }
 
-        [Required]
+        [Optional]
         public string GOLONGAN { get; set; }
 
-        [Required]
+        [Optional]
         public string JENJANG { get; set; }
 
-        [Required]
+        [Optional]
         public string NO_TABUNGAN { get; set; }
 
-        [Required]
+        [Optional]
         public string NPWP { get; set; }
 
         [Optional]
@@ -62,8 +63,17 @@ namespace Payroll25.Models
         [Optional]
         public float? TARIF { get; set; }
 
-        [Optional]
+        [Required]
+        [Name("NOMINAL")]
         public float? NOMINAL { get; set; }
+
+        [Required]
+        [Name("JUMLAH_SATUAN")]
+        public float? JUMLAH_SATUAN { get; set; }
+
+        [Required]
+        [Name("ID_KOMPONEN_GAJI")]
+        public int? ID_KOMPONEN_GAJI { get; set; }
 
 
         public class PenggajianViewModel
@@ -75,10 +85,30 @@ namespace Payroll25.Models
             public string NAMAFilter { get; set; }
             public string UNITFilter { get; set; }
             public int BULANFilter { get; set; }
+
+            [Required]
+            [Display(Name = "CSV File")]
+            [DataType(DataType.Upload)]
+            [FileExtensions(Extensions = "csv", ErrorMessage = "Please upload a valid CSV file.")]
+            public IFormFile CsvFile { get; set; }
         }
 
-        public int GET_BULAN_GAJI { get; set; }
-        public int ID_KOMPONEN_GAJI { get;set; }
 
+        [Optional]
+        public int GET_BULAN_GAJI { get; set; }
+        [Optional]
+        public string KOMPONEN_GAJI { get; set; }
+
+    }
+
+    public class PenggajianModelMap : ClassMap<PenggajianModel>
+    {
+        public PenggajianModelMap()
+        {
+            Map(m => m.ID_PENGGAJIAN).Name("ID_PENGGAJIAN");
+            Map(m => m.ID_KOMPONEN_GAJI).Name("ID_KOMPONEN_GAJI");
+            Map(m => m.JUMLAH_SATUAN).Name("JUMLAH_SATUAN");
+            Map(m => m.NOMINAL).Name("NOMINAL");
+        }
     }
 }
