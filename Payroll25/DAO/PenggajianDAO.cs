@@ -202,10 +202,6 @@ namespace Payroll25.DAO
             }
         }
 
-
-
-
-
         public async Task<IEnumerable<PenggajianModel>> GetPenggajianDataAsync(string NPPFilter = null)
         {
             var connectionString = DBkoneksi.payrollkoneksi;

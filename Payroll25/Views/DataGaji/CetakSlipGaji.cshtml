@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Payroll25.Models.DataGajiModel>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Cetak Slip Gaji</title>
+</head>
+
+<body>
+    @foreach (var item in Model)
+    {
+        <div style="border: 1px solid black; padding: 10px; margin-bottom: 10px;">
+            <h1>RINCIAN HONORARIUM</h1>
+            <h2>DOSEN / ASISTEN TIDAK TETAP</h2>
+
+            <p><strong>BULAN:</strong> @item.BULAN @item.TAHUN</p>
+            <p><strong>UNIT:</strong> @item.NAMA_UNIT</p>
+
+            <p><strong>NPP:</strong> @item.NPP</p>
+            <p><strong>NAMA:</strong> @item.NAMA</p>
+            <p><strong>GOLONGAN:</strong> @item.GOLONGAN</p>
+            <p><strong>JENJANG:</strong> @item.JENJANG</p>
+            <p><strong>NO TABUNGAN:</strong> @item.NO_REKENING</p>
+            <p><strong>NAMA REKENING:</strong> @item.NAMA_REKENING</p>
+            <p><strong>BANK:</strong> @item.NAMA_BANK</p>
+            <p><strong>NPWP:</strong> @item.NPWP</p>
+            <br>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Komponen Gaji</th>
+                        <th>Jumlah Satuan</th>
+                        <th>Nominal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detailGaji in item.DetailGaji)  // Ganti dataGaji dengan item
+                    {
+                        <tr>
+                            <td>@detailGaji.KOMPONEN_GAJI</td>
+                            <td>@detailGaji.JUMLAH_SATUAN</td>
+                            <td>@detailGaji.NOMINAL</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    }
+</body>
+</html>

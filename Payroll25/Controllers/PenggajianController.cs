@@ -105,8 +105,6 @@ namespace Payroll25.Controllers
         }
 
 
-
-
         [HttpPost]
         public IActionResult InsertDetailPenggajian([FromBody] PenggajianModel model)
         {
