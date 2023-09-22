@@ -2,6 +2,7 @@
 {
     public class PenggajianDosenModel
     {
+        public int ID_PENGGAJIAN { get; set; }
         public string NPP { get; set; }
         public int ID_BULAN_GAJI { get; set; }
         public string NAMA { get; set; }
@@ -13,7 +14,7 @@
         public string JBT_FUNGSIONAL { get; set; }
         public string PANGKAT { get; set; }
         public string GOLONGAN { get; set; }
-        public string JENJANG { get; set; }
+        public string? JENJANG { get; set; }
         public string NO_TABUNGAN { get; set; }
         public string NPWP { get; set; }
     }
@@ -39,4 +40,29 @@
         public string NAMA_REKENING { get; set; }
 
     }
+
+    public class KomponenGajiAndJumlahSatuanModel
+    {
+        public string NPP { get; set; }
+        public int ID_KOMPONEN_GAJI { get; set; }
+        public string NAMA_KOMPONEN_GAJI { get; set; }
+        public int? JUMLAH { get; set; }
+        public float? TARIF { get; set; }
+        public int? ID_BULAN_GAJI { get; set; } 
+
+    }
+
+    public class DetailPenggajianModel
+    {
+        public int ID_PENGGAJIAN { get; set; }
+        public int ID_KOMPONEN_GAJI { get; set; }
+        public float? JUMLAH_SATUAN { get; set; }
+        public float? NOMINAL{ get; set; }
+    }
+
+
+
+
+
+
 }

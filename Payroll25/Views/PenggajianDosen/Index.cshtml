@@ -15,33 +15,60 @@
     <div class="container mt-5">
         <h1 class="my-4">Penggajian Auto Dosen</h1>
 
-        <!-- Tahun Dropdown -->
-        <div class="mb-3">
-            <label class="control-label">Tahun</label>
-            <select class="form-control" id="tahunInput">
-                @{
-                    var currentYear = DateTime.Now.Year;
-                    for (var Year = currentYear; Year >= 2019; Year--)
-                    {
-                        <option value="@Year">@Year</option>
-                    }
-                }
-            </select>
+        <!-- Card Container -->
+        <div class="card">
+            <div class="card-body">
+
+                <!-- Tahun Dropdown -->
+                <div class="mb-3">
+                    <label class="control-label">Tahun</label>
+                    <select class="form-control" id="tahunInput">
+                        @{
+                            var currentYear = DateTime.Now.Year;
+                            for (var Year = currentYear; Year >= 2019; Year--)
+                            {
+                                <option value="@Year">@Year</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Bulan Gaji Dropdown -->
+                <div class="mb-3">
+                    <label for="ID_BULAN_GAJI" class="form-label">BULAN GAJI</label>
+                    <select class="form-control" name="ID_BULAN_GAJI" id="bulanGajiDropdown">
+                        <option value="">Pilih Bulan</option>
+                    </select>
+                </div>
+
+                <!-- Insert Penggajian Button -->
+                <div class="row">
+                    <div class="col">
+                        <button id="autoInsertPenggajianBtn" class="btn btn-primary btn-block">Insert Penggajian</button>
+                    </div>
+                    <div class="col">
+                        <button id="autoDetailPenggajianBtn" class="btn btn-primary btn-block">Hitung Penggajian</button>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Bulan Gaji Dropdown -->
-        <div class="mb-3">
-            <label for="ID_BULAN_GAJI" class="form-label">BULAN GAJI</label>
-            <select class="form-control" name="ID_BULAN_GAJI" id="bulanGajiDropdown">
-                <option value="">Pilih Bulan</option>
-            </select>
+        <!-- Loading Modal -->
+        <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Silahkan tunggu...</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Insert Penggajian Button -->
-        <button id="autoInsertPenggajianBtn" class="btn btn-primary">Insert Penggajian</button>
     </div>
-
-   
 </body>
 
 <!-- JavaScript References -->
@@ -56,6 +83,14 @@
         $(document).ready(function () {
             $('#dataTable').DataTable();
         });
+
+        function showLoadingModal() {
+            $('#loadingModal').modal('show');
+        }
+
+        function hideLoadingModal() {
+            $('#loadingModal').modal('hide');
+        }
 
         function getCariData() {
             var tahun = $("#tahunInput").val();
@@ -77,28 +112,63 @@
 
         $("#autoInsertPenggajianBtn").click(function (event) {
             event.preventDefault();
+            showLoadingModal();  // Tampilkan modal
+
             var tahun = $("#tahunInput").val();
             var idBulanGaji = $("#bulanGajiDropdown").val();
 
             if (tahun && idBulanGaji) {
                 $.ajax({
                     url: `/PenggajianDosen/AutoInsertPenggajian?idBulanGaji=${idBulanGaji}&tahun=${tahun}`,
-                    type: 'GET', // Pastikan ini sesuai dengan apa yang ada di Controller
+                    type: 'POST',
                     success: function (response) {
+                        hideLoadingModal();  // Sembunyikan modal
                         if (response.success) {
-                            alert("Penggajian berhasil di-insert.");
+                            alert("Pendaftaran Penggajian berhasil dilakukan.");
                         } else {
-                            alert("Penggajian gagal di-insert.");
+                            alert("Pendaftaran Penggajian gagal dilakukan.");
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
+                        hideLoadingModal();  // Sembunyikan modal
                         alert("Terjadi kesalahan saat memproses data: " + textStatus);
                     }
                 });
             } else {
+                hideLoadingModal();  // Sembunyikan modal
+                alert("Mohon pilih tahun dan bulan gaji.");
+            }
+        });
+
+        $("#autoDetailPenggajianBtn").click(function (event) {
+            event.preventDefault();
+            showLoadingModal();  // Tampilkan modal
+
+            var tahun = $("#tahunInput").val();
+            var idBulanGaji = $("#bulanGajiDropdown").val();
+
+            if (tahun && idBulanGaji) {
+                $.ajax({
+                    url: `/PenggajianDosen/AutoHitungGaji?idBulanGaji=${idBulanGaji}&tahun=${tahun}`,
+                    type: 'POST',
+                    success: function (response) {
+                        hideLoadingModal();  // Sembunyikan modal
+                        if (response.success) {
+                            alert("Gaji sudah Masuk.");
+                        } else {
+                            alert("Gaji belum Masuk.");
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        hideLoadingModal();  // Sembunyikan modal
+                        alert("Terjadi kesalahan saat memproses data: " + textStatus);
+                    }
+                });
+            } else {
+                hideLoadingModal();  // Sembunyikan modal
                 alert("Mohon pilih tahun dan bulan gaji.");
             }
         });
 
     </script>
-    }
+}

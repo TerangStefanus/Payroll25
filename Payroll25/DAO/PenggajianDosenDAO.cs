@@ -214,17 +214,17 @@ namespace Payroll25.DAO
         {
             try
             {
-                var karyawanData = await GetKaryawanData();
+                var karyawanData = await GetKaryawanData(); // 1. Get Data Karyawan
 
-                foreach (var karyawan in karyawanData)
+                foreach (var karyawan in karyawanData) // 2. Lakukan secara iterasi berdasarkan NPP karyawan
                 {
-                    if (!await IsDataExist(karyawan.NPP, idBulanGaji))
+                    if (!await IsDataExist(karyawan.NPP, idBulanGaji)) // 3. Cek Apakah data Penggajian dengan ID_BULAN_GAJI dan NPP sudah ada 
                     {
-                        var masaKerjaRiil = await CalculateMasaKerjaRiil(karyawan.TGL_MASUK);
-                        var pangkat = await GetPangkat(karyawan.NPP);
-                        var noTabungan = await GetNoTabungan(karyawan.NPP);
+                        var masaKerjaRiil = await CalculateMasaKerjaRiil(karyawan.TGL_MASUK); // Hitung Masa Kerja Riil 
+                        var pangkat = await GetPangkat(karyawan.NPP); // Masukkan Pangkat berdasarkan Query
+                        var noTabungan = await GetNoTabungan(karyawan.NPP); // Masukan No Tabungan 
 
-                        var insertData = new PenggajianDosenModel
+                        var insertData = new PenggajianDosenModel 
                         {
                             NPP = karyawan.NPP,
                             ID_BULAN_GAJI = idBulanGaji,
@@ -236,13 +236,13 @@ namespace Payroll25.DAO
                             JBT_AKADEMIK = "-",
                             JBT_FUNGSIONAL = "-",
                             PANGKAT = pangkat,
-                            GOLONGAN = karyawan.ID_REF_GOLONGAN_LOKAL,  // Konversi ke string
+                            GOLONGAN = karyawan.ID_REF_GOLONGAN_LOKAL,  
                             JENJANG = null,
                             NO_TABUNGAN = noTabungan,
                             NPWP = karyawan.NPWP
                         };
 
-                        await InsertToTblPenggajian(insertData);
+                        await InsertToTblPenggajian(insertData); // 4. Insert Data ke TBL_PENGGAJIAN 
                     }
                 }
 
@@ -253,6 +253,178 @@ namespace Payroll25.DAO
                 return false;
             }
         }
+
+
+        // Auto Hitung Gaji \\
+
+        public async Task<List<PenggajianDosenModel>> GetPenggajianData(int idBulanGaji)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    // SQL query untuk mengambil data dari TBL_PENGGAJIAN
+                    string query = "SELECT [ID_PENGGAJIAN], [NPP], [ID_BULAN_GAJI] FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN] WHERE STATUS_KEPEGAWAIAN = 'Kontrak' AND ID_BULAN_GAJI = @idBulanGaji";
+
+                    var penggajianData = await conn.QueryAsync<PenggajianDosenModel>(query, new { idBulanGaji });
+
+                    return penggajianData.ToList();
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
+        }
+
+        public async Task<List<KomponenGajiAndJumlahSatuanModel>> GetKomponenGajiAndJumlahSatuan(int idBulanGaji, string tahun, string npp)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    // SQL query untuk mengambil data ID komponen gaji , jumlah satuan dan tarif
+                    string query = @"
+                    SELECT 
+                    TBL_BEBAN_MENGAJAR.NPP, 
+                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
+                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                    TBL_BEBAN_MENGAJAR.TOTAL_SKS AS JUMLAH, 
+                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
+                    FROM [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
+                    INNER JOIN [PAYROLL].[simka].[MST_KARYAWAN] ON TBL_BEBAN_MENGAJAR.NPP = MST_KARYAWAN.NPP
+                    JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_KARYAWAN.ID_REF_JBTN_AKADEMIK = MST_TARIF_PAYROLL.ID_REF_JBTN_AKADEMIK 
+                    JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI 
+                    JOIN [PAYROLL].[simka].[REF_JENJANG] ON MST_KARYAWAN.PENDIDIKAN_TERAKHIR = REF_JENJANG.DESKRIPSI AND REF_JENJANG.ID_REF_JENJANG = MST_TARIF_PAYROLL.ID_REF_JENJANG
+                    WHERE 
+                        MONTH(TGL_AWAL_SK) = (SELECT ID_BULAN FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI] WHERE ID_BULAN_GAJI = @ID_BULAN_GAJI) 
+                        AND YEAR(TGL_AWAL_SK) = @TAHUN
+	                    AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 77 
+	                    AND TBL_BEBAN_MENGAJAR.NPP = @NPP
+
+                    UNION ALL 
+
+                    SELECT DISTINCT
+                    MST_KARYAWAN.NPP,
+                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
+                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                    TBL_VAKASI.JUMLAH, 
+                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
+                    FROM PAYROLL.simka.MST_KARYAWAN
+                    JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                    JOIN PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                    JOIN PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
+                    WHERE 
+	                    TBL_VAKASI.ID_BULAN_GAJI = @ID_BULAN_GAJI
+                        AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 78 AND 201 
+	                    AND MST_KARYAWAN.NPP = @NPP";
+
+                    // Inisialisasi parameter SQL
+                    var parameters = new
+                    {
+                        ID_BULAN_GAJI = idBulanGaji,
+                        TAHUN = tahun,
+                        NPP = npp
+                    };
+
+                    // Eksekusi query dan simpan hasilnya dalam sebuah list
+                    var komponenGajiAndJumlahSatuanData = await conn.QueryAsync<KomponenGajiAndJumlahSatuanModel>(query, parameters);
+
+                    return komponenGajiAndJumlahSatuanData.ToList();
+                }
+                catch (Exception ex)
+                {
+                    // Tangani pengecualian di sini
+                    return null;
+                }
+            }
+        }
+
+
+        public async Task<bool> InsertOrUpdateToDtlPenggajian(DetailPenggajianModel insertData)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    // Cek apakah data sudah ada
+                    string checkQuery = @"SELECT COUNT(*) FROM [PAYROLL].[payroll].[DTL_PENGGAJIAN] WHERE ID_PENGGAJIAN = @ID_PENGGAJIAN AND ID_KOMPONEN_GAJI = @ID_KOMPONEN_GAJI";
+                    int count = await conn.ExecuteScalarAsync<int>(checkQuery, new { insertData.ID_PENGGAJIAN, insertData.ID_KOMPONEN_GAJI });
+
+                    if (count > 0)
+                    {
+                        // Update data yang sudah ada
+                        string updateQuery = @"UPDATE [PAYROLL].[payroll].[DTL_PENGGAJIAN]
+                                        SET [JUMLAH_SATUAN] = @JUMLAH_SATUAN, [NOMINAL] = @NOMINAL
+                                        WHERE [ID_PENGGAJIAN] = @ID_PENGGAJIAN AND [ID_KOMPONEN_GAJI] = @ID_KOMPONEN_GAJI";
+                        await conn.ExecuteAsync(updateQuery, insertData);
+                    }
+                    else
+                    {
+                        // Insert data baru
+                        string insertQuery = @"INSERT INTO [PAYROLL].[payroll].[DTL_PENGGAJIAN]
+                                        ([ID_PENGGAJIAN],[ID_KOMPONEN_GAJI],[JUMLAH_SATUAN],[NOMINAL])
+                                        VALUES
+                                        (@ID_PENGGAJIAN,@ID_KOMPONEN_GAJI,@JUMLAH_SATUAN,@NOMINAL)";
+                        await conn.ExecuteAsync(insertQuery, insertData);
+                    }
+
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+
+        public async Task<bool> AutoHitungGaji(int idBulanGaji, string tahun)
+        {
+            try
+            {
+                var penggajianData = await GetPenggajianData(idBulanGaji); // 1. Get Data Penggajian sesuai Bulan
+
+                if (penggajianData == null) // 1.1 Kembalikan False ketika data kosong
+                {
+                    return false; 
+                }
+
+                foreach (var penggajian in penggajianData) // 2. Lakukan Iterasi untuk per ID_PENGGAJIAN
+                {
+                    var komponenGajiDataList = await GetKomponenGajiAndJumlahSatuan(idBulanGaji, tahun, penggajian.NPP); // 3. Ambil Data ID_KOMPONEN_GAJI , JUMLAH , dan TARIF
+
+                    foreach (var komponenGajiData in komponenGajiDataList) // 4. Lakukan iterasi per ID_KOMPONEN_GAJI
+                    {
+                        var tarif = komponenGajiData.TARIF;  
+                        var nominal = tarif * komponenGajiData.JUMLAH;
+
+                        var insertData = new DetailPenggajianModel
+                        {
+                            ID_PENGGAJIAN = penggajian.ID_PENGGAJIAN,
+                            ID_KOMPONEN_GAJI = komponenGajiData.ID_KOMPONEN_GAJI,
+                            JUMLAH_SATUAN = komponenGajiData.JUMLAH,
+                            NOMINAL = nominal
+                        };
+
+                        await InsertOrUpdateToDtlPenggajian(insertData);// 5. Insert Data ke DTL_PENGGAJIAN jika belum ada jika sudah Update ada
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here
+                return false;
+            }
+        }
+
+
 
 
     }

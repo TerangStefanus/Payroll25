@@ -59,11 +59,35 @@ namespace Payroll25.Controllers
             return Ok(new { success = result });
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> AutoInsertPenggajian(int idBulanGaji, string tahun)
         {
             var result = await DAO.AutoInsertPenggajian(idBulanGaji, tahun);
             return Ok(new { success = result });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AutoHitungGaji(int idBulanGaji, string tahun)
+        {
+            try
+            {
+                bool isSuccess = await DAO.AutoHitungGaji(idBulanGaji, tahun);
+
+                if (isSuccess)
+                {
+                    return Ok(new { success = true, message = "Penggajian berhasil dihitung." });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = "Penggajian gagal dihitung. Data mungkin kosong atau terjadi kesalahan lain." });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here
+                return StatusCode(500, new { message = "Terjadi kesalahan internal server.", error = ex.Message });
+            }
+        }
+
     }
 }
