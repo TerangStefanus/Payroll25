@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Payroll25.DAO;
 using Payroll25.Models;
+using Rotativa.AspNetCore;
 
 namespace Payroll25.Controllers
 {
@@ -88,6 +89,56 @@ namespace Payroll25.Controllers
                 return StatusCode(500, new { message = "Terjadi kesalahan internal server.", error = ex.Message });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> AutoCetakSlipGaji(int idBulanGaji)
+        {
+            var isAvailable = await DAO.CheckDataGaji(idBulanGaji);
+            if (!isAvailable)
+            {
+                return Json(new { success = false, message = "Data gaji tidak tersedia" });
+            }
+
+            var headers = await DAO.GetHeaderPenggajian(idBulanGaji);
+
+            foreach (var header in headers)
+            {
+                var isDetailAvailable = await DAO.CheckDetailGaji(header.ID_PENGGAJIAN);
+                if (!isDetailAvailable)
+                {
+                    continue; // atau tampilkan pesan error
+                }
+
+                var body = await DAO.GetBodyPenggajian(header.ID_PENGGAJIAN);
+
+                var model = new SlipGajiViewModel
+                {
+                    Header = header,
+                    Body = body
+                };
+
+                // Jika Anda menggunakan library seperti Rotativa
+                var pdfResult = new ViewAsPdf("SlipGaji", model)
+                {
+                    FileName = $"SlipGajiDosen_{header.NPP}.pdf"
+                };
+                return pdfResult;
+                return Json(new { success = true, message = "Gaji bisa dicetak." });
+
+
+                // Jika Anda menghasilkan PDF sebagai byte array
+                // return File(pdfByteArray, "application/pdf", $"SlipGajiDosen_{header.NPP}.pdf");
+            }
+
+            return View("Success");
+        }
+
+
+
+
+
+
+
 
     }
 }

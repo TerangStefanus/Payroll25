@@ -49,6 +49,9 @@
                     <div class="col">
                         <button id="autoDetailPenggajianBtn" class="btn btn-primary btn-block">Hitung Penggajian</button>
                     </div>
+                    <div class="col">
+                        <button id="autoCetakSlipBtn" class="btn btn-primary btn-block">Cetak Penggajian</button>
+                    </div>
                 </div>
 
             </div>
@@ -169,6 +172,40 @@
                 alert("Mohon pilih tahun dan bulan gaji.");
             }
         });
+
+        $("#autoCetakSlipBtn").click(function (event) {
+            event.preventDefault();
+            showLoadingModal();
+
+            var tahun = $("#tahunInput").val();
+            var idBulanGaji = $("#bulanGajiDropdown").val();
+
+            if (tahun && idBulanGaji) {
+                $.ajax({
+                    url: `/PenggajianDosen/AutoCetakSlipGaji?idBulanGaji=${idBulanGaji}&tahun=${tahun}`,
+                    type: 'GET',
+                    success: function (response) {
+                        hideLoadingModal();
+                        if (response.success) {
+                            alert(response.message);
+                            // Jika Anda ingin membuka PDF di tab baru
+                            window.open(`/PenggajianDosen/AutoCetakSlipGaji?idBulanGaji=${idBulanGaji}&tahun=${tahun}`, '_blank');
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        hideLoadingModal();
+                        alert("Terjadi kesalahan saat memproses data: " + textStatus);
+                    }
+                });
+            } else {
+                hideLoadingModal();
+                alert("Mohon pilih tahun dan bulan gaji.");
+            }
+        });
+
+
 
     </script>
 }

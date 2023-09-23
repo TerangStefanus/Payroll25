@@ -1,0 +1,39 @@
+﻿@model Payroll25.Models.SlipGajiViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slip Gaji</title>
+</head>
+<body>
+    <h1>Slip Gaji</h1>
+    <p>NPP: @Model.Header.NPP</p>
+    <p>Nama: @Model.Header.NAMA</p>
+    <p>Golongan: @Model.Header.GOLONGAN</p>
+    <p>Jenjang: @Model.Header.JENJANG</p>
+    <p>NPWP: @Model.Header.NPWP</p>
+    <p>No Tabungan: @Model.Header.NO_TABUNGAN</p>
+    <p>Nama Bank: @Model.Header.NAMA_BANK</p>
+    <p>Nama Rekening: @Model.Header.NAMA_REKENING</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Komponen Gaji</th>
+                <th>Jumlah Satuan</th>
+                <th>Nominal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Body)
+            {
+                <tr>
+                    <td>@item.NAMA_KOMPONEN_GAJI</td>
+                    <td>@item.JUMLAH_SATUAN</td>
+                    <td>@item.NOMINAL</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

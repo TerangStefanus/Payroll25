@@ -79,11 +79,11 @@ namespace Payroll25.DAO
                 try
                 {
                     string query = @"INSERT INTO  [PAYROLL].[payroll].[TBL_PENGGAJIAN]
-                            ([NPP],[ID_BULAN_GAJI],[NAMA],[STATUS_KEPEGAWAIAN],[MASA_KERJA_RIIL],[MASA_KERJA_GOL],[JBT_STRUKTURAL],
-                            [JBT_AKADEMIK],[JBT_FUNGSIONAL],[PANGKAT],[GOLONGAN],[JENJANG],[NO_TABUNGAN],[NPWP])
-                            VALUES
-                            (@NPP,@ID_BULAN_GAJI,@NAMA,@STATUS_KEPEGAWAIAN,@MASA_KERJA_RIIL,@MASA_KERJA_GOL,@JBT_STRUKTURAL,
-                            @JBT_AKADEMIK,@JBT_FUNGSIONAL,@PANGKAT,@GOLONGAN,@JENJANG,@NO_TABUNGAN,@NPWP)";
+                                    ([NPP],[ID_BULAN_GAJI],[NAMA],[STATUS_KEPEGAWAIAN],[MASA_KERJA_RIIL],[MASA_KERJA_GOL],[JBT_STRUKTURAL],
+                                    [JBT_AKADEMIK],[JBT_FUNGSIONAL],[PANGKAT],[GOLONGAN],[JENJANG],[NO_TABUNGAN],[NPWP])
+                                    VALUES
+                                    (@NPP,@ID_BULAN_GAJI,@NAMA,@STATUS_KEPEGAWAIAN,@MASA_KERJA_RIIL,@MASA_KERJA_GOL,@JBT_STRUKTURAL,
+                                    @JBT_AKADEMIK,@JBT_FUNGSIONAL,@PANGKAT,@GOLONGAN,@JENJANG,@NO_TABUNGAN,@NPWP)";
 
                     var result = await conn.ExecuteAsync(query, insertData);
 
@@ -424,8 +424,74 @@ namespace Payroll25.DAO
             }
         }
 
+        // Cetak Slip Gaji
 
+            public async Task<bool> CheckDataGaji(int idBulanGaji)
+            {
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    string query = "SELECT COUNT(*) FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN] WHERE ID_BULAN_GAJI = @idBulanGaji";
+                    int count = await conn.ExecuteScalarAsync<int>(query, new { idBulanGaji });
+                    return count > 0;
+                }
+            }
 
+            public async Task<IEnumerable<HeaderPenggajian>> GetHeaderPenggajian(int idBulanGaji)
+            {
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    string query = @"SELECT
+                                    [payroll].[TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                                    [payroll].[TBL_PENGGAJIAN].NPP, 
+                                    [payroll].[TBL_PENGGAJIAN].NAMA, 
+                                    [payroll].[TBL_PENGGAJIAN].GOLONGAN, 
+                                    [payroll].[TBL_PENGGAJIAN].JENJANG, 
+                                    [payroll].[TBL_PENGGAJIAN].NPWP,
+                                    [payroll].[TBL_PENGGAJIAN].NO_TABUNGAN,
+                                    [simka].[MST_REKENING].NAMA_BANK,
+                                    [simka].[MST_REKENING].NAMA_REKENING
+                                    FROM 
+                                    [payroll].[TBL_PENGGAJIAN]
+                                    JOIN 
+                                    [simka].[MST_REKENING] ON [payroll].[TBL_PENGGAJIAN].NPP = [simka].[MST_REKENING].NPP
+                                    WHERE 
+                                    [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji";
+
+                    var headers = await conn.QueryAsync<HeaderPenggajian>(query, new { idBulanGaji });
+                    return headers;
+                }
+            }
+
+            public async Task<bool> CheckDetailGaji(int idPenggajian)
+            {
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    string query = "SELECT COUNT(*) FROM [PAYROLL].[payroll].[DTL_PENGGAJIAN] WHERE ID_PENGGAJIAN = @idPenggajian";
+                    int count = await conn.ExecuteScalarAsync<int>(query, new { idPenggajian });
+                    return count > 0;
+                }
+            }
+
+            public async Task<IEnumerable<DetailPenggajianModel>> GetBodyPenggajian(int idPenggajian)
+            {
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    string query = @"SELECT 
+                                    [PAYROLL].[payroll].[DTL_PENGGAJIAN].ID_KOMPONEN_GAJI, 
+                                    [PAYROLL].[payroll].[MST_KOMPONEN_GAJI].KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                                    [PAYROLL].[payroll].[DTL_PENGGAJIAN].JUMLAH_SATUAN, 
+                                    [PAYROLL].[payroll].[DTL_PENGGAJIAN].NOMINAL 
+                                    FROM 
+                                    [PAYROLL].[payroll].[DTL_PENGGAJIAN]
+                                    JOIN 
+                                    [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON [PAYROLL].[payroll].[DTL_PENGGAJIAN].ID_KOMPONEN_GAJI = [PAYROLL].[payroll].[MST_KOMPONEN_GAJI].ID_KOMPONEN_GAJI
+                                    WHERE 
+                                    [PAYROLL].[payroll].[DTL_PENGGAJIAN].ID_PENGGAJIAN = @idPenggajian";
+
+                    var result = await conn.QueryAsync<DetailPenggajianModel>(query, new { idPenggajian });
+                    return result;
+                }
+            }
 
     }
 }
