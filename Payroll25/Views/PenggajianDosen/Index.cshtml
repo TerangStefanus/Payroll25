@@ -181,15 +181,15 @@
             var idBulanGaji = $("#bulanGajiDropdown").val();
 
             if (tahun && idBulanGaji) {
+                // Memeriksa ketersediaan data
                 $.ajax({
-                    url: `/PenggajianDosen/AutoCetakSlipGaji?idBulanGaji=${idBulanGaji}&tahun=${tahun}`,
+                    url: `/PenggajianDosen/CheckAutoCetakSlipGaji?idBulanGaji=${idBulanGaji}`,
                     type: 'GET',
                     success: function (response) {
                         hideLoadingModal();
                         if (response.success) {
-                            alert(response.message);
-                            // Jika Anda ingin membuka PDF di tab baru
-                            window.open(`/PenggajianDosen/AutoCetakSlipGaji?idBulanGaji=${idBulanGaji}&tahun=${tahun}`, '_blank');
+                            // Membuka PDF di tab baru
+                            window.open(`/PenggajianDosen/AutoCetakSlipGaji?idBulanGaji=${idBulanGaji}`, '_blank');
                         } else {
                             alert(response.message);
                         }
@@ -204,6 +204,8 @@
                 alert("Mohon pilih tahun dan bulan gaji.");
             }
         });
+
+
 
 
 

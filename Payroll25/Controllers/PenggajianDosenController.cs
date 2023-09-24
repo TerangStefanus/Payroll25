@@ -2,6 +2,7 @@
 using Payroll25.DAO;
 using Payroll25.Models;
 using Rotativa.AspNetCore;
+using System.IO.Compression;
 
 namespace Payroll25.Controllers
 {
@@ -91,47 +92,82 @@ namespace Payroll25.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AutoCetakSlipGaji(int idBulanGaji)
+        public async Task<IActionResult> CheckAutoCetakSlipGaji(int idBulanGaji)
         {
             var isAvailable = await DAO.CheckDataGaji(idBulanGaji);
             if (!isAvailable)
             {
-                return Json(new { success = false, message = "Data gaji tidak tersedia" });
+                return NotFound(new { success = false, message = "Data gaji tidak tersedia" });
             }
+            return Ok(new { success = true, message = "Data gaji tersedia" });
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> AutoCetakSlipGaji(int idBulanGaji)
+        {
             var headers = await DAO.GetHeaderPenggajian(idBulanGaji);
+            string tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            Directory.CreateDirectory(tempFolder);
 
             foreach (var header in headers)
             {
                 var isDetailAvailable = await DAO.CheckDetailGaji(header.ID_PENGGAJIAN);
                 if (!isDetailAvailable)
                 {
-                    continue; // atau tampilkan pesan error
+                    continue;
                 }
 
                 var body = await DAO.GetBodyPenggajian(header.ID_PENGGAJIAN);
 
+                decimal totalPenerimaanKotor = 0;
+                decimal totalPajak = 0;
+
+                foreach (var item in body)
+                {
+                    totalPenerimaanKotor += (decimal)item.NOMINAL.GetValueOrDefault();
+                }
+
+                totalPajak = totalPenerimaanKotor * 0.03m;  // Misalnya pajak adalah 3%
+                decimal totalPenerimaanBersih = totalPenerimaanKotor - totalPajak;
+
                 var model = new SlipGajiViewModel
                 {
                     Header = header,
-                    Body = body
+                    Body = body,
+                    TotalPenerimaanKotor = totalPenerimaanKotor,
+                    TotalPajak = totalPajak,
+                    TotalPenerimaanBersih = totalPenerimaanBersih
                 };
 
-                // Jika Anda menggunakan library seperti Rotativa
-                var pdfResult = new ViewAsPdf("SlipGaji", model)
+
+                var pdf = new ViewAsPdf("SlipGaji", model)
                 {
-                    FileName = $"SlipGajiDosen_{header.NPP}.pdf"
+                    FileName = Path.Combine(tempFolder, $"SlipGajiDosen_{header.NPP}.pdf")
                 };
-                return pdfResult;
-                return Json(new { success = true, message = "Gaji bisa dicetak." });
 
-
-                // Jika Anda menghasilkan PDF sebagai byte array
-                // return File(pdfByteArray, "application/pdf", $"SlipGajiDosen_{header.NPP}.pdf");
+                var pdfFile = await pdf.BuildFile(ControllerContext);
+                System.IO.File.WriteAllBytes(Path.Combine(tempFolder, $"SlipGajiDosen_{header.NPP}.pdf"), pdfFile);
             }
 
-            return View("Success");
+            string zipPath = Path.Combine(Path.GetTempPath(), "SlipGaji.zip");
+            ZipFile.CreateFromDirectory(tempFolder, zipPath);
+
+            Directory.Delete(tempFolder, true);
+
+            byte[] zipBytes = System.IO.File.ReadAllBytes(zipPath);
+            System.IO.File.Delete(zipPath);
+
+            if (zipBytes.Length > 0)
+            {
+                return File(zipBytes, "application/zip", "SlipGaji.zip");
+            }
+            else
+            {
+                return NotFound(new { success = false, message = "Tidak ada data yang bisa dicetak." });
+            }
         }
+
 
 
 

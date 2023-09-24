@@ -72,13 +72,18 @@
         public string NO_TABUNGAN { get; set; }
         public string NAMA_BANK { get; set; }
         public string NAMA_REKENING { get; set; }
+        public string NAMA_UNIT { get; set; }
     }
 
     public class SlipGajiViewModel
     {
         public HeaderPenggajian Header { get; set; }
         public IEnumerable<DetailPenggajianModel> Body { get; set; }
+        public decimal TotalPenerimaanKotor { get; set; }
+        public decimal TotalPajak { get; set; }
+        public decimal TotalPenerimaanBersih { get; set; }
     }
+
 
 
 }
