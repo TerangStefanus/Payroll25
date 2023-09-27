@@ -62,6 +62,9 @@ namespace Payroll25.Models
         public IdentitasAsistenModel IdentitasAsisten { get; set; }
         public List<IdentitasAsistenModel> UnitsList { get; set; }
         public List<IdentitasAsistenModel> JenisAsistenList { get; set; }
+        public string NPMFilter { get; set; }
+        public string NAMAFilter { get; set; }
+        public string UNITFilter { get; set; }
 
         [Required]
         [Display(Name = "CSV File")]

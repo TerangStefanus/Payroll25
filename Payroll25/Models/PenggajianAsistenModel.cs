@@ -1,6 +1,6 @@
 ﻿namespace Payroll25.Models
 {
-    public class PenggajianDosenModel
+    public class PenggajianAsistenModel
     {
         public int ID_PENGGAJIAN { get; set; }
         public string NPP { get; set; }
@@ -17,51 +17,58 @@
         public string? JENJANG { get; set; }
         public string NO_TABUNGAN { get; set; }
         public string NPWP { get; set; }
+        public string JENIS { get; set; }
+
     }
 
-    public class GajiKaryawanModel
+    public class AsistenDataModel
     {
-        // Karyawan
-        public string NPP { get; set; }
-        public string NAMA_LENGKAP_GELAR { get; set; }
-        public DateTime TGL_MASUK { get; set; }
-        public int? ID_UNIT { get; set; }
-        public int? MST_ID_UNIT { get; set; }
-        public string ID_REF_GOLONGAN { get; set; }
-        public string ID_REF_GOLONGAN_LOKAL { get; set; }
-        public string NPWP { get; set; }
-        public string STATUS_KEPEGAWAIAN { get; set; }
-        public int? MASA_KERJA_GOLONGAN { get; set; }
-        
-        // Rekening 
-
+        public int ID_ASISTEN { get; set; }
+        public int ID_TAHUN_AKADEMIK { get; set; }
+        public int NO_SEMESTER { get; set; }
+        public string NPM { get; set; }
+        public string NAMA_MHS { get; set; }
+        public int ID_UNIT { get; set; }
+        public string NAMA_UNIT { get; set; }
         public string NO_REKENING { get; set; }
-        public string NAMA_BANK { get; set; }
         public string NAMA_REKENING { get; set; }
-
+        public string NAMA_BANK { get; set; }
+        public string JENIS { get; set; }
     }
 
-    public class KomponenGajiAndJumlahSatuanModel
+    public class KomponenGajiMhsModel
     {
+        public int ID_BULAN_GAJI { get; set; }
         public string NPP { get; set; }
         public int ID_KOMPONEN_GAJI { get; set; }
         public string NAMA_KOMPONEN_GAJI { get; set; }
-        public int? JUMLAH { get; set; }
+        public int JUMLAH { get; set; }
         public float? TARIF { get; set; }
-        public int? ID_BULAN_GAJI { get; set; } 
-
+        public string JENIS { get; set; }
     }
 
-    public class DetailPenggajianModel
+    public class DetailPenggajianMhsModel
     {
         public int ID_PENGGAJIAN { get; set; }
         public int ID_KOMPONEN_GAJI { get; set; }
-        public string NAMA_KOMPONEN_GAJI { get; set; }  
+        public string NAMA_KOMPONEN_GAJI { get; set; }
         public float? JUMLAH_SATUAN { get; set; }
         public float? NOMINAL { get; set; }
+        public string JENIS { get; set; }
     }
 
-    public class HeaderPenggajian
+    public class KomponenGajiDictionaryModel
+    {
+        public static readonly Dictionary<string, List<int>> validKomponenGaji = new Dictionary<string, List<int>>()
+        {
+            { "Asisten Mahasiswa", new List<int> { 77, 78, 79, 80, 167, 182, 194, 197, 199 } },
+            { "Asisten Lab", new List<int> { 77,78,80,168, 200 } },
+            { "Student Staf", new List<int> { 169, 170, 201 } }
+        };
+    }
+
+
+    public class HeaderPenggajianMhs
     {
         public int ID_PENGGAJIAN { get; set; }
         public string NPP { get; set; }
@@ -73,17 +80,17 @@
         public string NAMA_BANK { get; set; }
         public string NAMA_REKENING { get; set; }
         public string NAMA_UNIT { get; set; }
+        public string JENIS { get; set; }
     }
 
-    public class SlipGajiViewModel
+    public class SlipGajiAsistenViewModel
     {
-        public HeaderPenggajian Header { get; set; }
-        public IEnumerable<DetailPenggajianModel> Body { get; set; }
+        public HeaderPenggajianMhs Header { get; set; }
+        public IEnumerable<DetailPenggajianMhsModel> Body { get; set; }
         public decimal TotalPenerimaanKotor { get; set; }
         public decimal TotalPajak { get; set; }
         public decimal TotalPenerimaanBersih { get; set; }
     }
-
 
 
 }

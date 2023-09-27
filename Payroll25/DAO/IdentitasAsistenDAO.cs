@@ -11,57 +11,91 @@ namespace Payroll25.DAO
 {
     public class IdentitasAsistenDAO
     {
-        public IEnumerable<IdentitasAsistenModel> ShowIdentitasAssisten()
+        public async Task<IEnumerable<IdentitasAsistenModel>> ShowIdentitasAssisten(string NPMFilter = null, string NAMAFilter = null, string UNITFilter = null)
         {
-            using(SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            var connectionString = DBkoneksi.payrollkoneksi;
+
+            if (string.IsNullOrEmpty(NPMFilter) && string.IsNullOrEmpty(NAMAFilter) && string.IsNullOrEmpty(UNITFilter))
+            {
+                return new List<IdentitasAsistenModel>();
+            }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
-                    var parameters = new DynamicParameters();
+                    await conn.OpenAsync();
+                    var baseQuery = @"SELECT DISTINCT
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN, 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_TAHUN_AKADEMIK, 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].NO_SEMESTER, 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].NPM,
+                                    MHS.nama_mhs AS NAMA_MHS,
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT,
+                                    [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].NO_REKENING, 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_REKENING, 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK,
+                                    REF.JENIS AS JENIS
+                                    FROM 
+                                    [PAYROLL].[siatmax].[MST_UNIT]
+                                    INNER JOIN 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN] 
+                                    ON 
+                                    [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
+                                    INNER JOIN 
+                                    [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS
+                                    ON 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
+                                    INNER JOIN 
+                                    [PAYROLL].[payroll].[REF_JENIS_ASISTEN] AS REF
+                                    ON 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = REF.ID_JENIS_ASISTEN";
 
-                    var query = @"SELECT DISTINCT
-                                [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN, 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].ID_TAHUN_AKADEMIK, 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NO_SEMESTER, 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NPM,
-                                MHS.nama_mhs AS NAMA_MHS,
-                                [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT,
-                                [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NO_REKENING, 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_REKENING, 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK,
-                                REF.JENIS AS JENIS
-                                FROM 
-                                [PAYROLL].[siatmax].[MST_UNIT]
-                                INNER JOIN 
-                                [PAYROLL].[payroll].[TBL_ASISTEN] 
-                                ON 
-                                [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
-                                INNER JOIN 
-                                [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS
-                                ON 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
-                                INNER JOIN 
-                                [PAYROLL].[payroll].[REF_JENIS_ASISTEN] AS REF
-                                ON 
-                                [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = REF.ID_JENIS_ASISTEN
-                                ORDER BY [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN DESC;";
-                                
+                    var whereClause = "";
 
-                    var data = conn.Query<IdentitasAsistenModel>(query, parameters).ToList();
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
 
-                    return data;
+                    if (!string.IsNullOrEmpty(NPMFilter))
+                    {
+                        whereClause += " AND TBL_ASISTEN.NPM = @NPMFilter";
+                        parameters.Add("@NPMFilter", NPMFilter);
+                    }
+
+                    if (!string.IsNullOrEmpty(NAMAFilter))
+                    {
+                        whereClause += " AND MHS.nama_mhs LIKE @NAMAFilter";
+                        parameters.Add("@NAMAFilter", $"%{NAMAFilter}%");
+                    }
+
+                    if (!string.IsNullOrEmpty(UNITFilter))
+                    {
+                        whereClause += " AND MST_UNIT.NAMA_UNIT = @UNITFilter";
+                        parameters.Add("@UNITFilter", UNITFilter);
+                    }
+
+                    if (!string.IsNullOrEmpty(whereClause))
+                    {
+                        baseQuery += " WHERE 1=1" + whereClause;
+                    }
+
+                    baseQuery += " ORDER BY [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN DESC;";
+
+                    return await conn.QueryAsync<IdentitasAsistenModel>(baseQuery, parameters);
                 }
-                catch (Exception)
+                catch (SqlException sqlEx)
                 {
-                    return null;
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    throw;
                 }
-                finally
+                catch (Exception ex)
                 {
-                    conn.Close();
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
                 }
             }
         }
+
 
         public IdentitasAsistenModel GetDetails(string npm)
         {

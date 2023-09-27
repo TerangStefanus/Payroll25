@@ -6,7 +6,6 @@ namespace Payroll25.DAO
 {
     public class PenggajianDosenDAO
     {
-
         public async Task<List<GajiKaryawanModel>> GetKaryawanData()
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -394,7 +393,7 @@ namespace Payroll25.DAO
                     return false; 
                 }
 
-                foreach (var penggajian in penggajianData) // 2. Lakukan Iterasi untuk per ID_PENGGAJIAN
+                foreach (var penggajian in penggajianData) // 2. Lakukan Iterasi untuk per npp
                 {
                     var komponenGajiDataList = await GetKomponenGajiAndJumlahSatuan(idBulanGaji, tahun, penggajian.NPP); // 3. Ambil Data ID_KOMPONEN_GAJI , JUMLAH , dan TARIF
 
@@ -460,16 +459,16 @@ namespace Payroll25.DAO
                                 [simka].[MST_REKENING].NAMA_BANK,
                                 [simka].[MST_REKENING].NAMA_REKENING,
                                 [siatmax].[MST_UNIT].NAMA_UNIT
-                            FROM 
-                                [payroll].[TBL_PENGGAJIAN]
-                            JOIN 
-                                [simka].[MST_REKENING] ON [payroll].[TBL_PENGGAJIAN].NPP = [simka].[MST_REKENING].NPP
-                            JOIN 
-                                [simka].[MST_KARYAWAN] ON [payroll].[TBL_PENGGAJIAN].NPP = [simka].[MST_KARYAWAN].NPP
-                            JOIN 
-                                [siatmax].[MST_UNIT] ON [simka].[MST_KARYAWAN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
-                            WHERE 
-                                [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji";
+                                FROM 
+                                    [payroll].[TBL_PENGGAJIAN]
+                                JOIN 
+                                    [simka].[MST_REKENING] ON [payroll].[TBL_PENGGAJIAN].NPP = [simka].[MST_REKENING].NPP
+                                JOIN 
+                                    [simka].[MST_KARYAWAN] ON [payroll].[TBL_PENGGAJIAN].NPP = [simka].[MST_KARYAWAN].NPP
+                                JOIN 
+                                    [siatmax].[MST_UNIT] ON [simka].[MST_KARYAWAN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
+                                WHERE 
+                                    [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji";
 
                 var headers = await conn.QueryAsync<HeaderPenggajian>(query, new { idBulanGaji });
                 return headers;

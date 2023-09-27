@@ -22,17 +22,30 @@ namespace Payroll25.Controllers
         }
 
         // GET: IdentitasAsisten
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string NPMFilter = null, string NAMAFilter = null, string UNITFilter = null)
         {
-            var viewModel = new IndexViewModel
+            try
             {
-                IdentitasAsistenList = DAO.ShowIdentitasAssisten(),
-                IdentitasAsisten = new IdentitasAsistenModel(),
-                UnitsList = (List<IdentitasAsistenModel>)DAO.GetUnit(),
-                JenisAsistenList = (List<IdentitasAsistenModel>)DAO.GetJenisAsisten()
-            };
+                var identitasAsistenList = await DAO.ShowIdentitasAssisten(NPMFilter, NAMAFilter, UNITFilter) ?? new List<IdentitasAsistenModel>();
 
-            return View(viewModel);
+                var viewModel = new IndexViewModel
+                {
+                    IdentitasAsistenList = identitasAsistenList,
+                    IdentitasAsisten = new IdentitasAsistenModel(),
+                    UnitsList = (List<IdentitasAsistenModel>)DAO.GetUnit(),
+                    JenisAsistenList = (List<IdentitasAsistenModel>)DAO.GetJenisAsisten(),
+                    NPMFilter = NPMFilter,
+                    NAMAFilter = NAMAFilter,
+                    UNITFilter = UNITFilter
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Terjadi kesalahan saat mengambil data : {ex.Message}");
+            }
+
         }
 
 
@@ -140,7 +153,7 @@ namespace Payroll25.Controllers
                 return BadRequest("Data tidak valid. Mohon isi formulir dengan benar.");
             }
 
-            viewModel.IdentitasAsistenList = DAO.ShowIdentitasAssisten();
+            //viewModel.IdentitasAsistenList = DAO.ShowIdentitasAssisten();
             return View("Index", viewModel);
         }
 

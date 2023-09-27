@@ -254,10 +254,10 @@
             var tahun = $("#tahunInput").val();
             $.get("/BebanMengajarAsisten/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
                 console.log("Data yang diterima dari server:", data); // Menampilkan data yang diterima di konsol
-                var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                var options = "<option value=''>Pilih Bulan </option>";
                 var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                 for (var i = 0; i < data.length; i++) {
-                    options += "<option value='" + data[i].id_bulan + "'>" + data[i].id_bulan + " - " + namaBulan[i] + "</option>";
+                    options += `<option value='${data[i].id_bulan}'>${namaBulan[i]}</option>`;
                 }
                 $("#bulanGajiDropdown").html(options);
             }).done(function () {

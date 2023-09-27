@@ -28,5 +28,7 @@
             public string NPMFilter { get; set; }
             public string NAMAFilter { get; set; }
         }
+
+
     }
 }

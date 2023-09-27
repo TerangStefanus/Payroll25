@@ -1,0 +1,324 @@
+﻿@model Payroll25.Models.SlipGajiAsistenViewModel
+
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Daftar Karyawan</title>
+    <style>
+        .font-univ {
+            font-family: 'Eras UAJY';
+        }
+
+        .header {
+            text-align: left;
+            font-family: Cambria;
+            border-bottom: double;
+            font-size: 20px;
+        }
+
+        .header-data {
+            text-align: left;
+            font-family: Cambria;
+            border-bottom: double;
+            font-size: 14px;
+        }
+
+        .header-cetak {
+            text-align: center;
+            font-family: Cambria;
+            border-bottom: double;
+        }
+
+        .body-sertif {
+            text-align: center;
+        }
+
+        .p-keterangan {
+            font-family: 'Segoe Print';
+            font-size: 24px;
+        }
+
+        .p-nama {
+            font-size: 40px;
+            /*font-weight: bold;*/
+            font-family: 'Tahoma';
+        }
+
+        .p-ttd {
+            font-family: 'Segoe Print';
+            font-size: 26px;
+        }
+
+        .divlogo {
+            /*display: inline-block;
+                                    vertical-align: top;
+                                    height: 120px;*/
+        }
+
+        .divhead {
+            text-align: center;
+            padding-top: 125px;
+        }
+
+        .divttd {
+            margin-top: 50px;
+        }
+
+        .classbody {
+            /*background-color: burlywood;*/
+        }
+
+        .divbody {
+            /* padding-top: 100px;
+                                    padding-bottom: 115px;
+                                    margin-left: 135px;
+                                    margin-right: 135px;*/
+        }
+
+        .imgttd {
+            height: 100px;
+            float: left;
+        }
+
+        .table-logo {
+            width: 100%;
+        }
+
+        .tdlogo1 {
+            width: 50%;
+        }
+
+        .tdlogo2 {
+            width: 50%;
+        }
+
+        .imglogo {
+            height: 250px;
+        }
+
+        .div-qr {
+        }
+
+        .imgqrcode {
+            height: 100px;
+            float: left;
+        }
+
+        .pcode {
+            font-family: 'Tahoma';
+            padding-top: 5px;
+            font-size: 20px;
+            padding-right: 5px;
+            float: right;
+        }
+
+        .p-judul {
+            font-size: 26px;
+            font-family: 'Tahoma';
+        }
+
+        .p-tanggal {
+            font-family: 'Segoe Print';
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .p {
+            font-family: 'Tahoma';
+            font-size: 20px;
+        }
+
+        th, td, table {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        tbody.noBorder th, tbody.noBorder td {
+            border: 0;
+        }
+
+        .underline {
+            width: 20%;
+            height: 20%;
+            border-top: 1px solid black;
+        }
+
+        table thead .firstLine td {
+            border-bottom: 1px solid #000;
+        }
+
+        hr {
+            border-bottom: 0px;
+            border: none;
+            height: 1px;
+            width: 130px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            color: #000;
+            background-color: #000;
+            text-align: right;
+            margin-right: 0;
+        }
+    </style>
+</head>
+
+<body class="classbody">
+    <div class="header">
+        <table style="width:80%; border:none">
+            <tbody class="noBorder">
+                <tr>
+                    <td rowspan="3" style="text-align: center;width:20%"><img src="/Assets/dist/img/uajy.png" alt="" height=100 width=80 /></td>
+                    <td style="height:30px;"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="font-size: 24px;width:40%">Rincian Honorarium</td>
+                    <td>Bulan</td>
+                    <td style="width:50%">
+                        : @DateTime.Now.ToString("MMMM yyyy")
+                    </td>
+                </tr>
+                <tr>
+                    <td style="height:50px">
+                        : @DateTime.Now.ToString("dd MMMM yyyy")
+                    </td>
+                    <td>Unit</td>
+                    <td style="font-size: 17px;">: @Model.Header.NAMA_UNIT</td>
+                </tr>
+
+            </tbody>
+        </table>
+
+
+    </div>
+    <div class="header-data">
+        <table style="width:100%; border:none">
+            <tbody class="noBorder">
+                <tr>
+                    <td style="width:140px">NPP</td>
+                    <td style="width:200px">: @Model.Header.NPP </td>
+                    <td style="width:140px">Nomor Tabungan</td>
+                    <td style="width:200px">: @Model.Header.NO_TABUNGAN </td>
+                </tr>
+                <tr>
+                    <td>Nama</td>
+                    <td>: @Model.Header.NAMA</td>
+                    <td>Nomor Tabungan</td>
+                    <td>: @Model.Header.NAMA_REKENING</td>
+                </tr>
+                <tr>
+                    <td>Golongan</td>
+                    <td>: @Model.Header.GOLONGAN</td>
+                    <td>Bank</td>
+                    <td>: @Model.Header.NAMA_BANK</td>
+                </tr>
+                <tr>
+                    <td>Jenjang</td>
+                    <td>: @Model.Header.JENJANG</td>
+                    <td>NPWP</td>
+                    <td>: @Model.Header.NPWP</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="divbody">
+        <table style="width:100%; border:none;margin-bottom:15px;margin-top:20px">
+            <tbody class="noBorder">
+                <tr>
+                    <th colspan="3" style="text-align:left;">KOMPONEN GAJI</th>
+                </tr>
+                @foreach (var item in Model.Body)
+                {
+                    <tr>
+                        <td style="width:10%"></td>
+                        <td style="text-align:left;width:40%">@item.NAMA_KOMPONEN_GAJI</td>
+                        <td style="width:100px">@item.JUMLAH_SATUAN</td>
+                        <td style="text-align:right;width:20%">@item.NOMINAL</td>
+                    </tr>
+                }
+                <tr style="height: 30px;">
+                    <td colspan="4"></td>
+                </tr>
+                <!-- Garis pemisah -->
+                <tr>
+                    <td colspan="4" style="border-top: 2px solid black;"></td>
+                </tr>
+                <!-- Menambahkan jarak lagi -->
+                <tr style="height: 30px;">
+                    <td colspan="4"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align:right;">Penerimaan Kotor:</td>
+                    <td style="text-align:right;">Rp @Model.TotalPenerimaanKotor.ToString("N0")</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align:right;">Pajak (3%):</td>
+                    <td style="text-align:right;">Rp @Model.TotalPajak.ToString("N0")</td>
+                </tr>
+                <!-- Menambahkan spasi -->
+                <tr style="height: 20px;">
+                    <td colspan="4"></td>
+                </tr>
+                <tr style="height: 20px;">
+                    <td colspan="4"></td>
+                </tr>
+                <!-- Menambahkan garis horizontal -->
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td colspan="2" style="text-align:right;">
+                        <span style="border-top: 2px solid black; display: inline-block;">
+                            <span>Penerimaan Bersih :</span>
+                            <span style="margin-left: 35px;">Rp @Model.TotalPenerimaanBersih.ToString("N0")</span>
+                        </span>
+                    </td>
+                </tr>
+
+                <tr style="height: 50px;">
+                    <td colspan="4"></td>
+                </tr>
+
+                <tr style="height: 50px;">
+                    <td colspan="4"></td>
+                </tr>
+
+                <tr>
+                    <td colspan="3"></td>
+                    <td style="text-align:right; white-space: nowrap;">Kantor Sumber Daya Manusia</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td style="text-align:right;">Kepala,</td>
+                </tr>
+
+                <tr style="height: 20px;">
+                    <td colspan="4"></td>
+                </tr>
+
+                <tr>
+                    <td colspan="3"></td>
+                    <td style="text-align:right;">(.............................)</td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td style="text-align:right;">Nama Kepala KSDM</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+</body>
+</html>
