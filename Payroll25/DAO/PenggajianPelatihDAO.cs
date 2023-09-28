@@ -1,11 +1,11 @@
 ﻿using Dapper;
 using Payroll25.Models;
 using System.Data.SqlClient;
-using System.Drawing;
+using static Payroll25.Models.PenggajianPelatihModel;
 
 namespace Payroll25.DAO
 {
-    public class PenggajianAsistenDAO
+    public class PenggajianPelatihDAO
     {
         public async Task<IEnumerable<PenggajianModel>> GetBulanGaji(int tahun = 0)
         {
@@ -60,30 +60,7 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<List<string>> GetJenis()
-        {
-            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-            {
-                try
-                {
-                    await conn.OpenAsync();
-                    const string query = @"SELECT [JENIS] FROM [PAYROLL].[payroll].[REF_JENIS_ASISTEN]";
-                    var result = await conn.QueryAsync<string>(query);
-                    return result.ToList();
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
-                finally
-                {
-                    conn.Close();
-                }
-            }
-        }
-
-
-        public async Task<List<AsistenDataModel>> GetAsistenData(string unit, string jenis)
+        public async Task<List<PelatihDataModel>> GetPelatihData(string unit = null)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -91,29 +68,29 @@ namespace Payroll25.DAO
                 {
                     await conn.OpenAsync();
 
-                    const string query = @"SELECT DISTINCT
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN, 
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_TAHUN_AKADEMIK, 
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].NO_SEMESTER, 
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].NPM,
-                                    MHS.nama_mhs AS NAMA_MHS,
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT,
-                                    [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].NO_REKENING, 
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_REKENING, 
-                                    [PAYROLL].[payroll].[TBL_ASISTEN].NAMA_BANK,
-                                    REF.JENIS AS JENIS
-                                    FROM 
-                                    [PAYROLL].[siatmax].[MST_UNIT]
-                                    INNER JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT = [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT
-                                    INNER JOIN [PAYROLL].[dbo].[mst_mhs_aktif] AS MHS ON [PAYROLL].[payroll].[TBL_ASISTEN].NPM = MHS.npm
-                                    INNER JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] AS REF ON [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = REF.ID_JENIS_ASISTEN
-                                    WHERE MST_UNIT.NAMA_UNIT = @Unit AND REF.JENIS = @Jenis
-                                    ORDER BY [PAYROLL].[payroll].[TBL_ASISTEN].ID_ASISTEN DESC;";
+                    string query = @"SELECT DISTINCT
+                            [ID_PELATIH],
+                            [TBL_PELATIH].[NPP],
+                            [NAMA],
+                            [ID_TAHUN_AKADEMIK],
+                            [NO_SEMESTER],
+                            [TBL_PELATIH].[ID_UNIT],
+                            [NO_REKENING],
+                            [NAMA_REKENING],
+                            [NAMA_BANK]
+                            FROM [PAYROLL].[payroll].[TBL_PELATIH]
+                            JOIN [PAYROLL].[siatmax].[MST_UNIT] ON [MST_UNIT].ID_UNIT = [TBL_PELATIH].ID_UNIT";
 
-                    var parameters = new { Unit = unit, Jenis = jenis };
+                    if (!string.IsNullOrEmpty(unit))
+                    {
+                        query += " WHERE MST_UNIT.NAMA_UNIT = @Unit";
+                    }
 
-                    var result = await conn.QueryAsync<AsistenDataModel>(query, parameters);
+                    query += " ORDER BY [TBL_PELATIH].ID_PELATIH DESC";
+
+                    var parameters = new { Unit = unit };
+
+                    var result = await conn.QueryAsync<PelatihDataModel>(query, parameters);
 
                     return result.ToList();
                 }
@@ -154,7 +131,7 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<bool> InsertToTblPenggajianMhs(PenggajianAsistenModel insertData)
+        public async Task<bool> InsertToTblPenggajianPelatih(PenggajianPelatihModel insertData)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -182,36 +159,22 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<bool> AutoInsertPenggajianAsisten(int idBulanGaji, string tahun, string unit, string jenis)
+        public async Task<bool> AutoInsertPenggajianPelatih(int idBulanGaji, string tahun, string unit)
         {
             try
             {
-                var asistenData = await GetAsistenData(unit, jenis); // 1. Get Data Asisten
+                var pelatihData = await GetPelatihData(unit); // 1. Get Data Pelatih
 
-                foreach (var asisten in asistenData) // 2. Lakukan secara iterasi berdasarkan NPM asisten
+                foreach (var pelatih in pelatihData) // 2. Lakukan secara iterasi berdasarkan NPP Pelatih
                 {
-                    if (!await IsDataExist(asisten.NPM, idBulanGaji)) // 3. Cek Apakah data Penggajian dengan ID_BULAN_GAJI dan ( NPP = NPM ) sudah ada 
+                    if (!await IsDataExist(pelatih.NPP, idBulanGaji)) // 3. Cek Apakah data Penggajian dengan ID_BULAN_GAJI dan NPP sudah ada 
                     {
 
-                        string jenjang;
-                        if (jenis == "Student Staf")
+                        var insertData = new PenggajianPelatihModel
                         {
-                            jenjang = null;
-                        }
-                        else if (jenis == "Asisten Mahasiswa" || jenis == "Asisten Lab")
-                        {
-                            jenjang = "S0";
-                        }
-                        else
-                        {
-                            jenjang = null;
-                        }
-
-                        var insertData = new PenggajianAsistenModel
-                        {
-                            NPP = asisten.NPM,
+                            NPP = pelatih.NPP,
                             ID_BULAN_GAJI = idBulanGaji,
-                            NAMA = asisten.NAMA_MHS,
+                            NAMA = pelatih.NAMA,
                             STATUS_KEPEGAWAIAN = "Kontrak",
                             MASA_KERJA_RIIL = "0",
                             MASA_KERJA_GOL = "0",
@@ -220,12 +183,12 @@ namespace Payroll25.DAO
                             JBT_FUNGSIONAL = "-",
                             PANGKAT = null,
                             GOLONGAN = "II/A",
-                            JENJANG = jenjang, // Gunakan variabel jenjang yang sudah ditentukan
-                            NO_TABUNGAN = asisten.NO_REKENING,
+                            JENJANG = null, // Gunakan variabel jenjang yang sudah ditentukan
+                            NO_TABUNGAN = pelatih.NO_REKENING,
                             NPWP = null
                         };
 
-                        await InsertToTblPenggajianMhs(insertData); // 4. Insert Data ke TBL_PENGGAJIAN 
+                        await InsertToTblPenggajianPelatih(insertData); // 4. Insert Data ke TBL_PENGGAJIAN 
                     }
                 }
 
@@ -237,10 +200,9 @@ namespace Payroll25.DAO
             }
         }
 
+        // Auto Hitung Gaji 
 
-        // Auto Hitung Gaji Asisten / Mahasiswa
-
-        public async Task<IEnumerable<PenggajianAsistenModel>> GetPenggajianDataMhs(int idBulanGaji, string unit, string jenis)
+        public async Task<IEnumerable<PenggajianPelatihModel>> GetPenggajianDataPelatih(int idBulanGaji, string unit = null)
         {
             try
             {
@@ -249,28 +211,31 @@ namespace Payroll25.DAO
                     await conn.OpenAsync();
 
                     var query = @"SELECT 
-                                [ID_PENGGAJIAN], 
-                                [payroll].[TBL_PENGGAJIAN].[NPP], 
-                                [ID_BULAN_GAJI], 
-                                [NAMA], 
-                                [STATUS_KEPEGAWAIAN], 
-                                [PANGKAT], 
-                                [GOLONGAN], 
-                                [JENJANG], 
-                                [NO_TABUNGAN], 
-                                [NPWP], 
-                                [REF_JENIS_ASISTEN].JENIS
-                                FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
-                                JOIN [PAYROLL].[payroll].[TBL_ASISTEN] 
-                                    ON [TBL_PENGGAJIAN].NPP = [TBL_ASISTEN].NPM
-                                JOIN [PAYROLL].[siatmax].[MST_UNIT] 
-                                    ON [TBL_ASISTEN].ID_UNIT = [MST_UNIT].ID_UNIT
-                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] 
-                                    ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
-                                WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji AND [MST_UNIT].NAMA_UNIT = @Unit AND [REF_JENIS_ASISTEN].JENIS = @Jenis
-                                ORDER BY [TBL_PENGGAJIAN].ID_PENGGAJIAN DESC";
+                        [ID_PENGGAJIAN], 
+                        [payroll].[TBL_PENGGAJIAN].[NPP], 
+                        [ID_BULAN_GAJI], 
+                        [TBL_PENGGAJIAN].[NAMA], 
+                        [STATUS_KEPEGAWAIAN], 
+                        [PANGKAT], 
+                        [GOLONGAN], 
+                        [JENJANG], 
+                        [NO_TABUNGAN], 
+                        [NPWP]
+                        FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
+                        JOIN [PAYROLL].[payroll].[TBL_PELATIH] ON [TBL_PENGGAJIAN].NPP = [TBL_PELATIH].NPP
+                        JOIN [PAYROLL].[siatmax].[MST_UNIT] ON [MST_UNIT].ID_UNIT = [TBL_PELATIH].ID_UNIT
+                        WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji";
 
-                    var result = await conn.QueryAsync<PenggajianAsistenModel>(query, new { IdBulanGaji = idBulanGaji, Unit = unit, Jenis = jenis });
+                    if (!string.IsNullOrEmpty(unit))
+                    {
+                        query += " AND [MST_UNIT].NAMA_UNIT = @Unit";
+                    }
+
+                    query += " ORDER BY [TBL_PENGGAJIAN].ID_PENGGAJIAN DESC";
+
+                    var parameters = new { IdBulanGaji = idBulanGaji, Unit = unit };
+
+                    var result = await conn.QueryAsync<PenggajianPelatihModel>(query, parameters);
 
                     return result.ToList();
                 }
@@ -282,7 +247,8 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<IEnumerable<KomponenGajiMhsModel>> GetKomponenGajiMhs(int idBulanGaji, string NPP)
+
+        public async Task<IEnumerable<KomponenGajiPelatihModel>> GetKomponenGajiMhs(int idBulanGaji, string NPP)
         {
             try
             {
@@ -290,40 +256,21 @@ namespace Payroll25.DAO
                 {
                     await conn.OpenAsync();
 
-                    var query = @"SELECT * FROM (
-                                  SELECT TOP 1
-                                  [ID_BULAN_GAJI],
-                                  [NPP],
-                                  [TBL_VAKASI].[ID_KOMPONEN_GAJI],
-                                  [MST_KOMPONEN_GAJI].[KOMPONEN_GAJI] AS NAMA_KOMPONEN_GAJI,
-                                  [JUMLAH],
-                                  [MST_TARIF_PAYROLL].[NOMINAL] AS TARIF
-                                  FROM [PAYROLL].[payroll].[TBL_VAKASI]
-                                  JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON [TBL_VAKASI].[ID_KOMPONEN_GAJI] = [MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI]
-                                  JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON [MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI] = [MST_TARIF_PAYROLL].[ID_KOMPONEN_GAJI]
-                                  WHERE [TBL_VAKASI].[ID_BULAN_GAJI] = @IdBulanGaji 
-                                  AND [TBL_VAKASI].[NPP] = @NPP
-                                  AND [TBL_VAKASI].[ID_KOMPONEN_GAJI] = 77
-                                  ORDER BY [MST_TARIF_PAYROLL].[NOMINAL] DESC ) AS A
+                    var query = @"SELECT
+                                [ID_BULAN_GAJI],
+                                [NPP],
+                                [TBL_VAKASI].[ID_KOMPONEN_GAJI],
+                                [MST_KOMPONEN_GAJI].[KOMPONEN_GAJI] AS NAMA_KOMPONEN_GAJI,
+                                [JUMLAH],
+                                [MST_TARIF_PAYROLL].[NOMINAL] AS TARIF
+                                FROM [PAYROLL].[payroll].[TBL_VAKASI]
+                                JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON [TBL_VAKASI].[ID_KOMPONEN_GAJI] = [MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI]
+                                JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON [MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI] = [MST_TARIF_PAYROLL].[ID_KOMPONEN_GAJI]
+                                WHERE [TBL_VAKASI].[ID_BULAN_GAJI] = @IdBulanGaji 
+                                AND [TBL_VAKASI].[NPP] = @NPP
+                                AND [TBL_VAKASI].[ID_KOMPONEN_GAJI] BETWEEN 78 AND 201";
 
-                                  UNION ALL
-
-                                  SELECT * FROM (
-                                  SELECT
-                                  [ID_BULAN_GAJI],
-                                  [NPP],
-                                  [TBL_VAKASI].[ID_KOMPONEN_GAJI],
-                                  [MST_KOMPONEN_GAJI].[KOMPONEN_GAJI] AS NAMA_KOMPONEN_GAJI,
-                                  [JUMLAH],
-                                  [MST_TARIF_PAYROLL].[NOMINAL] AS TARIF
-                                  FROM [PAYROLL].[payroll].[TBL_VAKASI]
-                                  JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON [TBL_VAKASI].[ID_KOMPONEN_GAJI] = [MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI]
-                                  JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON [MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI] = [MST_TARIF_PAYROLL].[ID_KOMPONEN_GAJI]
-                                  WHERE [TBL_VAKASI].[ID_BULAN_GAJI] = @IdBulanGaji 
-                                  AND [TBL_VAKASI].[NPP] = @NPP
-                                  AND [TBL_VAKASI].[ID_KOMPONEN_GAJI] BETWEEN 78 AND 201) AS B";
-
-                    var result = await conn.QueryAsync<KomponenGajiMhsModel>(query, new { IdBulanGaji = idBulanGaji, NPP = NPP });
+                    var result = await conn.QueryAsync<KomponenGajiPelatihModel>(query, new { IdBulanGaji = idBulanGaji, NPP = NPP });
 
                     return result.ToList();
                 }
@@ -335,8 +282,7 @@ namespace Payroll25.DAO
             }
         }
 
-
-        public async Task<bool> InsertOrUpdateToDtlPenggajianMhs(DetailPenggajianMhsModel insertData)
+        public async Task<bool> InsertOrUpdateToDtlPenggajianPelatih(DetailPenggajianPelatihModel insertData)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -377,19 +323,17 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<bool> AutoHitungGajiAsisten(int idBulanGaji, string tahun, string unit, string jenis)
+
+        public async Task<bool> AutoHitungGajiPelatih(int idBulanGaji, string tahun, string unit)
         {
             try
             {
-                var penggajianData = await GetPenggajianDataMhs(idBulanGaji, unit, jenis); // 1. Get Data Penggajian sesuai Bulan, Tahun, Unit, dan Jenis Asisten
+                var penggajianData = await GetPenggajianDataPelatih(idBulanGaji, unit); // 1. Get Data Penggajian sesuai Bulan, Tahun, Unit, dan Jenis Asisten
 
                 if (penggajianData == null) // Jika data kosong, kembalikan false
                 {
                     return false;
                 }
-
-                // Ambil daftar komponen gaji yang valid berdasarkan jenis asisten
-                var validKomponenIds = KomponenGajiDictionaryModel.validKomponenGaji[jenis];
 
                 foreach (var penggajian in penggajianData) // 2. Iterasi untuk setiap NPP
                 {
@@ -397,16 +341,11 @@ namespace Payroll25.DAO
 
                     foreach (var komponenGajiData in komponenGajiDataList) // 4. Iterasi untuk setiap ID_KOMPONEN_GAJI
                     {
-                        // Jika komponen gaji tidak valid untuk jenis asisten ini, lewati iterasi ini
-                        if (!validKomponenIds.Contains(komponenGajiData.ID_KOMPONEN_GAJI))
-                        {
-                            continue;
-                        }
-
+                        
                         var tarif = komponenGajiData.TARIF;
                         var nominal = tarif * komponenGajiData.JUMLAH;
 
-                        var insertData = new DetailPenggajianMhsModel
+                        var insertData = new DetailPenggajianPelatihModel
                         {
                             ID_PENGGAJIAN = penggajian.ID_PENGGAJIAN,
                             ID_KOMPONEN_GAJI = komponenGajiData.ID_KOMPONEN_GAJI,
@@ -414,7 +353,7 @@ namespace Payroll25.DAO
                             NOMINAL = nominal
                         };
 
-                        await InsertOrUpdateToDtlPenggajianMhs(insertData); // 5. Insert atau Update ke DTL_PENGGAJIAN
+                        await InsertOrUpdateToDtlPenggajianPelatih(insertData); // 5. Insert atau Update ke DTL_PENGGAJIAN
                     }
                 }
 
@@ -427,9 +366,10 @@ namespace Payroll25.DAO
             }
         }
 
-        // Cetak Slip Gaji 
 
-        public async Task<bool> CheckDataGajiMhs(int idBulanGaji)
+        // Cetak Slip Gaji
+
+        public async Task<bool> CheckDataGajiPelatih(int idBulanGaji)
         {
             try
             {
@@ -447,7 +387,7 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<IEnumerable<HeaderPenggajianMhs>> GetHeaderPenggajianAsisten(int idBulanGaji, string unit, string jenis)
+        public async Task<IEnumerable<HeaderPenggajianPelatih>> GetHeaderPenggajianPelatih(int idBulanGaji, string unit = null)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -459,24 +399,25 @@ namespace Payroll25.DAO
                                 [TBL_PENGGAJIAN].JENJANG, 
                                 [TBL_PENGGAJIAN].NPWP,
                                 [TBL_PENGGAJIAN].NO_TABUNGAN,
-                                [TBL_ASISTEN].NAMA_BANK,
-                                [TBL_ASISTEN].NAMA_REKENING,
-                                [siatmax].[MST_UNIT].NAMA_UNIT,
-                                [REF_JENIS_ASISTEN].JENIS
+                                [TBL_PELATIH].NAMA_BANK,
+                                [TBL_PELATIH].NAMA_REKENING,
+                                [siatmax].[MST_UNIT].NAMA_UNIT
                                 FROM [payroll].[TBL_PENGGAJIAN]
-                                JOIN [payroll].[TBL_ASISTEN] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_ASISTEN].NPM
-                                JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_ASISTEN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
-                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
-                                WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
-                                AND [MST_UNIT].NAMA_UNIT = @Unit 
-                                AND [REF_JENIS_ASISTEN].JENIS = @Jenis";
+                                JOIN [payroll].[TBL_PELATIH] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_PELATIH].NPP
+                                JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_PELATIH].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
+                                WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji";
 
-                var headers = await conn.QueryAsync<HeaderPenggajianMhs>(query, new { IdBulanGaji = idBulanGaji, Unit = unit, Jenis = jenis });
+                if (!string.IsNullOrEmpty(unit))
+                {
+                    query += " AND [MST_UNIT].NAMA_UNIT = @Unit";
+                }
+
+                var headers = await conn.QueryAsync<HeaderPenggajianPelatih>(query, new { IdBulanGaji = idBulanGaji, Unit = unit });
                 return headers;
             }
         }
 
-        public async Task<bool> CheckDetailGajiAsisten(int idPenggajian)
+        public async Task<bool> CheckDetailGajiPelatih(int idPenggajian)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -486,7 +427,7 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<IEnumerable<DetailPenggajianMhsModel>> GetBodyPenggajianAsisten(int idPenggajian)
+        public async Task<IEnumerable<DetailPenggajianPelatihModel>> GetBodyPenggajianPelatih(int idPenggajian)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
@@ -502,10 +443,14 @@ namespace Payroll25.DAO
                                 WHERE 
                                 [PAYROLL].[payroll].[DTL_PENGGAJIAN].ID_PENGGAJIAN = @idPenggajian";
 
-                var result = await conn.QueryAsync<DetailPenggajianMhsModel>(query, new { idPenggajian });
+                var result = await conn.QueryAsync<DetailPenggajianPelatihModel>(query, new { idPenggajian });
                 return result;
             }
         }
+
+
+
+
 
     }
 }
