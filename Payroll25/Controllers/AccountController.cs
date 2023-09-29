@@ -64,6 +64,13 @@ namespace Payroll25.Controllers
             }
             else if(dataMHS != null)
             {
+                bool isAsisten = DAO.CheckAsisten(username);
+                if (!isAsisten)
+                {
+                    TempData["error"] = "NPM bukan Student Staff / Asisten";
+                    return RedirectToAction("Login");
+                }
+
                 //Data dicek masuk
                 var hashpass = _encPassMhs(password);// password di enkripsi menggunakan RIPEMD160
                 if (hashpass == dataMHS.PASSWORD)
@@ -80,7 +87,6 @@ namespace Payroll25.Controllers
                                new Claim("alamat",dataMHS.ALAMAT),
                                new Claim("role", dataMHS.ROLE),
 
-                               //new Claim("menu", GenerateMenu(data.deskripsi))
                     }, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     HttpContext.SignInAsync(
@@ -90,7 +96,7 @@ namespace Payroll25.Controllers
             }
             else
             {
-                TempData["error"] = "Data Mahasiswa tidak ditemukan";
+                TempData["error"] = "Data Karyawan Tidak tetap tidak ditemukan";
             }
 
             if(data != null) 

@@ -1,8 +1,8 @@
-﻿@{
+﻿@* @{
     var menu = User.Claims
         .Where(c => c.Type == "menu")
             .Select(c => c.Value).SingleOrDefault();
-}
+} *@
 
 <!DOCTYPE html>
 <html lang="en">

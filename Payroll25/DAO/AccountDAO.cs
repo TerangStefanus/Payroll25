@@ -101,10 +101,31 @@ namespace Payroll25.DAO
             }
         }
 
-        //public getMahasiswaAssisten
+        public bool CheckAsisten(string npm)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    string query = @"SELECT COUNT(*) 
+                             FROM [PAYROLL].[payroll].[TBL_ASISTEN]
+                             WHERE NPM = @npm";
 
-        //ambil dari DB SIATMA_UAJY ( Semua mahasiswa )
-        //filter nama - npm kemudian dari prodi/fakultas
+                    var param = new { npm = npm };
+                    var count = conn.ExecuteScalar<int>(query, param);
+
+                    return count > 0;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
 
         public MhsModel GetMahasiswa(string npm)
         {
