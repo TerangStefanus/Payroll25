@@ -96,7 +96,7 @@ namespace Payroll25.Controllers
             }
             else
             {
-                TempData["error"] = "Data Karyawan Tidak tetap tidak ditemukan";
+                TempData["error"] = "Data Karyawan Non Tetap tidak ditemukan";
             }
 
             if(data != null) 

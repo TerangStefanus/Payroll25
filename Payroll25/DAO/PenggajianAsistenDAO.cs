@@ -129,17 +129,31 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<bool> IsDataExist(string npp, int idBulanGaji)
+        public async Task<bool> IsDataExist(string npp, int idBulanGaji , string unit, string jenis)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
                 try
                 {
-                    string query = @"SELECT COUNT(*) 
-                                    FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN] 
-                                    WHERE NPP = @NPP AND ID_BULAN_GAJI = @ID_BULAN_GAJI";
+                    string query = @" DECLARE @InputJenisAsisten NVARCHAR(50)
+                                    SET @InputJenisAsisten = @JenisAsisten
 
-                    var count = await conn.ExecuteScalarAsync<int>(query, new { NPP = npp, ID_BULAN_GAJI = idBulanGaji });
+                                    SELECT COUNT(*) 
+                                    FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
+                                    JOIN payroll.TBL_ASISTEN ON TBL_PENGGAJIAN.NPP = TBL_ASISTEN.NPM AND CAST(TBL_PENGGAJIAN.PANGKAT AS INT) = TBL_ASISTEN.ID_JENIS_ASISTEN
+                                    JOIN PAYROLL.siatmax.MST_UNIT ON TBL_ASISTEN.ID_UNIT = MST_UNIT.ID_UNIT
+                                    JOIN payroll.REF_JENIS_ASISTEN ON TBL_ASISTEN.ID_JENIS_ASISTEN = REF_JENIS_ASISTEN.ID_JENIS_ASISTEN
+                                    WHERE TBL_PENGGAJIAN.NPP = @NPP 
+                                    AND ID_BULAN_GAJI = @ID_BULAN_GAJI 
+                                    AND MST_UNIT.NAMA_UNIT = @NamaUnit 
+                                    AND REF_JENIS_ASISTEN.ID_JENIS_ASISTEN = CASE
+                                                        WHEN @InputJenisAsisten = 'Student Staf' THEN 3
+                                                        WHEN @InputJenisAsisten = 'Asisten Mahasiswa' THEN 1
+                                                        WHEN @InputJenisAsisten = 'Asisten Lab' THEN 2
+                                                        ELSE NULL
+                                                        END";
+
+                    var count = await conn.ExecuteScalarAsync<int>(query, new { NPP = npp, ID_BULAN_GAJI = idBulanGaji , Unit = unit, Jenis = jenis });
 
                     return count > 0;
                 }
@@ -190,21 +204,26 @@ namespace Payroll25.DAO
 
                 foreach (var asisten in asistenData) // 2. Lakukan secara iterasi berdasarkan NPM asisten
                 {
-                    if (!await IsDataExist(asisten.NPM, idBulanGaji)) // 3. Cek Apakah data Penggajian dengan ID_BULAN_GAJI dan ( NPP = NPM ) sudah ada 
+                    if (!await IsDataExist(asisten.NPM, idBulanGaji, unit, jenis)) // 3. Cek Apakah data Penggajian dengan ID_BULAN_GAJI dan ( NPP = NPM ) sudah ada 
                     {
+                        string jenjang = null;
+                        string golongan = "II/A";
+                        string pangkat = null;
 
-                        string jenjang;
-                        if (jenis == "Student Staf")
+                        switch (jenis)
                         {
-                            jenjang = null;
-                        }
-                        else if (jenis == "Asisten Mahasiswa" || jenis == "Asisten Lab")
-                        {
-                            jenjang = "S0";
-                        }
-                        else
-                        {
-                            jenjang = null;
+                            case "Asisten Mahasiswa":
+                                jenjang = "S0";
+                                pangkat = "1";
+                                break;
+                            case "Asisten Lab":
+                                jenjang = "S0";
+                                golongan = null;
+                                pangkat = "2";
+                                break;
+                            case "Student Staf":
+                                pangkat = "3";
+                                break;
                         }
 
                         var insertData = new PenggajianAsistenModel
@@ -218,8 +237,8 @@ namespace Payroll25.DAO
                             JBT_STRUKTURAL = "-",
                             JBT_AKADEMIK = "-",
                             JBT_FUNGSIONAL = "-",
-                            PANGKAT = null,
-                            GOLONGAN = "II/A",
+                            PANGKAT = pangkat, // Set PANGKAT based on jenis
+                            GOLONGAN = golongan, // Gunakan variabel golongan yang sudah ditentukan
                             JENJANG = jenjang, // Gunakan variabel jenjang yang sudah ditentukan
                             NO_TABUNGAN = asisten.NO_REKENING,
                             NPWP = null
@@ -233,9 +252,13 @@ namespace Payroll25.DAO
             }
             catch (Exception ex)
             {
+                // Consider logging the exception here
                 return false;
             }
         }
+
+
+
 
 
         // Auto Hitung Gaji Asisten / Mahasiswa
@@ -304,6 +327,7 @@ namespace Payroll25.DAO
                                   WHERE [TBL_VAKASI].[ID_BULAN_GAJI] = @IdBulanGaji 
                                   AND [TBL_VAKASI].[NPP] = @NPP
                                   AND [TBL_VAKASI].[ID_KOMPONEN_GAJI] = 77
+                                  AND MST_TARIF_PAYROLL.NOMINAL = 78000
                                   ORDER BY [MST_TARIF_PAYROLL].[NOMINAL] DESC ) AS A
 
                                   UNION ALL
@@ -506,6 +530,8 @@ namespace Payroll25.DAO
                 return result;
             }
         }
+
+
 
     }
 }
