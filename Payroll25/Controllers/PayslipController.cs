@@ -53,52 +53,68 @@ namespace Payroll25.Controllers
         [HttpGet]
         public async Task<IActionResult> CetakSlipGajiAsisten(int idBulanGaji, string npp)
         {
-            var headers = await DAO.GetHeaderPenggajianAsisten(idBulanGaji, npp);
-            string tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var asistenDataList = await DAO.GetAsistenDataByNPP(npp);
 
-            if (headers == null || !headers.Any())
+            if (asistenDataList == null || !asistenDataList.Any())
             {
-                return NotFound(new { success = false, message = "Tidak ada data yang bisa dicetak." });
+                return NotFound(new { success = false, message = "Tidak ada data asisten yang bisa dicetak." });
             }
 
+            string tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempFolder);
-            foreach (var header in headers)
+
+            var uniqueJenisAsisten = asistenDataList.Select(a => a.JENIS).Distinct();
+            List<string> errors = new List<string>();
+
+            foreach (var jenis in uniqueJenisAsisten)
             {
-                var isDetailAvailable = await DAO.CheckDetailGajiAsisten(header.ID_PENGGAJIAN);
-                if (!isDetailAvailable)
+                var headers = await DAO.GetHeaderPenggajianUserAsisten(idBulanGaji, npp, jenis);
+
+                if (headers == null || !headers.Any())
                 {
-                    return NotFound(new { success = false, message = "Tidak ada detail gaji yang bisa dicetak." });
+                    errors.Add($"Tidak ada data yang bisa dicetak untuk jenis {jenis}.");
+                    continue; // Skip to the next iteration
                 }
 
-                var body = await DAO.GetBodyPenggajianAsisten(header.ID_PENGGAJIAN);
-
-                decimal totalPenerimaanKotor = 0;
-                decimal totalPajak = 0;
-
-                foreach (var item in body)
+                foreach (var header in headers)
                 {
-                    totalPenerimaanKotor += (decimal)item.NOMINAL.GetValueOrDefault();
+                    var isDetailAvailable = await DAO.CheckDetailGajiAsisten(header.ID_PENGGAJIAN);
+                    if (!isDetailAvailable)
+                    {
+                        errors.Add($"Tidak ada detail gaji yang bisa dicetak untuk header {header.ID_PENGGAJIAN}.");
+                        continue; // Skip to the next iteration
+                    }
+
+                    var body = await DAO.GetBodyPenggajianAsisten(header.ID_PENGGAJIAN);
+
+                    decimal totalPenerimaanKotor = 0;
+                    decimal totalPajak = 0;
+
+                    foreach (var item in body)
+                    {
+                        totalPenerimaanKotor += (decimal)item.NOMINAL.GetValueOrDefault();
+                    }
+
+                    totalPajak = totalPenerimaanKotor * 0.03m;  // Misalnya pajak adalah 3%
+                    decimal totalPenerimaanBersih = totalPenerimaanKotor - totalPajak;
+
+                    var model = new SlipUserAsistenViewModel
+                    {
+                        Header = header,
+                        Body = body,
+                        TotalPenerimaanKotor = totalPenerimaanKotor,
+                        TotalPajak = totalPajak,
+                        TotalPenerimaanBersih = totalPenerimaanBersih
+                    };
+
+                    var pdf = new ViewAsPdf("SlipGajiUserAsisten", model)
+                    {
+                        FileName = $"SlipGaji{header.JENIS}_{header.NPP}.pdf"
+                    };
+
+                    var pdfFile = await pdf.BuildFile(ControllerContext);
+                    System.IO.File.WriteAllBytes(Path.Combine(tempFolder, $"SlipGaji{header.JENIS}_{header.NPP}.pdf"), pdfFile);
                 }
-
-                totalPajak = totalPenerimaanKotor * 0.03m;  // Misalnya pajak adalah 3%
-                decimal totalPenerimaanBersih = totalPenerimaanKotor - totalPajak;
-
-                var model = new SlipUserAsistenViewModel
-                {
-                    Header = header,
-                    Body = body,
-                    TotalPenerimaanKotor = totalPenerimaanKotor,
-                    TotalPajak = totalPajak,
-                    TotalPenerimaanBersih = totalPenerimaanBersih
-                };
-
-                var pdf = new ViewAsPdf("SlipGajiUserAsisten", model)
-                {
-                    FileName = $"SlipGaji{header.JENIS}_{header.NPP}.pdf"
-                };
-
-                var pdfFile = await pdf.BuildFile(ControllerContext);
-                System.IO.File.WriteAllBytes(Path.Combine(tempFolder, $"SlipGaji{header.JENIS}_{header.NPP}.pdf"), pdfFile);
             }
 
             string zipPath = Path.Combine(Path.GetTempPath(), "SlipGaji.zip");
@@ -112,6 +128,10 @@ namespace Payroll25.Controllers
             if (zipBytes.Length > 0)
             {
                 return File(zipBytes, "application/zip", "SlipGaji.zip");
+            }
+            else if (errors.Any())
+            {
+                return NotFound(new { success = false, message = string.Join(" ", errors) });
             }
             else
             {

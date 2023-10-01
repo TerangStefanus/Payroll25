@@ -59,13 +59,32 @@
 
     public class KomponenGajiDictionaryModel
     {
-        public static readonly Dictionary<string, List<int>> validKomponenGaji = new Dictionary<string, List<int>>()
+        public static readonly Dictionary<string, Dictionary<string, List<int>>> validKomponenGaji = new Dictionary<string, Dictionary<string, List<int>>>()
+    {
         {
-            { "Asisten Mahasiswa", new List<int> { 77, 78, 79, 80, 167, 182, 194, 197, 199 } },
-            { "Asisten Lab", new List<int> { 77,78,80,168, 200 } },
-            { "Student Staf", new List<int> { 169, 170, 201 } }
-        };
+            "Asisten Mahasiswa", new Dictionary<string, List<int>>()
+            {
+                { "1", new List<int> { 77, 78, 79, 80, 167, 182, 194, 197, 199 } },
+                // Tambahkan mapping untuk PANGKAT lainnya di sini
+            }
+        },
+        {
+            "Asisten Lab", new Dictionary<string, List<int>>()
+            {
+                { "2", new List<int> { 77,78,80,168, 200 } },
+                // Tambahkan mapping untuk PANGKAT lainnya di sini
+            }
+        },
+        {
+            "Student Staf", new Dictionary<string, List<int>>()
+            {
+                { "3", new List<int> { 169, 170, 201 } },
+                // Tambahkan mapping untuk PANGKAT lainnya di sini
+            }
+        }
+    };
     }
+
 
 
     public class HeaderPenggajianMhs
@@ -73,6 +92,7 @@
         public int ID_PENGGAJIAN { get; set; }
         public string NPP { get; set; }
         public string NAMA { get; set; }
+        public string PANGKAT { get; set; }
         public string GOLONGAN { get; set; }
         public string JENJANG { get; set; }
         public string NPWP { get; set; }

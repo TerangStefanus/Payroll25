@@ -58,40 +58,74 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<IEnumerable<HeaderPenggajianUserAsistenModel>> GetHeaderPenggajianAsisten(int idBulanGaji, string npp)
+        public async Task<IEnumerable<AsistenDataModel>> GetAsistenDataByNPP(string npp)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
+                string query = @"SELECT TOP (3) 
+                                [ID_ASISTEN],
+                                [ID_TAHUN_AKADEMIK],
+                                [NO_SEMESTER],
+                                [NPM],
+                                [ID_UNIT],
+                                [NO_REKENING],
+                                [NAMA_REKENING],
+                                [NAMA_BANK],
+                                TBL_ASISTEN.[ID_JENIS_ASISTEN],
+                                REF_JENIS_ASISTEN.JENIS
+                                FROM [PAYROLL].[payroll].[TBL_ASISTEN]
+                                JOIN PAYROLL.REF_JENIS_ASISTEN ON TBL_ASISTEN.ID_JENIS_ASISTEN = REF_JENIS_ASISTEN.ID_JENIS_ASISTEN
+                                WHERE NPM =  @npp";
 
-                string query = @"SELECT 
-                        TBL_PENGGAJIAN.ID_PENGGAJIAN,
-                        TBL_PENGGAJIAN.NPP,
-                        TBL_PENGGAJIAN.ID_BULAN_GAJI,
-                        TBL_PENGGAJIAN.NAMA,
-                        TBL_PENGGAJIAN.STATUS_KEPEGAWAIAN,
-                        TBL_PENGGAJIAN.GOLONGAN,
-                        TBL_PENGGAJIAN.JENJANG,
-                        TBL_PENGGAJIAN.NO_TABUNGAN,
-                        TBL_PENGGAJIAN.NPWP,
-                        TBL_ASISTEN.ID_ASISTEN,
-                        TBL_ASISTEN.ID_TAHUN_AKADEMIK,
-                        TBL_ASISTEN.NO_SEMESTER,
-                        TBL_ASISTEN.NPM,
-                        TBL_ASISTEN.ID_UNIT,
-                        TBL_ASISTEN.NO_REKENING,
-                        TBL_ASISTEN.NAMA_REKENING,
-                        TBL_ASISTEN.NAMA_BANK,
-                        TBL_ASISTEN.ID_JENIS_ASISTEN,
-                        REF_JENIS_ASISTEN.JENIS,
-                        MST_UNIT.NAMA_UNIT
-                        FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
-                        JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON TBL_PENGGAJIAN.NPP = TBL_ASISTEN.NPM
-                        JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON TBL_ASISTEN.ID_JENIS_ASISTEN = REF_JENIS_ASISTEN.ID_JENIS_ASISTEN
-                        JOIN [PAYROLL].[siatmax].[MST_UNIT] ON TBL_ASISTEN.ID_UNIT = MST_UNIT.ID_UNIT
-                        WHERE TBL_PENGGAJIAN.ID_BULAN_GAJI = @idBulanGaji AND TBL_PENGGAJIAN.NPP = @npp"
-                ;
+                var asistenData = await conn.QueryAsync<AsistenDataModel>(query, new { npp = npp });
+                return asistenData;
+            }
+        }
 
-                var headers = await conn.QueryAsync<HeaderPenggajianUserAsistenModel>(query, new { IdBulanGaji = idBulanGaji , npp = npp });
+        public static string ConvertJenisToPangkat(string jenis)
+        {
+            switch (jenis)
+            {
+                case "Asisten Mahasiswa":
+                    return "1";
+                case "Asisten Lab":
+                    return "2";
+                case "Student Staf":
+                    return "3";
+                default:
+                    throw new ArgumentException("Jenis not recognized");
+            }
+        }
+
+
+        public async Task<IEnumerable<HeaderPenggajianUserAsistenModel>> GetHeaderPenggajianUserAsisten(int idBulanGaji, string npp , string jenis)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                string pangkat = ConvertJenisToPangkat(jenis); // Konversi jenis ke pangkat
+
+                string query = @"SELECT
+                        [TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                        [TBL_PENGGAJIAN].NPP, 
+                        [TBL_PENGGAJIAN].NAMA,
+                        [TBL_PENGGAJIAN].PANGKAT,
+                        [TBL_PENGGAJIAN].GOLONGAN, 
+                        [TBL_PENGGAJIAN].JENJANG, 
+                        [TBL_PENGGAJIAN].NPWP,
+                        [TBL_PENGGAJIAN].NO_TABUNGAN,
+                        [TBL_ASISTEN].NAMA_BANK,
+                        [TBL_ASISTEN].NAMA_REKENING,
+                        [siatmax].[MST_UNIT].NAMA_UNIT,
+                        [REF_JENIS_ASISTEN].JENIS
+                        FROM [payroll].[TBL_PENGGAJIAN]
+                        JOIN [payroll].[TBL_ASISTEN] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_ASISTEN].NPM
+                        JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_ASISTEN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
+                        JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
+                        WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
+                        AND [REF_JENIS_ASISTEN].JENIS = @Jenis
+                        AND [TBL_PENGGAJIAN].PANGKAT = @Pangkat";
+
+                var headers = await conn.QueryAsync<HeaderPenggajianUserAsistenModel>(query, new { IdBulanGaji = idBulanGaji , npp = npp , Jenis = jenis, Pangkat = pangkat });
                 return headers;
                   
             }
