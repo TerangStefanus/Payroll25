@@ -32,8 +32,10 @@ namespace Payroll25.Controllers
             bool isAuth = false;
             var data = DAO.GetKaryawan(username);
             var dataMHS = DAO.GetMahasiswa(username);
+            var dataDosenKontrak = DAO.GetDosenKontrak(username);
 
-            if(data != null ) 
+
+            if (data != null ) 
             {
                 //Data dicek masuk
                 var hashpass = _encPassMhs(password);// password di enkripsi menggunakan RIPEMD160
@@ -94,10 +96,39 @@ namespace Payroll25.Controllers
                        new ClaimsPrincipal(identity));
                 }
             }
+            else if (dataDosenKontrak != null) // Menambahkan ini
+            {
+                var hashpass = _encPassMhs(password); // Anda mungkin perlu mengubah metode enkripsi sesuai kebutuhan
+                if (hashpass == dataDosenKontrak.PASSWORD_RIPEM)
+                {
+                    isAuth = true;
+                    identity = new ClaimsIdentity(new[] {
+                        new Claim(ClaimTypes.Name, dataDosenKontrak.NPP),
+                        new Claim(ClaimTypes.Name, dataDosenKontrak.NAMA),
+                        new Claim(ClaimTypes.Role, dataDosenKontrak.ROLE),
+                        new Claim("username", dataDosenKontrak.NPP),
+                        new Claim("name_dosen", dataDosenKontrak.NAMA),
+                        new Claim("role", dataDosenKontrak.ROLE),
+                        new Claim("tgl_lahir", dataDosenKontrak.TGL_LAHIR.ToString()),
+                        new Claim("alamat", dataDosenKontrak.ALAMAT),
+                        new Claim("no_hp", dataDosenKontrak.NO_TELPON_HP)
+                    }, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(identity));
+                }
+                else
+                {
+                    TempData["error"] = "Password Salah!";
+                }
+            }
             else
             {
                 TempData["error"] = "Data Karyawan Non Tetap tidak ditemukan";
             }
+
+
 
             if(data != null) 
             {
@@ -129,6 +160,19 @@ namespace Payroll25.Controllers
                     var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
                     return RedirectToAction("Index_User", "User");
+                }
+                else
+                {
+                    return RedirectToAction("Login");
+                }
+            }
+            else if (dataDosenKontrak != null) // Menambahkan ini
+            {
+                if (isAuth && dataDosenKontrak.ROLE == "Dosen Kontrak") // Gantikan "Dosen Kontrak" dengan role yang sesuai
+                {
+                    var principal = new ClaimsPrincipal(identity);
+                    var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                    return RedirectToAction("Index_Dosen", "User"); 
                 }
                 else
                 {

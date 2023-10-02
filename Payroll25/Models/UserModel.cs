@@ -35,4 +35,19 @@
         public string ALAMAT { get; set; }
     }
 
+    public class DosenKontrakModel
+    {
+        public string NPP { get; set; }
+        public string PASSWORD_RIPEM { get; set; }
+        public string ROLE { get; set; }
+        public string NAMA { get; set; }
+        public DateTime TGL_LAHIR { get; set; }
+        public string ALAMAT { get; set; }
+        public string NO_TELPON_HP { get; set; }
+    }
+
+
+
+
+
 }

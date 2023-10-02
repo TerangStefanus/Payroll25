@@ -101,6 +101,10 @@ namespace Payroll25.DAO
             }
         }
 
+        //ambil dari DB payroll.TBL_ASISTEN
+
+        //Masukkan dulu nama mahasiswa Student Staff / Assisten Lab yang bisa login
+
         public bool CheckAsisten(string npm)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -127,6 +131,8 @@ namespace Payroll25.DAO
             }
         }
 
+        
+
         public MhsModel GetMahasiswa(string npm)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.siatmakoneksi))
@@ -134,7 +140,14 @@ namespace Payroll25.DAO
                 try
                 {
                     //k = Karyawan ur = USER_ROLE rr = REF_ROLE
-                    string query = @"SELECT a.NPM, a.PASSWORD, 'Mahasiswa' AS ROLE, a.NAMA_MHS, a.TGL_LAHIR,a.ALAMAT,a.NO_HP
+                    string query = @"SELECT 
+                                    a.NPM,
+                                    a.PASSWORD, 
+                                    'Mahasiswa' AS ROLE,
+                                    a.NAMA_MHS, 
+                                    a.TGL_LAHIR,
+                                    a.ALAMAT,
+                                    a.NO_HP
                                     FROM MST_MHS_AKTIF a
                                     WHERE a.NPM = @username";
 
@@ -155,8 +168,45 @@ namespace Payroll25.DAO
             }
         }
 
-        //ambil dari DB payroll.TBL_ASISTEN
-        //Masukkan dulu nama mahasiswa Student Staff / Assisten Lab yang bisa login
+
+        // Ambil dari DB MST_KARYAWAN Kontrak
+
+        public DosenKontrakModel GetDosenKontrak(string npp)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    string query = @"SELECT 
+                            [NPP],
+                            [PASSWORD_RIPEM],
+                            'Dosen Kontrak' AS ROLE,
+                            [NAMA],
+                            [TGL_LAHIR],
+                            [ALAMAT],
+                            [NO_TELPON_HP]
+                            FROM [PAYROLL].[simka].[MST_KARYAWAN]
+                            WHERE 
+                            simka.MST_KARYAWAN.STATUS_KEPEGAWAIAN = 'Kontrak' 
+                            and [simka].[MST_KARYAWAN].[NPP] = @username";
+
+                    var param = new { username = npp };
+                    var data = conn.QueryFirstOrDefault<DosenKontrakModel>(query, param);
+
+                    return data;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+
 
     }
 }

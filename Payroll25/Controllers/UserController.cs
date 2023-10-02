@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Payroll25.Controllers
 {
-	[Authorize(Roles = "Mahasiswa")]
+
 	public class UserController : Controller
 	{
 
@@ -19,11 +19,17 @@ namespace Payroll25.Controllers
             DAO = new AccountDAO();
         }
 
+        [Authorize(Roles = "Mahasiswa")]
         public IActionResult Index_User()
-		{
-			return View();
-		}
+        {
+            return View();
+        }
 
+        [Authorize(Roles = "Dosen Kontrak")] // atau role yang sesuai
+        public IActionResult Index_Dosen()
+        {
+            return View();
+        }
 
-	}
+    }
 }
