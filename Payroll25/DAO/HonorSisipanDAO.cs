@@ -181,9 +181,7 @@ namespace Payroll25.DAO
                                 [ID_KOMPONEN_GAJI],
                                 [KOMPONEN_GAJI]
                                 FROM [PAYROLL].[payroll].[MST_KOMPONEN_GAJI]
-                                WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 140 AND 174 
-                                OR 
-                                MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 190 AND 197";
+                                WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 77 AND 201";
 
                     var data = await conn.QueryAsync<HonorPendadaranModel>(query);
 

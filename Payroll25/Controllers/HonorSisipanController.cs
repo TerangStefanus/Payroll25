@@ -58,7 +58,7 @@ namespace Payroll25.Controllers
                 using (var reader = new StreamReader(CsvFile.OpenReadStream()))
                 using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
                 {
-                    var records = csv.GetRecords<IdentitasAsistenModel>().ToList();
+                    var records = csv.GetRecords<HonorSisipanModel>().ToList();
 
                     var uploadResult = DAO.UploadAndInsertCSV(CsvFile); // Memanggil metode ini dengan parameter yang benar
 
