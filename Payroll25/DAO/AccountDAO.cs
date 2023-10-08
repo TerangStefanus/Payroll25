@@ -169,7 +169,7 @@ namespace Payroll25.DAO
         }
 
 
-        // Ambil dari DB MST_KARYAWAN Kontrak
+        // Ambil dari DB Payroll MST_KARYAWAN jenis Kontrak
 
         public DosenKontrakModel GetDosenKontrak(string npp)
         {
@@ -192,6 +192,44 @@ namespace Payroll25.DAO
 
                     var param = new { username = npp };
                     var data = conn.QueryFirstOrDefault<DosenKontrakModel>(query, param);
+
+                    return data;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+
+
+        // Ambil dari TBL_PELATIH
+
+
+        public PelatihModel GetPelatih(string npp)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    string query = @"SELECT 
+                                    [NPP],
+                                    [PASSWORD],
+                                    'Pelatih' AS ROLE,
+                                    [NAMA],
+                                    [TGL_LAHIR],
+                                    [ALAMAT],
+                                    [NO_TELP]
+                                    FROM [PAYROLL].[payroll].[TBL_PELATIH]
+                                    WHERE [TBL_PELATIH].[NPP] = @username";
+
+                    var param = new { username = npp };
+                    var data = conn.QueryFirstOrDefault<PelatihModel>(query, param);
 
                     return data;
                 }

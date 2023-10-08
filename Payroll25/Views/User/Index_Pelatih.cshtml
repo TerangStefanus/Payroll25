@@ -1,0 +1,74 @@
+﻿@using System.Security.Principal
+@using System.Security.Claims
+
+@model PelatihModel
+
+@{
+    Layout = "_LayoutUser";
+    var namePelatihClaim = User.FindFirst("name_pelatih");
+    var namePelatih = namePelatihClaim?.Value;
+    var noHPClaim = User.FindAll("no_hp");
+    var tgl_LahirClaim = User.FindAll("tgl_lahir");
+    var alamatClaim = User.FindAll("alamat");
+}
+
+<h1>Ini Profile User</h1>
+
+<div class="card mb-3 h-100 w-100 p-5 my-5" style="max-width: 100%;">
+    <div class="row g-0">
+        <div class="">
+            <div style="margin-left: auto; margin-right: auto">
+                <img src="/Assets/dist/img/user2-160x160.jpg" class="img-fluid rounded-start" alt="gambar profile" width="300">
+            </div>
+
+        </div>
+        <div class="col-md-8">
+            <div class="card-body" style="padding-left: 50px">
+                <form>
+                    <div>
+                        <h2 style="color: #F3AD1B; font-size: 38px;font-weight: 600;">
+                            INFORMASI AKUN
+                        </h2>
+                        <br />
+                    </div>
+                    <div class="mb-3" style="font-size: 20px">
+                        <label for="exampleInputEmail1" class="form-label">Nama User</label>
+                        <p style="border-style: groove;padding: 10px;">@namePelatih</p>
+                        <div class="mb-3">
+                            <label for="exampleInputPassword1" class="form-label">NPP</label>
+                            <p style="border-style: groove;padding: 10px;">@User.Identity.Name</p>
+                        </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3 h-100 w-100 p-5 my-5" style="max-width: 100%;">
+    <div class="row g-0">
+        <div class="col-md-8">
+            <div class="card-body">
+                <form>
+                    <div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">No Handphone</label>
+                        <p style="border-style: groove; padding: 10px;border-radius: 8px;">@(noHPClaim.FirstOrDefault()?.Value)</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Alamat</label>
+                        <p style="border-style: groove; padding: 10px;border-radius: 8px;">@(alamatClaim.FirstOrDefault()?.Value)</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">Tanggal Lahir</label>
+                        <p style="border-style: groove; padding: 10px;border-radius: 8px;">@(tgl_LahirClaim.FirstOrDefault()?.Value)</p>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

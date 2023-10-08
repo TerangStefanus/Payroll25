@@ -40,7 +40,7 @@ namespace Payroll25.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CheckAutoCetakSlipGajiMhs(int idBulanGaji, string npp)
+        public async Task<IActionResult> CheckAutoCetakSlipGaji(int idBulanGaji, string npp)
         {
             var isAvailable = await DAO.CheckDataGajiMhs(idBulanGaji, npp);
             if (!isAvailable)
@@ -51,7 +51,7 @@ namespace Payroll25.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CetakSlipGajiAsisten(int idBulanGaji, string npp)
+        public async Task<IActionResult> CetakSlipGaji(int idBulanGaji, string npp)
         {
             var asistenDataList = await DAO.GetAsistenDataByNPP(npp);
 

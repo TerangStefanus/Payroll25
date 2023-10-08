@@ -468,7 +468,7 @@ namespace Payroll25.DAO
                                 JOIN 
                                     [siatmax].[MST_UNIT] ON [simka].[MST_KARYAWAN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
                                 WHERE 
-                                    [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji";
+                                    [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji ";
 
                 var headers = await conn.QueryAsync<HeaderPenggajian>(query, new { idBulanGaji });
                 return headers;

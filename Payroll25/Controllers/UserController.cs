@@ -25,11 +25,16 @@ namespace Payroll25.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Dosen Kontrak")] // atau role yang sesuai
+        [Authorize(Roles = "Dosen Kontrak")] 
         public IActionResult Index_Dosen()
         {
             return View();
         }
 
+        [Authorize(Roles = "Pelatih")]
+        public IActionResult Index_Pelatih()
+        {
+            return View();
+        }
     }
 }

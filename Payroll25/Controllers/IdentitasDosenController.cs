@@ -11,7 +11,7 @@ using static Payroll25.Models.IdentitasDosenModel;
 
 namespace Payroll25.Controllers
 {
-    //[Authorize(Roles = "KSDM")]
+    
     public class IdentitasDosenController : Controller
     {
         IdentitasDosenDAO DAO;

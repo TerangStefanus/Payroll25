@@ -1,6 +1,8 @@
-﻿@{
-    var menu = User.Claims
-        .Where(c => c.Type == "menu")
+﻿@using System.Security.Claims
+
+@{
+    var roleClaim = User.Claims
+        .Where(c => c.Type == ClaimTypes.Role)
             .Select(c => c.Value).SingleOrDefault();
 }
 
@@ -103,14 +105,43 @@
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="\Payslip\Index" class="nav-link">
-                                <i class="nav-icon fas fa-wallet"></i>
-                                <p>
-                                    Payslip
-                                </p>
-                            </a>
-                        </li>
+                        @if (roleClaim == "Mahasiswa")
+                        {
+                            <li class="nav-item">
+                                <a href="\Payslip\Index" class="nav-link">
+                                    <i class="nav-icon fas fa-wallet"></i>
+                                    <p>
+                                        Payslip Mahasiswa
+                                    </p>
+                                </a>
+                            </li>
+                        }
+
+                        @if (roleClaim == "Dosen Kontrak")
+                        {
+                            <li class="nav-item">
+                                <a href="\PayslipDosen\Index" class="nav-link">
+                                    <i class="nav-icon fas fa-wallet"></i>
+                                    <p>
+                                        Payslip Dosen
+                                    </p>
+                                </a>
+                            </li>
+                        }
+
+                        @if (roleClaim == "Pelatih")
+                        {
+                            <li class="nav-item">
+                                <a href="\PayslipPelatih\Index" class="nav-link">
+                                    <i class="nav-icon fas fa-wallet"></i>
+                                    <p>
+                                        Payslip Pelatih
+                                    </p>
+                                </a>
+                            </li>
+                        }
+
+                        
                         
                         <li class="nav-item">
                             <a href="/Account/Logout" class="nav-link">

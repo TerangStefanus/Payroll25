@@ -33,6 +33,7 @@ namespace Payroll25.Controllers
             var data = DAO.GetKaryawan(username);
             var dataMHS = DAO.GetMahasiswa(username);
             var dataDosenKontrak = DAO.GetDosenKontrak(username);
+            var dataPelatih = DAO.GetPelatih(username);
 
 
             if (data != null ) 
@@ -96,9 +97,9 @@ namespace Payroll25.Controllers
                        new ClaimsPrincipal(identity));
                 }
             }
-            else if (dataDosenKontrak != null) // Menambahkan ini
+            else if (dataDosenKontrak != null) 
             {
-                var hashpass = _encPassMhs(password); // Anda mungkin perlu mengubah metode enkripsi sesuai kebutuhan
+                var hashpass = _encPassMhs(password); 
                 if (hashpass == dataDosenKontrak.PASSWORD_RIPEM)
                 {
                     isAuth = true;
@@ -112,6 +113,33 @@ namespace Payroll25.Controllers
                         new Claim("tgl_lahir", dataDosenKontrak.TGL_LAHIR.ToString()),
                         new Claim("alamat", dataDosenKontrak.ALAMAT),
                         new Claim("no_hp", dataDosenKontrak.NO_TELPON_HP)
+                    }, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(identity));
+                }
+                else
+                {
+                    TempData["error"] = "Password Salah!";
+                }
+            }
+            else if (dataPelatih != null)
+            {
+                var hashpass = _encPassMhs(password);
+                if (hashpass == dataPelatih.PASSWORD)
+                {
+                    isAuth = true;
+                    identity = new ClaimsIdentity(new[] {
+                        new Claim(ClaimTypes.Name, dataPelatih.NPP),
+                        new Claim(ClaimTypes.Name, dataPelatih.NAMA),
+                        new Claim(ClaimTypes.Role, dataPelatih.ROLE),
+                        new Claim("username", dataPelatih.NPP),
+                        new Claim("name_pelatih", dataPelatih.NAMA),
+                        new Claim("role", dataPelatih.ROLE),
+                        new Claim("tgl_lahir", dataPelatih.TGL_LAHIR.ToString()),
+                        new Claim("alamat", dataPelatih.ALAMAT),
+                        new Claim("no_hp", dataPelatih.NO_TELP)
                     }, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     HttpContext.SignInAsync(
@@ -166,9 +194,9 @@ namespace Payroll25.Controllers
                     return RedirectToAction("Login");
                 }
             }
-            else if (dataDosenKontrak != null) // Menambahkan ini
+            else if (dataDosenKontrak != null) 
             {
-                if (isAuth && dataDosenKontrak.ROLE == "Dosen Kontrak") // Gantikan "Dosen Kontrak" dengan role yang sesuai
+                if (isAuth && dataDosenKontrak.ROLE == "Dosen Kontrak") 
                 {
                     var principal = new ClaimsPrincipal(identity);
                     var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
@@ -179,6 +207,20 @@ namespace Payroll25.Controllers
                     return RedirectToAction("Login");
                 }
             }
+            else if (dataPelatih != null) 
+            {
+                if (isAuth && dataPelatih.ROLE == "Pelatih") 
+                {
+                    var principal = new ClaimsPrincipal(identity);
+                    var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                    return RedirectToAction("Index_Pelatih", "User");
+                }
+                else
+                {
+                    return RedirectToAction("Login");
+                }
+            }
+
             else
             {
                 return RedirectToAction("Login");
