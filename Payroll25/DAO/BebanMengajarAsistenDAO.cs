@@ -35,7 +35,7 @@ namespace Payroll25.DAO
                                 JOIN [PAYROLL].[payroll].[TBL_VAKASI] ON TBL_VAKASI.NPP = TBL_ASISTEN.NPM
                                 JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = TBL_VAKASI.ID_KOMPONEN_GAJI
                                 JOIN[PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
-                                where ID_REF_JENJANG IS NULL";
+                                where ID_REF_JENJANG IS NULL AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 77";
 
                     Dictionary<string, object> parameters = new Dictionary<string, object>();
 

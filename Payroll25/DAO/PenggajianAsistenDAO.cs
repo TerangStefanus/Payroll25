@@ -330,10 +330,6 @@ namespace Payroll25.DAO
         }
 
 
-
-
-
-
         public async Task<IEnumerable<KomponenGajiMhsModel>> GetKomponenGajiMhs(int idBulanGaji, string NPP)
         {
             try

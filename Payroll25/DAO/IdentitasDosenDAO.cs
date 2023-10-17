@@ -33,7 +33,7 @@ namespace Payroll25.DAO
                                 FROM simka.MST_KARYAWAN
                                 INNER JOIN [PAYROLL].[simka].[MST_REKENING]
                                     ON simka.MST_KARYAWAN.NPP = [PAYROLL].[simka].[MST_REKENING].NPP
-                                WHERE simka.MST_KARYAWAN.STATUS_KEPEGAWAIAN = 'Kontrak';";
+                                WHERE simka.MST_KARYAWAN.STATUS_KEPEGAWAIAN = 'Kontrak'";
 
                     var data = conn.Query<IdentitasDosenModel>(query, parameters).ToList();
 

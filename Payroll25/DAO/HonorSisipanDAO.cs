@@ -146,6 +146,7 @@ namespace Payroll25.DAO
             }
         }
 
+
         public int DeleteHonorSisipan(List<HonorSisipanModel> model)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))

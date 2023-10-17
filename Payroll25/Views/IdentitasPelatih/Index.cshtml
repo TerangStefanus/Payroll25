@@ -51,22 +51,22 @@
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="control-label"></label>
+                        <label asp-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="control-label">TAHUN AKADEMIK</label>
                         <input asp-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="form-control" />
                         <span asp-validation-for="IdentitasPelatih.ID_TAHUN_AKADEMIK" class="text-danger"></span>
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasPelatih.NO_SEMESTER" class="control-label"></label>
+                        <label asp-for="IdentitasPelatih.NO_SEMESTER" class="control-label">SEMESTER</label>
                         <input asp-for="IdentitasPelatih.NO_SEMESTER" class="form-control" />
                         <span asp-validation-for="IdentitasPelatih.NO_SEMESTER" class="text-danger"></span>
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasPelatih.ID_UNIT" class="control-label"></label>
+                        <label asp-for="IdentitasPelatih.ID_UNIT" class="control-label">UNIT</label>
 
                         <select class="form-control form-control-lg" id="selectUnit" asp-for="IdentitasPelatih.ID_UNIT">
-                            <option value="">-- Pilih Unit --</option>
+                            <option value="">Pilih Unit</option>
                             @foreach (var unit in Model.UnitsList)
                             {
                                 <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
@@ -78,19 +78,19 @@
 
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasPelatih.NO_REKENING" class="control-label"></label>
+                        <label asp-for="IdentitasPelatih.NO_REKENING" class="control-label">NO REKENING</label>
                         <input asp-for="IdentitasPelatih.NO_REKENING" class="form-control" />
                         <span asp-validation-for="IdentitasPelatih.NO_REKENING" class="text-danger"></span>
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasPelatih.NAMA_REKENING" class="control-label"></label>
+                        <label asp-for="IdentitasPelatih.NAMA_REKENING" class="control-label">NAMA REKENING</label>
                         <input asp-for="IdentitasPelatih.NAMA_REKENING" class="form-control" />
                         <span asp-validation-for="IdentitasPelatih.NAMA_REKENING" class="text-danger"></span>
                     </div>
 
                     <div class="form-group" style="width: 670px;padding-left: 20px;padding-top: 10px;">
-                        <label asp-for="IdentitasPelatih.NAMA_BANK" class="control-label"></label>
+                        <label asp-for="IdentitasPelatih.NAMA_BANK" class="control-label">NAMA BANK</label>
                         <input asp-for="IdentitasPelatih.NAMA_BANK" class="form-control" />
                         <span asp-validation-for="IdentitasPelatih.NAMA_BANK" class="text-danger"></span>
                     </div>

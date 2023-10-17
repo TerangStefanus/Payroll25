@@ -26,7 +26,10 @@
             public TunjanganPengabdianModel TunjanganPengabdian { get; set; }
             public string NPPFilter { get; set; }
             public string NAMAFilter { get; set; }
+            public string NPMFilter { get; set; }
         }
+
+
 
     }
 }

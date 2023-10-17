@@ -14,11 +14,11 @@ namespace Payroll25.Controllers
             DAO = new TunjanganPengabdianDAO();
         }
 
-        public async Task<IActionResult> Index(string NPPFilter = null, string NAMAFilter = null)
+        public async Task<IActionResult> Index(string NPPFilter = null, string NAMAFilter = null,string NPMFilter = null)
         {
             try
             {
-                var tunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(NPPFilter, NAMAFilter) ?? new List<TunjanganPengabdianModel>();
+                var tunjanganPengabdianList = await DAO.ShowTunjanganPengabdianAsync(NPPFilter, NAMAFilter,NPMFilter) ?? new List<TunjanganPengabdianModel>();
                 var komponenGajiList = await DAO.GetKomponenGaji();
 
                 ViewBag.KomponenGajiList = komponenGajiList; // Set data to ViewBag
@@ -27,7 +27,8 @@ namespace Payroll25.Controllers
                 {
                     TunjanganPengabdianList = tunjanganPengabdianList,
                     NPPFilter = NPPFilter,
-                    NAMAFilter = NAMAFilter
+                    NAMAFilter = NAMAFilter,
+                    NPMFilter = NPMFilter
                 };
 
                 return View(viewModel);

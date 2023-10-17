@@ -7,55 +7,43 @@ namespace Payroll25.DAO
 {
     public class TunjanganPengabdianDAO
     {
-        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync(string NPPFilter = null, string NAMAFilter = null)
+        public async Task<IEnumerable<TunjanganPengabdianModel>> ShowTunjanganPengabdianAsync(string NPPFilter = null, string NAMAFilter = null, string NPMFilter = null)
         {
             var connectionString = DBkoneksi.payrollkoneksi;
-
-            if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter))
-            {
-                return new List<TunjanganPengabdianModel>();
-            }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     await conn.OpenAsync();
-                    var query = @"SELECT DISTINCT
-                                TBL_VAKASI.ID_VAKASI,
-                                MST_KARYAWAN.NPP,
-                                MST_KARYAWAN.NAMA,
-                                MST_KOMPONEN_GAJI.KOMPONEN_GAJI,
-                                TBL_VAKASI.JUMLAH,
-                                MST_TARIF_PAYROLL.NOMINAL,
-                                CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS TANGGAL
-                                FROM 
-                                    PAYROLL.simka.MST_KARYAWAN
-                                JOIN 
-                                    PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                                JOIN 
-                                    PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
-                                JOIN
-                                    PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
-                                WHERE 
-                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 198 AND 201 ";
+                    string finalQuery = "";
 
-                    Dictionary<string, object> parameters = new Dictionary<string, object>();
+                    if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter) && string.IsNullOrEmpty(NPMFilter))
+                    {
+                        // Tidak ada filter, mengembalikan hasil kosong
+                        return new List<TunjanganPengabdianModel>();
+                    }
 
                     if (!string.IsNullOrEmpty(NPPFilter))
                     {
-                        query += " AND MST_KARYAWAN.NPP = @NPPFilter";
-                        parameters.Add("@NPPFilter", NPPFilter);
+                        // Filter NPP saja
+                        finalQuery = KaryawanQuery(NPPFilter, null, null);
                     }
-
-                    if (!string.IsNullOrEmpty(NAMAFilter))
+                    else if (!string.IsNullOrEmpty(NPMFilter))
                     {
-                        query += " AND MST_KARYAWAN.NAMA LIKE @NAMAFilter";
-                        parameters.Add("@NAMAFilter", $"%{NAMAFilter}%");
+                        // Filter NPM saja
+                        finalQuery = AsistenQuery(null, null, NPMFilter);
+                    }
+                    else if (!string.IsNullOrEmpty(NAMAFilter))
+                    {
+                        // Filter NAMA saja
+                        finalQuery = KaryawanQuery(null, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, null);// Spasi sebelah union penting agar tidak terjadi query error
                     }
 
-                    return await conn.QueryAsync<TunjanganPengabdianModel>(query, parameters);
+                    return await conn.QueryAsync<TunjanganPengabdianModel>(finalQuery, GetParameters(NPPFilter, NAMAFilter, NPMFilter));
                 }
+
+
                 catch (SqlException sqlEx)
                 {
                     Console.WriteLine($"SQL Error: {sqlEx.Message}");
@@ -68,6 +56,105 @@ namespace Payroll25.DAO
                 }
             }
         }
+
+
+        private string KaryawanQuery(string NPPFilter, string NAMAFilter, string NPMFilter)
+        {
+
+            string conditionNPP = !string.IsNullOrEmpty(NPPFilter) ? "AND MST_KARYAWAN.NPP = @NPPFilter " : "";
+            string conditionNAMA = !string.IsNullOrEmpty(NAMAFilter) ? "AND MST_KARYAWAN.NAMA LIKE @NAMAFilter " : "";
+
+            if ( ( string.IsNullOrEmpty(NPPFilter) || string.IsNullOrEmpty(NAMAFilter) ))
+            {
+                return $@"SELECT DISTINCT
+                        TBL_VAKASI.ID_VAKASI,
+                        TBL_VAKASI.NPP,
+                        MST_KARYAWAN.NAMA,
+                        MST_KOMPONEN_GAJI.KOMPONEN_GAJI,
+                        TBL_VAKASI.JUMLAH,
+                        MST_TARIF_PAYROLL.NOMINAL,
+                        CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS TANGGAL
+                        FROM PAYROLL.simka.MST_KARYAWAN
+                        JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                        JOIN PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                        JOIN PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
+                        WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 198 AND 201
+                        {conditionNPP}
+                        {conditionNAMA}";
+                        
+            }
+
+            return "";
+        }
+
+
+        private string AsistenQuery(string NPPFilter, string NAMAFilter, string NPMFilter)
+        {
+            string asistenQuery = " ";
+
+            string conditionNPM = !string.IsNullOrEmpty(NPMFilter) ? "AND TBL_ASISTEN.NPM = @NPMFilter " : "";
+            string conditionNAMA = !string.IsNullOrEmpty(NAMAFilter) ? "AND mst_mhs_aktif.nama_mhs LIKE @NAMAFilter " : "";
+
+            if ( ( string.IsNullOrEmpty(NAMAFilter) || string.IsNullOrEmpty(NPMFilter) ) )
+            {
+                asistenQuery = $@"SELECT
+                                TBL_VAKASI.ID_VAKASI,
+                                TBL_VAKASI.NPP,
+                                mst_mhs_aktif.nama_mhs AS 'NAMA',
+                                MST_KOMPONEN_GAJI.KOMPONEN_GAJI, 
+                                TBL_VAKASI.JUMLAH,
+                                MST_TARIF_PAYROLL.NOMINAL,
+                                CONVERT(varchar, TBL_VAKASI.DATE_INSERTED, 101) AS TANGGAL
+                                FROM [PAYROLL].[payroll].[TBL_ASISTEN]
+                                JOIN [PAYROLL].[dbo].[mst_mhs_aktif] ON [PAYROLL].[dbo].[mst_mhs_aktif].npm = [PAYROLL].[payroll].[TBL_ASISTEN].NPM
+                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON REF_JENIS_ASISTEN.ID_JENIS_ASISTEN = TBL_ASISTEN.ID_JENIS_ASISTEN
+                                JOIN [PAYROLL].[payroll].[TBL_VAKASI] ON TBL_VAKASI.NPP = TBL_ASISTEN.NPM
+                                JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = TBL_VAKASI.ID_KOMPONEN_GAJI
+                                JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                                WHERE ID_REF_JENJANG IS NULL AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 198 AND 201
+                                {conditionNPM}
+                                {conditionNAMA}";
+            }
+
+            return asistenQuery;
+
+        }
+
+
+
+        private Dictionary<string, object> GetParameters(string NPPFilter, string NAMAFilter, string NPMFilter)
+        {
+            var parameters = new Dictionary<string, object>();
+
+            if (!string.IsNullOrEmpty(NPPFilter))
+            {
+                parameters.Add("@NPPFilter", NPPFilter);
+            }
+
+            if (!string.IsNullOrEmpty(NAMAFilter))
+            {
+                parameters.Add("@NAMAFilter", $"%{NAMAFilter}%");
+            }
+
+            if (!string.IsNullOrEmpty(NPMFilter))
+            {
+                parameters.Add("@NPMFilter", NPMFilter);
+            }
+
+            return parameters;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
         public int InsertTunjanganPengabdian(TunjanganPengabdianModel model)
         {
