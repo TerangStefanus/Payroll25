@@ -18,13 +18,35 @@ namespace Payroll25.DAO
                     await conn.OpenAsync();
                     string finalQuery = "";
 
+                    
+
                     if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter) && string.IsNullOrEmpty(NPMFilter))
                     {
                         // Tidak ada filter, mengembalikan hasil kosong
                         return new List<TunjanganPengabdianModel>();
                     }
 
-                    if (!string.IsNullOrEmpty(NPPFilter))
+                    if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter) && string.IsNullOrEmpty(NPMFilter))
+                    {
+                        // Filter NPP dan NPM dan NAMA
+                        finalQuery = KaryawanQuery(NPPFilter, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, NPMFilter);
+                    }
+                    else if (!string.IsNullOrEmpty(NPPFilter) && !string.IsNullOrEmpty(NPMFilter))
+                    {
+                        // Filter NPP dan NPM
+                        finalQuery = KaryawanQuery(NPPFilter, null, null) + "UNION " + AsistenQuery(null, null, NPMFilter);
+                    }
+                    else if (!string.IsNullOrEmpty(NPPFilter) && !string.IsNullOrEmpty(NAMAFilter))
+                    {
+                        // Filter NPP dan NAMA
+                        finalQuery = KaryawanQuery(NPPFilter, NAMAFilter, null);
+                    }
+                    else if (!string.IsNullOrEmpty(NAMAFilter) && !string.IsNullOrEmpty(NPMFilter))
+                    {
+                        // Filter NPM dan NAMA
+                        finalQuery = AsistenQuery(null, NAMAFilter, NPMFilter);
+                    }
+                    else if (!string.IsNullOrEmpty(NPPFilter))
                     {
                         // Filter NPP saja
                         finalQuery = KaryawanQuery(NPPFilter, null, null);
@@ -39,6 +61,7 @@ namespace Payroll25.DAO
                         // Filter NAMA saja
                         finalQuery = KaryawanQuery(null, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, null);// Spasi sebelah union penting agar tidak terjadi query error
                     }
+                    
 
                     return await conn.QueryAsync<TunjanganPengabdianModel>(finalQuery, GetParameters(NPPFilter, NAMAFilter, NPMFilter));
                 }
@@ -62,9 +85,9 @@ namespace Payroll25.DAO
         {
 
             string conditionNPP = !string.IsNullOrEmpty(NPPFilter) ? "AND MST_KARYAWAN.NPP = @NPPFilter " : "";
-            string conditionNAMA = !string.IsNullOrEmpty(NAMAFilter) ? "AND MST_KARYAWAN.NAMA LIKE @NAMAFilter " : "";
+            string conditionNAMA = !string.IsNullOrEmpty(NAMAFilter) ? " AND MST_KARYAWAN.NAMA LIKE @NAMAFilter " : "";
 
-            if ( ( string.IsNullOrEmpty(NPPFilter) || string.IsNullOrEmpty(NAMAFilter) ))
+            if ( !string.IsNullOrEmpty(NPPFilter) || !string.IsNullOrEmpty(NAMAFilter) )
             {
                 return $@"SELECT DISTINCT
                         TBL_VAKASI.ID_VAKASI,
@@ -80,8 +103,7 @@ namespace Payroll25.DAO
                         JOIN PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
                         WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 198 AND 201
                         {conditionNPP}
-                        {conditionNAMA}";
-                        
+                        {conditionNAMA}";            
             }
 
             return "";
@@ -93,9 +115,10 @@ namespace Payroll25.DAO
             string asistenQuery = " ";
 
             string conditionNPM = !string.IsNullOrEmpty(NPMFilter) ? "AND TBL_ASISTEN.NPM = @NPMFilter " : "";
-            string conditionNAMA = !string.IsNullOrEmpty(NAMAFilter) ? "AND mst_mhs_aktif.nama_mhs LIKE @NAMAFilter " : "";
+            string conditionNAMA = !string.IsNullOrEmpty(NAMAFilter) ? " AND mst_mhs_aktif.nama_mhs LIKE @NAMAFilter " : "";
 
-            if ( ( string.IsNullOrEmpty(NAMAFilter) || string.IsNullOrEmpty(NPMFilter) ) )
+
+            if ( !string.IsNullOrEmpty(NAMAFilter) || !string.IsNullOrEmpty(NPMFilter) ) 
             {
                 asistenQuery = $@"SELECT
                                 TBL_VAKASI.ID_VAKASI,
@@ -117,9 +140,7 @@ namespace Payroll25.DAO
             }
 
             return asistenQuery;
-
         }
-
 
 
         private Dictionary<string, object> GetParameters(string NPPFilter, string NAMAFilter, string NPMFilter)
@@ -143,15 +164,6 @@ namespace Payroll25.DAO
 
             return parameters;
         }
-
-
-
-
-
-
-
-
-
 
 
 

@@ -66,6 +66,42 @@ namespace Payroll25.DAO
             }
         }
 
+        public int InsertBebanMengajarAsisten(BebanMengajarAsistenModel model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                try
+                {
+                    var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_VAKASI]
+                                ([ID_KOMPONEN_GAJI],[ID_BULAN_GAJI],[NPP],[JUMLAH],[DATE_INSERTED],[DESKRIPSI])
+                                VALUES
+                                (@ID_KOMPONEN_GAJI,@ID_BULAN_GAJI,@NPP,@JUMLAH,@DATE_INSERTED,@DESKRIPSI)";
+
+                    var parameters = new
+                    {
+                        ID_KOMPONEN_GAJI = 77,
+                        ID_BULAN_GAJI = model.ID_BULAN_GAJI,
+                        NPP = model.NPP,
+                        JUMLAH = model.JUMLAH,
+                        DATE_INSERTED = DateTime.Now, // Set to current time
+                        DESKRIPSI = model.DESKRIPSI
+                    };
+
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
         public int UpdateBebanMengajarAsisten(List<BebanMengajarAsistenModel> model)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -92,28 +128,17 @@ namespace Payroll25.DAO
             }
         }
 
-        public int InsertBebanMengajarAsisten(BebanMengajarAsistenModel model)
+
+        public int DeleteBebanMengajarAsisten(List<BebanMengajarAsistenModel> model)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
                 try
                 {
-                    var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_VAKASI]
-                                ([ID_KOMPONEN_GAJI],[ID_BULAN_GAJI],[NPP],[JUMLAH],[DATE_INSERTED],[DESKRIPSI])
-                                VALUES
-                                (@ID_KOMPONEN_GAJI,@ID_BULAN_GAJI,@NPP,@JUMLAH,@DATE_INSERTED,@DESKRIPSI)";
+                    var query = @"DELETE FROM [payroll].[TBL_VAKASI]
+                                WHERE ID_VAKASI = @ID_VAKASI";
 
-                    var parameters = new
-                    {
-                        ID_KOMPONEN_GAJI = 77,
-                        ID_BULAN_GAJI = model.ID_BULAN_GAJI,
-                        NPP = model.NPP,
-                        JUMLAH = model.JUMLAH,
-                        DATE_INSERTED = DateTime.Now, // Set to current time
-                        DESKRIPSI = model.DESKRIPSI
-                    };
-
-                    return conn.Execute(query, parameters);
+                    return conn.Execute(query, model);
                 }
                 catch (SqlException sqlEx)
                 {

@@ -90,5 +90,28 @@ namespace Payroll25.Controllers
             return Json(data);
         }
 
+        [HttpPost]
+        public IActionResult DeleteBebanMengajarDosen([FromBody] List<BebanMengajarDosenModel> model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
+
+            success = DAO.DeleteBebanMengajarDosen(model);
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = " Delete data berhasil ";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = " Delete data gagal";
+            }
+
+            return Json(data);
+        }
+
+
+
     }
 }

@@ -149,6 +149,32 @@
             }
 
             // Buat Fungsi Delete 
+            public int DeleteBebanMengajarDosen(List<BebanMengajarDosenModel> model)
+            {
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    try
+                    {
+                        var query = @"DELETE FROM [payroll].[TBL_BEBAN_MENGAJAR]
+                                    WHERE ID_BEBAN_MENGAJAR = @ID_BEBAN_MENGAJAR";
+
+                        return conn.Execute(query, model);
+                    }
+                    catch (SqlException sqlEx)
+                    {
+                        Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                        return 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"An error occurred: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
+
+
+
 
         }
 
