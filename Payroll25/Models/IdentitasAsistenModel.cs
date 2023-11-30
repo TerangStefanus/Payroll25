@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ClosedXML.Excel;
+using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
 using System.ComponentModel.DataAnnotations.Schema;
 using CsvHelper.Configuration;
+using System.Runtime.Serialization;
 
 namespace Payroll25.Models
 {
@@ -54,6 +56,10 @@ namespace Payroll25.Models
 
         [Optional]
         public string JENIS { get; set; }
+
+        [Ignore] // CsvHelper akan mengabaikan properti ini saat membaca atau menulis CSV
+        [IgnoreDataMember] // ClosedXML akan mengabaikan properti ini saat membaca atau menulis XLS
+        public IXLWorksheet WorksheetReference { get; set; }
     }
 
     public class IndexViewModel
@@ -67,10 +73,10 @@ namespace Payroll25.Models
         public string UNITFilter { get; set; }
 
         [Required]
-        [Display(Name = "CSV File")]
+        [Display(Name = "Excel File")] // Ubah label sesuai dengan jenis file
         [DataType(DataType.Upload)]
-        [FileExtensions(Extensions = "csv", ErrorMessage = "Please upload a valid CSV file.")]
-        public IFormFile CsvFile { get; set; }
+        [FileExtensions(Extensions = "xlsx", ErrorMessage = "Please upload a valid Excel file.")]
+        public IFormFile ExcelFile { get; set; }
     }
 
     public class IdentitasAsistenModelMap : ClassMap<IdentitasAsistenModel>
@@ -88,10 +94,4 @@ namespace Payroll25.Models
             Map(m => m.ID_JENIS_ASISTEN).Name("ID_JENIS_ASISTEN");
         }
     }
-
-
-
-
 }
-
-

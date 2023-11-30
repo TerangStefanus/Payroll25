@@ -64,6 +64,8 @@ namespace Payroll25.DAO
             {
                 string query = @"SELECT
                                 [payroll].[TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                                [TBL_BULAN_GAJI].BULAN,
+                                [TBL_BULAN_GAJI].ID_TAHUN,
                                 [payroll].[TBL_PENGGAJIAN].NPP, 
                                 [payroll].[TBL_PENGGAJIAN].NAMA, 
                                 [payroll].[TBL_PENGGAJIAN].GOLONGAN, 
@@ -79,6 +81,8 @@ namespace Payroll25.DAO
                                     [payroll].[TBL_PELATIH] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_PELATIH].NPP
                                 JOIN 
                                     [siatmax].[MST_UNIT] ON [payroll].[TBL_PELATIH].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
+                                JOIN
+	                                [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
                                 WHERE 
                                     [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji AND TBL_PENGGAJIAN.NPP = @npp";
 

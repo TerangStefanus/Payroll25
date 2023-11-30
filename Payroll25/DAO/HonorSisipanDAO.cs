@@ -4,6 +4,7 @@ using Dapper;
 using Payroll25.Models;
 using System.Data.SqlClient;
 using System.Globalization;
+using ClosedXML.Excel;
 
 namespace Payroll25.DAO
 {
@@ -19,8 +20,8 @@ namespace Payroll25.DAO
                 {
                     await conn.OpenAsync();
 
-                    string topClause = string.IsNullOrEmpty(NPPFilter) ? "TOP 300" : "";
-                    string whereClause = string.IsNullOrEmpty(NPPFilter) ? "" : "WHERE NPP = @NPPFilter";
+                    string topClause = string.IsNullOrEmpty(NPPFilter) ? "TOP 200" : "";
+                    string whereClause = string.IsNullOrEmpty(NPPFilter) ? "" : " AND NPP = @NPPFilter";
 
                     var parameters = new Dictionary<string, object>();
 
@@ -40,6 +41,7 @@ namespace Payroll25.DAO
                                     TBL_VAKASI.[DESKRIPSI]
                                     FROM [PAYROLL].[payroll].[TBL_VAKASI]
                                     JOIN PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                                    WHERE MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 77 AND 201
                                     {whereClause}
                                     ORDER BY ID_BULAN_GAJI DESC";
 
@@ -55,66 +57,6 @@ namespace Payroll25.DAO
                     Console.WriteLine($"An error occurred: {ex.Message}");
                     throw;
                 }
-            }
-        }
-
-        public (bool, List<string>) UploadAndInsertCSV(IFormFile csvFile)
-        {
-            var errorMessages = new List<string>();
-            try
-            {
-                using (var stream = csvFile.OpenReadStream())
-                using (var reader = new StreamReader(stream))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-                {
-                    conn.Open();
-                    var transaction = conn.BeginTransaction();
-
-                    try
-                    {
-                        var records = csv.GetRecords<HonorSisipanModel>().ToList();
-                        var validRecords = records.Where(record =>
-                            record.ID_KOMPONEN_GAJI != null &&
-                            record.ID_BULAN_GAJI != null &&
-                            !string.IsNullOrEmpty(record.NPP) &&
-                            record.JUMLAH != null 
-                        ).ToList();
-
-                        var invalidRecords = records.Except(validRecords).ToList();
-
-                        foreach (var invalidRecord in invalidRecords)
-                        {
-                            errorMessages.Add($"Record dengan NPP {invalidRecord.NPP} memiliki data yang tidak valid atau tidak lengkap.");
-                        }
-
-                        foreach (var record in validRecords)
-                        {
-                            var insertQuery = @"INSERT INTO [payroll].[TBL_VAKASI] 
-                                                (ID_KOMPONEN_GAJI, ID_BULAN_GAJI, NPP, JUMLAH) 
-                                                VALUES 
-                                                (@ID_KOMPONEN_GAJI, @ID_BULAN_GAJI, @NPP, @JUMLAH)";
-
-                            conn.Execute(insertQuery, record, transaction);
-                        }
-
-                        transaction.Commit();
-                        return (true, errorMessages);
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        Console.WriteLine("Error: " + ex.Message);
-                        errorMessages.Add(ex.Message);
-                        return (false, errorMessages);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-                errorMessages.Add(ex.Message);
-                return (false, errorMessages);
             }
         }
 
@@ -145,7 +87,6 @@ namespace Payroll25.DAO
                 }
             }
         }
-
 
         public int DeleteHonorSisipan(List<HonorSisipanModel> model)
         {
@@ -226,6 +167,105 @@ namespace Payroll25.DAO
                     return Enumerable.Empty<HonorPendadaranModel>();
                 }
             }
+        }
+
+        public (bool, List<string>) UploadAndInsertExcel(IFormFile excelFile)
+        {
+            var errorMessages = new List<string>();
+            try
+            {
+                using (var stream = excelFile.OpenReadStream())
+                using (var workbook = new XLWorkbook(stream))
+                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                {
+                    conn.Open();
+                    var transaction = conn.BeginTransaction();
+
+                    try
+                    {
+                        var worksheet = workbook.Worksheets.First(); // Ambil worksheet pertama
+
+                        var rows = worksheet.RowsUsed().Skip(1); // Skip baris header
+                        var records = new List<HonorSisipanModel>();
+
+                        foreach (var row in rows)
+                        {
+                            var record = new HonorSisipanModel
+                            {
+                                ID_KOMPONEN_GAJI = GetNullableIntValue(row.Cell(1)),
+                                ID_BULAN_GAJI = GetNullableIntValue(row.Cell(2)),
+                                NPP = GetStringCellValue(row.Cell(3)),
+                                JUMLAH = GetNullableIntValue(row.Cell(4)),
+                            };
+
+                            records.Add(record);
+                        }
+
+                        var validRecords = records.Where(record =>
+                            record.ID_KOMPONEN_GAJI != null &&
+                            record.ID_BULAN_GAJI != null &&
+                            !string.IsNullOrEmpty(record.NPP) &&
+                            record.JUMLAH != null
+                        ).ToList();
+
+                        var invalidRecords = records.Except(validRecords).ToList();
+
+                        foreach (var invalidRecord in invalidRecords)
+                        {
+                            errorMessages.Add($"Record dengan NPP {invalidRecord.NPP} memiliki data yang tidak valid atau tidak lengkap.");
+                        }
+
+                        foreach (var record in validRecords)
+                        {
+                            record.DATE_INSERTED = DateTime.Now;
+
+                            var insertQuery = @"INSERT INTO [payroll].[TBL_VAKASI] 
+                                                (ID_KOMPONEN_GAJI, ID_BULAN_GAJI, NPP, JUMLAH, DATE_INSERTED) 
+                                                VALUES 
+                                                (@ID_KOMPONEN_GAJI, @ID_BULAN_GAJI, @NPP, @JUMLAH, @DATE_INSERTED)";
+
+                            conn.Execute(insertQuery, record, transaction);
+                        }
+
+                        transaction.Commit();
+                        return (true, errorMessages);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine("Error: " + ex.Message);
+                        errorMessages.Add(ex.Message);
+                        return (false, errorMessages);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                errorMessages.Add(ex.Message);
+                return (false, errorMessages);
+            }
+        }
+
+        private int? GetNullableIntValue(IXLCell cell)
+        {
+            if (cell.IsEmpty())
+            {
+                return null;
+            }
+
+            int result;
+            if (int.TryParse(cell.Value.ToString(), out result))
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        private string GetStringCellValue(IXLCell cell)
+        {
+            return cell.IsEmpty() ? null : cell.Value.ToString();
         }
 
 

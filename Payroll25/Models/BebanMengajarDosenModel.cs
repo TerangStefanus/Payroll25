@@ -9,8 +9,8 @@
         public int TOTAL_SKS { get; set; }
         public int BEBAN_STRUKTURAL { get; set; }
         public int KELEBIHAN_BEBAN { get; set; }
-        public string TGL_AWAL_SK { get; set; }
-        public string TGL_AKHIR_SK { get; set; }
+        public DateTime TGL_AWAL_SK { get; set; }
+        public DateTime TGL_AKHIR_SK { get; set; }
 
         // -------- CODE INPUT FORM -------- //
 

@@ -46,7 +46,7 @@ namespace Payroll25.DAO
             {
                 using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
                 {
-                    string query = "SELECT COUNT(*) FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN] JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON TBL_PENGGAJIAN.NPP = TBL_ASISTEN.NPM WHERE ID_BULAN_GAJI = @idBulanGaji AND TBL_PENGGAJIAN.NPP = @npp";
+                    string query = "SELECT COUNT(*) \r\nFROM (\r\n    SELECT DISTINCT \r\n        TBL_PENGGAJIAN.ID_PENGGAJIAN,\r\n        TBL_PENGGAJIAN.NPP,\r\n        TBL_PENGGAJIAN.ID_BULAN_GAJI\r\n    FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN] \r\n    JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON TBL_PENGGAJIAN.NPP = TBL_ASISTEN.NPM \r\n    WHERE TBL_PENGGAJIAN.ID_BULAN_GAJI = @idBulanGaji AND TBL_PENGGAJIAN.NPP = @npp\r\n) AS SUBQUERY";
                     int count = await conn.ExecuteScalarAsync<int>(query, new { IdBulanGaji = idBulanGaji, npp = npp });
                     return count > 0;
                 }
@@ -74,7 +74,7 @@ namespace Payroll25.DAO
                                 TBL_ASISTEN.[ID_JENIS_ASISTEN],
                                 REF_JENIS_ASISTEN.JENIS
                                 FROM [PAYROLL].[payroll].[TBL_ASISTEN]
-                                JOIN PAYROLL.REF_JENIS_ASISTEN ON TBL_ASISTEN.ID_JENIS_ASISTEN = REF_JENIS_ASISTEN.ID_JENIS_ASISTEN
+                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON TBL_ASISTEN.ID_JENIS_ASISTEN = REF_JENIS_ASISTEN.ID_JENIS_ASISTEN
                                 WHERE NPM =  @npp";
 
                 var asistenData = await conn.QueryAsync<AsistenDataModel>(query, new { npp = npp });
@@ -105,27 +105,31 @@ namespace Payroll25.DAO
                 string pangkat = ConvertJenisToPangkat(jenis); // Konversi jenis ke pangkat
 
                 string query = @"SELECT
-                        [TBL_PENGGAJIAN].ID_PENGGAJIAN,
-                        [TBL_PENGGAJIAN].NPP, 
-                        [TBL_PENGGAJIAN].NAMA,
-                        [TBL_PENGGAJIAN].PANGKAT,
-                        [TBL_PENGGAJIAN].GOLONGAN, 
-                        [TBL_PENGGAJIAN].JENJANG, 
-                        [TBL_PENGGAJIAN].NPWP,
-                        [TBL_PENGGAJIAN].NO_TABUNGAN,
-                        [TBL_ASISTEN].NAMA_BANK,
-                        [TBL_ASISTEN].NAMA_REKENING,
-                        [siatmax].[MST_UNIT].NAMA_UNIT,
-                        [REF_JENIS_ASISTEN].JENIS
-                        FROM [payroll].[TBL_PENGGAJIAN]
-                        JOIN [payroll].[TBL_ASISTEN] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_ASISTEN].NPM
-                        JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_ASISTEN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
-                        JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
-                        WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
-                        AND [REF_JENIS_ASISTEN].JENIS = @Jenis
-                        AND [TBL_PENGGAJIAN].PANGKAT = @Pangkat";
+                                [TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                                [TBL_BULAN_GAJI].BULAN,
+                                [TBL_BULAN_GAJI].ID_TAHUN,
+                                [TBL_PENGGAJIAN].NPP, 
+                                [TBL_PENGGAJIAN].NAMA,
+                                [TBL_PENGGAJIAN].PANGKAT,
+                                [TBL_PENGGAJIAN].GOLONGAN, 
+                                [TBL_PENGGAJIAN].JENJANG, 
+                                [TBL_PENGGAJIAN].NPWP,
+                                [TBL_PENGGAJIAN].NO_TABUNGAN,
+                                [TBL_ASISTEN].NAMA_BANK,
+                                [TBL_ASISTEN].NAMA_REKENING,
+                                [PAYROLL].[siatmax].[MST_UNIT].NAMA_UNIT,
+                                [REF_JENIS_ASISTEN].JENIS
+                                FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
+                                JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON [PAYROLL].[payroll].[TBL_PENGGAJIAN].NPP = [PAYROLL].[payroll].[TBL_ASISTEN].NPM
+                                JOIN [PAYROLL].[siatmax].[MST_UNIT] ON [PAYROLL].[payroll].[TBL_ASISTEN].ID_UNIT = [PAYROLL].[siatmax].[MST_UNIT].ID_UNIT
+                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
+                                JOIN [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
+                                WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
+                                AND [REF_JENIS_ASISTEN].JENIS = @Jenis
+                                AND [TBL_PENGGAJIAN].PANGKAT = @pangkat
+                                AND NPM = @npp";
 
-                var headers = await conn.QueryAsync<HeaderPenggajianUserAsistenModel>(query, new { IdBulanGaji = idBulanGaji , npp = npp , Jenis = jenis, Pangkat = pangkat });
+                var headers = await conn.QueryAsync<HeaderPenggajianUserAsistenModel>(query, new { IdBulanGaji = idBulanGaji , npp = npp , Jenis = jenis , Pangkat = pangkat});
                 return headers;
                   
             }

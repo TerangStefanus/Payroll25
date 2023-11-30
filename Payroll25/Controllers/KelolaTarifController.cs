@@ -58,7 +58,56 @@ namespace Payroll25.Controllers
             return Json(data);
         }
 
+        [HttpPost]
+        public IActionResult InsertKelolaTarif([FromBody] KelolaTarifModel model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
 
+            try
+            {
+                success = DAO.InsertKelolaTarif(model);
+
+                if (success != 0)
+                {
+                    data.status = true;
+                    data.pesan = "Insert berhasil";
+                }
+                else
+                {
+                    data.status = false;
+                    data.pesan = "Insert gagal";
+                }
+            }
+            catch (Exception ex)
+            {
+                data.status = false;
+                data.pesan = $"Terjadi kesalahan saat melakukan insert: {ex.Message}";
+            }
+
+            return Json(data);
+        }
+
+        [HttpPost]
+        public IActionResult DeleteKelolaTarif([FromBody] List<KelolaTarifModel> model)
+        {
+            DBOutput data = new DBOutput();
+            var success = 0;
+
+            success = DAO.DeleteKelolaTarif(model);
+            if (success != 0)
+            {
+                data.status = true;
+                data.pesan = " Delete data berhasil ";
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = " Delete data gagal";
+            }
+
+            return Json(data);
+        }
 
 
     }

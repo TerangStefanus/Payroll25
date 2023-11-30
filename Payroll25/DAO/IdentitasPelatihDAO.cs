@@ -1,4 +1,5 @@
-﻿using CsvHelper.Configuration;
+﻿using ClosedXML.Excel;
+using CsvHelper.Configuration;
 using CsvHelper;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,8 @@ using Payroll25.Models;
 using System.Data.SqlClient;
 using System.Globalization;
 using static Payroll25.Models.IdentitasPelatihModel;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Payroll25.DAO
 {
@@ -57,9 +60,9 @@ namespace Payroll25.DAO
                     conn.Open();
 
                     var query = @"INSERT INTO [payroll].[TBL_PELATIH] 
-                                (NPP, NAMA, ID_TAHUN_AKADEMIK, NO_SEMESTER, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK) 
+                                (NPP, NAMA, ID_TAHUN_AKADEMIK, NO_SEMESTER, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK, TGL_LAHIR, PASSWORD, ALAMAT, NO_TELP) 
                                 VALUES 
-                                (@NPP, @NAMA, @ID_TAHUN_AKADEMIK, @NO_SEMESTER, @ID_UNIT , @NO_REKENING, @NAMA_REKENING, @NAMA_BANK)";
+                                (@NPP, @NAMA, @ID_TAHUN_AKADEMIK, @NO_SEMESTER, @ID_UNIT , @NO_REKENING, @NAMA_REKENING, @NAMA_BANK, @TGL_LAHIR, @PASSWORD, @ALAMAT, @NO_TELP)";
 
                     var parameters = new
                     {
@@ -71,6 +74,10 @@ namespace Payroll25.DAO
                         NO_REKENING = viewModel.IdentitasPelatih.NO_REKENING,
                         NAMA_REKENING = viewModel.IdentitasPelatih.NAMA_REKENING,
                         NAMA_BANK = viewModel.IdentitasPelatih.NAMA_BANK,
+                        TGL_LAHIR = new DateTime(1999, 09, 09).ToString("yyyy-MM-dd"),
+                        PASSWORD = _encPass("1234567"),
+                        ALAMAT = "Alamat NPP " + viewModel.IdentitasPelatih.NPP,
+                        NO_TELP = "08XXXXXXXXXX"
                     };
 
                     conn.Execute(query, parameters);
@@ -83,6 +90,18 @@ namespace Payroll25.DAO
                     return false; // Gagal melakukan insert
                 }
             }
+        }
+
+        private string _encPass(string password)
+        {
+            // password to RIPEMD160
+            string hash = "";
+            Encoding enc = Encoding.GetEncoding(1252);
+            RIPEMD160 ripemdHasher = RIPEMD160.Create();
+            byte[] data = ripemdHasher.ComputeHash(Encoding.Default.GetBytes(password));
+            hash = enc.GetString(data);
+
+            return hash;
         }
 
         public IEnumerable<IdentitasPelatihModel> GetUnit()
@@ -179,14 +198,14 @@ namespace Payroll25.DAO
             }
         }
 
-        public (bool, List<string>) UploadAndInsertCSV(IFormFile csvFile)
+        public (bool, List<string>) UploadAndInsertExcel(IFormFile excelFile)
         {
             var errorMessages = new List<string>();
+
             try
             {
-                using (var stream = csvFile.OpenReadStream())
-                using (var reader = new StreamReader(stream))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                using (var stream = excelFile.OpenReadStream())
+                using (var workbook = new XLWorkbook(stream))
                 using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
                 {
                     conn.Open();
@@ -194,7 +213,28 @@ namespace Payroll25.DAO
 
                     try
                     {
-                        var records = csv.GetRecords<IdentitasPelatihModel>().ToList();
+                        var worksheet = workbook.Worksheets.First(); // Ambil worksheet pertama
+
+                        var rows = worksheet.RowsUsed().Skip(1); // Skip baris header
+                        var records = new List<IdentitasPelatihModel>();
+
+                        foreach (var row in rows)
+                        {
+                            var record = new IdentitasPelatihModel
+                            {
+                                NPP = GetStringCellValue(row.Cell(1)),
+                                NAMA = GetStringCellValue(row.Cell(2)),
+                                ID_TAHUN_AKADEMIK = GetNullableIntValue(row.Cell(3)),
+                                NO_SEMESTER = GetNullableIntValue(row.Cell(4)),
+                                ID_UNIT = GetNullableIntValue(row.Cell(5)),
+                                NO_REKENING = GetStringCellValue(row.Cell(6)),
+                                NAMA_REKENING = GetStringCellValue(row.Cell(7)),
+                                NAMA_BANK = GetStringCellValue(row.Cell(8)),
+                            };
+
+                            records.Add(record);
+                        }
+
                         var validRecords = records.Where(record =>
                             !string.IsNullOrEmpty(record.NPP) &&
                             !string.IsNullOrEmpty(record.NAMA) &&
@@ -203,7 +243,7 @@ namespace Payroll25.DAO
                             record.ID_UNIT != null &&
                             !string.IsNullOrEmpty(record.NO_REKENING) &&
                             !string.IsNullOrEmpty(record.NAMA_REKENING) &&
-                            !string.IsNullOrEmpty(record.NAMA_BANK) 
+                            !string.IsNullOrEmpty(record.NAMA_BANK)
                         ).ToList();
 
                         var invalidRecords = records.Except(validRecords).ToList();
@@ -215,10 +255,15 @@ namespace Payroll25.DAO
 
                         foreach (var record in validRecords)
                         {
+                            record.ALAMAT = "Alamat NPP " + record.NPP;
+                            record.NO_TELP = "08XXXXXXXXXX";
+                            record.PASSWORD = _encPass("1234567");
+                            record.TGL_LAHIR = DateTime.ParseExact("1999-09-09", "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
                             var insertQuery = @"INSERT INTO [payroll].[TBL_PELATIH] 
-                                                (NPP, NAMA, ID_TAHUN_AKADEMIK, NO_SEMESTER, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK) 
-                                                VALUES 
-                                                (@NPP, @NAMA, @ID_TAHUN_AKADEMIK, @NO_SEMESTER, @ID_UNIT , @NO_REKENING, @NAMA_REKENING, @NAMA_BANK)";
+                                               (NPP, NAMA, ID_TAHUN_AKADEMIK, NO_SEMESTER, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK, PASSWORD, TGL_LAHIR) 
+                                               VALUES 
+                                               (@NPP, @NAMA, @ID_TAHUN_AKADEMIK, @NO_SEMESTER, @ID_UNIT , @NO_REKENING, @NAMA_REKENING, @NAMA_BANK, @PASSWORD, @TGL_LAHIR)";
 
                             conn.Execute(insertQuery, record, transaction);
                         }
@@ -243,6 +288,26 @@ namespace Payroll25.DAO
             }
         }
 
+        private int? GetNullableIntValue(IXLCell cell)
+        {
+            if (cell.IsEmpty())
+            {
+                return null;
+            }
+
+            int result;
+            if (int.TryParse(cell.Value.ToString(), out result))
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        private string GetStringCellValue(IXLCell cell)
+        {
+            return cell.IsEmpty() ? null : cell.Value.ToString();
+        }
 
 
     }

@@ -1,4 +1,5 @@
-﻿using CsvHelper.Configuration;
+﻿using ClosedXML.Excel;
+using CsvHelper.Configuration;
 using CsvHelper;
 using Dapper;
 using Payroll25.Models;
@@ -279,59 +280,82 @@ namespace Payroll25.DAO
             }
         }
 
-        public (bool, List<string>) UploadAndInsertCSV(IFormFile csvFile)
+        public (bool, List<string>) UploadAndInsertExcel(IFormFile excelFile)
         {
             var errorMessages = new List<string>();
+
             try
             {
-                using (var stream = csvFile.OpenReadStream())
-                using (var reader = new StreamReader(stream))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                using (var stream = excelFile.OpenReadStream())
+                using (var workbook = new XLWorkbook(stream))
                 {
-                    conn.Open();
-                    var transaction = conn.BeginTransaction();
+                    var worksheet = workbook.Worksheets.First(); // Ambil worksheet pertama
 
-                    try
+                    var rows = worksheet.RowsUsed().Skip(1); // Skip baris header
+                    var records = new List<IdentitasAsistenModel>();
+
+                    foreach (var row in rows)
                     {
-                        var records = csv.GetRecords<IdentitasAsistenModel>().ToList();
-                        var validRecords = records.Where(record =>
-                            record.ID_TAHUN_AKADEMIK != null &&
-                            record.NO_SEMESTER != null &&
-                            !string.IsNullOrEmpty(record.NPM) &&
-                            record.ID_UNIT != null &&
-                            !string.IsNullOrEmpty(record.NO_REKENING) &&
-                            !string.IsNullOrEmpty(record.NAMA_REKENING) &&
-                            !string.IsNullOrEmpty(record.NAMA_BANK) &&
-                            record.ID_JENIS_ASISTEN != null
-                        ).ToList();
-
-                        var invalidRecords = records.Except(validRecords).ToList();
-
-                        foreach (var invalidRecord in invalidRecords)
+                        var record = new IdentitasAsistenModel
                         {
-                            errorMessages.Add($"Record dengan NPM {invalidRecord.NPM} memiliki data yang tidak valid atau tidak lengkap.");
-                        }
+                            ID_TAHUN_AKADEMIK = GetNullableIntValue(row.Cell(1)),
+                            NO_SEMESTER = GetNullableIntValue(row.Cell(2)),
+                            NPM = GetStringCellValue(row.Cell(3)),
+                            ID_UNIT = GetNullableIntValue(row.Cell(4)),
+                            NO_REKENING = GetStringCellValue(row.Cell(5)),
+                            NAMA_REKENING = GetStringCellValue(row.Cell(6)),
+                            NAMA_BANK = GetStringCellValue(row.Cell(7)),
+                            ID_JENIS_ASISTEN = GetNullableIntValue(row.Cell(8)),
+                        };
 
-                        foreach (var record in validRecords)
-                        {
-                            var insertQuery = @"INSERT INTO payroll.TBL_ASISTEN 
-                                                (ID_TAHUN_AKADEMIK, NO_SEMESTER, NPM, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK, ID_JENIS_ASISTEN) 
-                                                VALUES 
-                                                (@ID_Tahun_Akademik, @no_Semester, @npm, @ID_Unit , @no_Rekening, @nama_Rekening, @nama_Bank, @ID_Jenis_Asisten)";
-
-                            conn.Execute(insertQuery, record, transaction);
-                        }
-
-                        transaction.Commit();
-                        return (true, errorMessages);
+                        records.Add(record);
                     }
-                    catch (Exception ex)
+
+                    var validRecords = records.Where(record =>
+                        record.ID_TAHUN_AKADEMIK != null &&
+                        record.NO_SEMESTER != null &&
+                        !string.IsNullOrEmpty(record.NPM) &&
+                        record.ID_UNIT != null &&
+                        !string.IsNullOrEmpty(record.NO_REKENING) &&
+                        !string.IsNullOrEmpty(record.NAMA_REKENING) &&
+                        !string.IsNullOrEmpty(record.NAMA_BANK) &&
+                        record.ID_JENIS_ASISTEN != null
+                    ).ToList();
+
+                    var invalidRecords = records.Except(validRecords).ToList();
+
+                    foreach (var invalidRecord in invalidRecords)
                     {
-                        transaction.Rollback();
-                        Console.WriteLine("Error: " + ex.Message);
-                        errorMessages.Add(ex.Message);
-                        return (false, errorMessages);
+                        errorMessages.Add($"Record dengan NPM {invalidRecord.NPM} memiliki data yang tidak valid atau tidak lengkap.");
+                    }
+
+                    using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                    {
+                        conn.Open();
+                        var transaction = conn.BeginTransaction();
+
+                        try
+                        {
+                            foreach (var record in validRecords)
+                            {
+                                var insertQuery = @"INSERT INTO payroll.TBL_ASISTEN 
+                                    (ID_TAHUN_AKADEMIK, NO_SEMESTER, NPM, ID_UNIT, NO_REKENING, NAMA_REKENING, NAMA_BANK, ID_JENIS_ASISTEN) 
+                                    VALUES 
+                                    (@ID_Tahun_Akademik, @no_Semester, @npm, @ID_Unit , @no_Rekening, @nama_Rekening, @nama_Bank, @ID_Jenis_Asisten)";
+
+                                conn.Execute(insertQuery, record, transaction);
+                            }
+
+                            transaction.Commit();
+                            return (true, errorMessages);
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                            Console.WriteLine("Error: " + ex.Message);
+                            errorMessages.Add(ex.Message);
+                            return (false, errorMessages);
+                        }
                     }
                 }
             }
@@ -342,6 +366,29 @@ namespace Payroll25.DAO
                 return (false, errorMessages);
             }
         }
+
+        private int? GetNullableIntValue(IXLCell cell)
+        {
+            if (cell.IsEmpty())
+            {
+                return null;
+            }
+
+            int result;
+            if (int.TryParse(cell.Value.ToString(), out result))
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        private string GetStringCellValue(IXLCell cell)
+        {
+            return cell.IsEmpty() ? null : cell.Value.ToString();
+        }
+
+
 
 
 

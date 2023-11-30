@@ -163,7 +163,7 @@
                     <td style="font-size: 24px;width:40%">Rincian Honorarium</td>
                     <td>Bulan</td>
                     <td style="width:50%">
-                        : @DateTime.Now.ToString("MMMM yyyy")
+                        : @Model.Header.BULAN @Model.Header.ID_TAHUN
                     </td>
                 </tr>
                 <tr>
@@ -191,7 +191,7 @@
                 <tr>
                     <td>Nama</td>
                     <td>: @Model.Header.NAMA</td>
-                    <td>Nomor Tabungan</td>
+                    <td>Nama Tabungan</td>
                     <td>: @Model.Header.NAMA_REKENING</td>
                 </tr>
                 <tr>

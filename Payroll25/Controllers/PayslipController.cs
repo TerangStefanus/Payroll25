@@ -42,7 +42,7 @@ namespace Payroll25.Controllers
         [HttpGet]
         public async Task<IActionResult> CheckAutoCetakSlipGaji(int idBulanGaji, string npp)
         {
-            var isAvailable = await DAO.CheckDataGajiMhs(idBulanGaji, npp);
+            var isAvailable = await DAO.CheckDataGajiMhs(idBulanGaji, npp); // Data harus 1 NPM
             if (!isAvailable)
             {
                 return NotFound(new { success = false, message = "Data gaji tidak tersedia" });
@@ -53,7 +53,7 @@ namespace Payroll25.Controllers
         [HttpGet]
         public async Task<IActionResult> CetakSlipGaji(int idBulanGaji, string npp)
         {
-            var asistenDataList = await DAO.GetAsistenDataByNPP(npp);
+            var asistenDataList = await DAO.GetAsistenDataByNPP(npp); // Data harusnya 1 NPM
 
             if (asistenDataList == null || !asistenDataList.Any())
             {
@@ -66,9 +66,9 @@ namespace Payroll25.Controllers
             var uniqueJenisAsisten = asistenDataList.Select(a => a.JENIS).Distinct();
             List<string> errors = new List<string>();
 
-            foreach (var jenis in uniqueJenisAsisten)
+            foreach (var jenis in uniqueJenisAsisten)// Iterasi per jenis Asisten
             {
-                var headers = await DAO.GetHeaderPenggajianUserAsisten(idBulanGaji, npp, jenis);
+                var headers = await DAO.GetHeaderPenggajianUserAsisten(idBulanGaji, npp, jenis);// Nanti akan dibedakan melalui sebuah fungsi convert Jenis -> Pangkat
 
                 if (headers == null || !headers.Any())
                 {
@@ -76,7 +76,7 @@ namespace Payroll25.Controllers
                     continue; // Skip to the next iteration
                 }
 
-                foreach (var header in headers)
+                foreach (var header in headers)// Cetak data berdasarkan ID Penggajian per jenis mahasiswa ( Hasil Akurat kalau 1 NPM punya 2 (JENIS) lebih dari itu agak kacau kecuali ada perubahan data Vakasi Beban Mengajar ) 
                 {
                     var isDetailAvailable = await DAO.CheckDetailGajiAsisten(header.ID_PENGGAJIAN);
                     if (!isDetailAvailable)

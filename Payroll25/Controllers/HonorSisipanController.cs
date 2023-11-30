@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Payroll25.DAO;
 using Payroll25.Models;
 using System.Globalization;
+using ClosedXML.Excel;
 
 namespace Payroll25.Controllers
 {
@@ -43,11 +44,11 @@ namespace Payroll25.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> UploadCSV(IFormFile CsvFile)
+        public async Task<IActionResult> UploadExcel(IFormFile excelFile)
         {
             var result = new { success = false, errorMessage = string.Empty };
 
-            if (CsvFile == null || CsvFile.Length == 0)
+            if (excelFile == null || excelFile.Length == 0)
             {
                 result = new { success = false, errorMessage = "File tidak ditemukan" };
                 return Json(result);
@@ -55,68 +56,67 @@ namespace Payroll25.Controllers
 
             try
             {
-                using (var reader = new StreamReader(CsvFile.OpenReadStream()))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                using (var stream = excelFile.OpenReadStream())
+                using (var workbook = new XLWorkbook(stream))
                 {
-                    var records = csv.GetRecords<HonorSisipanModel>().ToList();
-
-                    var uploadResult = DAO.UploadAndInsertCSV(CsvFile); // Memanggil metode ini dengan parameter yang benar
+                    var uploadResult = DAO.UploadAndInsertExcel(excelFile);
 
                     if (uploadResult.Item1)
                     {
-                        TempData["success"] = "Berhasil mengunggah dan memproses CSV!";
+                        TempData["success"] = "Berhasil mengunggah dan memproses Excel!";
+                        result = new { success = true, errorMessage = string.Empty }; // Only set success to true if upload was successful
                     }
                     else
                     {
-                        TempData["error"] = "Gagal mengunggah dan memproses CSV.";
+                        TempData["error"] = "Gagal mengunggah dan memproses Excel.";
                         if (uploadResult.Item2.Any())
                         {
                             TempData["validationErrors"] = string.Join(", ", uploadResult.Item2);
                         }
+                        result = new { success = false, errorMessage = "Gagal mengunggah dan memproses Excel." }; // Set success to false
                     }
                 }
-
-                result = new { success = true, errorMessage = string.Empty };
             }
             catch (Exception ex)
             {
-                result = new { success = false, errorMessage = "Gagal memproses file CSV: " + ex.Message };
+                result = new { success = false, errorMessage = "Gagal memproses file Excel: " + ex.Message };
             }
+
 
             return Json(result);
         }
 
-        public IActionResult DownloadCSV()
+        public IActionResult DownloadExcel()
         {
             try
             {
-                var config = new CsvConfiguration(CultureInfo.InvariantCulture) { };
-
-                using var memoryStream = new MemoryStream();
-                using var streamWriter = new StreamWriter(memoryStream);
-                using var csvWriter = new CsvWriter(streamWriter, config);
-                csvWriter.Context.RegisterClassMap<HonorSisipanModelMap>();
-
-                var templateRecord = new HonorSisipanModel
+                using (var memoryStream = new MemoryStream())
+                using (var workbook = new XLWorkbook())
                 {
-                    ID_KOMPONEN_GAJI = 0,
-                    ID_BULAN_GAJI = 0,
-                    NPP = "Isi NPMP disini",
-                    JUMLAH = 0
-                };
+                    var worksheet = workbook.Worksheets.Add("TemplateSheet");
 
-                var templateList = new List<HonorSisipanModel> { templateRecord };
+                    // Adding headers
+                    worksheet.Cell(1, 1).Value = "ID_KOMPONEN_GAJI";
+                    worksheet.Cell(1, 2).Value = "ID_BULAN_GAJI";
+                    worksheet.Cell(1, 3).Value = "NPP";
+                    worksheet.Cell(1, 4).Value = "JUMLAH";
 
-                csvWriter.WriteRecords(templateList);
+                    // Adding example data
+                    worksheet.Cell(2, 1).Value = 0;
+                    worksheet.Cell(2, 2).Value = 0;
+                    worksheet.Cell(2, 3).Value = "Isi NPP disini";
+                    worksheet.Cell(2, 4).Value = 0;
 
-                streamWriter.Flush();
-                memoryStream.Seek(0, SeekOrigin.Begin);
+                    workbook.SaveAs(memoryStream);
 
-                return File(memoryStream.ToArray(), "text/csv", "HonorSisipan_Template.csv");
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+
+                    return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Honor_Template.xlsx");
+                }
             }
             catch (Exception ex)
             {
-                return BadRequest("Terjadi kesalahan saat mencoba mendownload CSV: " + ex.Message);
+                return BadRequest("Terjadi kesalahan saat mencoba mendownload Excel: " + ex.Message);
             }
         }
 

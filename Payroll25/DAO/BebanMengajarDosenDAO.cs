@@ -83,46 +83,69 @@
                     }
                 }
             }
-        
-            public int InsertBebanMengajar(BebanMengajarDosenModel model)
+
+        public int InsertBebanMengajar(BebanMengajarDosenModel model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+                try
                 {
-                    try
-                    {
-                        var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
-                                    ([ID_TAHUN_AKADEMIK],[NO_SEMESTER],[NPP],[TOTAL_SKS],[BEBAN_STRUKTURAL],[KELEBIHAN_BEBAN],[TGL_AWAL_SK],[TGL_AKHIR_SK])
-                                    VALUES
-                                    (@ID_TAHUN_AKADEMIK,@NO_SEMESTER,@NPP,@TOTAL_SKS,@BEBAN_STRUKTURAL,@KELEBIHAN_BEBAN,@TGL_AWAL_SK,@TGL_AKHIR_SK)";
+                    var query = @"INSERT INTO [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
+                ([ID_TAHUN_AKADEMIK],[NO_SEMESTER],[NPP],[TOTAL_SKS],[BEBAN_STRUKTURAL],[KELEBIHAN_BEBAN],[TGL_AWAL_SK],[TGL_AKHIR_SK])
+                VALUES
+                (@ID_TAHUN_AKADEMIK,@NO_SEMESTER,@NPP,@TOTAL_SKS,@BEBAN_STRUKTURAL,@KELEBIHAN_BEBAN,@TGL_AWAL_SK,@TGL_AKHIR_SK)";
 
-                        var parameters = new
-                        {
-                            ID_TAHUN_AKADEMIK = model.ID_TAHUN_AKADEMIK,
-                            NO_SEMESTER = model.NO_SEMESTER,
-                            NPP = model.NPP,
-                            TOTAL_SKS = model.TOTAL_SKS,
-                            BEBAN_STRUKTURAL = (int?)null, // Set null
-                            KELEBIHAN_BEBAN = (int?)null, // Set null
-                            TGL_AWAL_SK = DateTime.Now, // Set to current time
-                            TGL_AKHIR_SK = DateTime.Now.AddMonths(5) // Set to 5 months from now
-                        };
+                    DateTime today = DateTime.Now;
+                    DateTime awalSK, akhirSK;
 
-                        return conn.Execute(query, parameters);
-                    }
-                    catch (SqlException sqlEx)
+                    // Check semester type
+                    if (today.Month >= 9 && today.Month <= 12) // Gasal
                     {
-                        Console.WriteLine($"SQL Error: {sqlEx.Message}");
-                        return 0;
+                        awalSK = new DateTime(today.Year, 9, 25); // September 25th of the current year
+                        akhirSK = new DateTime(today.Year + 1, 1, 25); // January 25th of the next year
                     }
-                    catch (Exception ex)
+                    else if (today.Month >= 2 && today.Month <= 7) // Genap
                     {
-                        Console.WriteLine($"An error occurred: {ex.Message}");
-                        throw;
+                        awalSK = new DateTime(today.Year, 2, 25); // February 25th of the current year
+                        akhirSK = new DateTime(today.Year, 7, 25); // July 25th of the current year
                     }
+                    else // Default case, handle as needed
+                    {
+                        // Add your default logic here
+                        awalSK = DateTime.MinValue;
+                        akhirSK = DateTime.MinValue;
+                    }
+
+                    var parameters = new
+                    {
+                        ID_TAHUN_AKADEMIK = model.ID_TAHUN_AKADEMIK,
+                        NO_SEMESTER = model.NO_SEMESTER,
+                        NPP = model.NPP,
+                        TOTAL_SKS = model.TOTAL_SKS,
+                        BEBAN_STRUKTURAL = (int?)null, // Set null
+                        KELEBIHAN_BEBAN = (int?)null, // Set null
+                        TGL_AWAL_SK = awalSK,
+                        TGL_AKHIR_SK = akhirSK
+                    };
+
+                    return conn.Execute(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
                 }
             }
+        }
 
-            public int UpdateBebanMengajar(List<BebanMengajarDosenModel> model)
+
+
+        public int UpdateBebanMengajar(List<BebanMengajarDosenModel> model)
             {
                 using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
                 {

@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
-using System.ComponentModel.DataAnnotations.Schema;
+using ClosedXML.Excel;
 using CsvHelper.Configuration;
+using System.Runtime.Serialization;
 
 namespace Payroll25.Models
 {
@@ -28,10 +29,14 @@ namespace Payroll25.Models
         public float? JUMLAH { get; set; }
 
         [Optional]
-        public DateTime? DATE_INSERTED { get; set; }
+        public DateTime? DATE_INSERTED { get; set; } = DateTime.Now;
 
         [Optional]
         public string? DESKRIPSI { get; set; }
+
+        [Ignore] // CsvHelper akan mengabaikan properti ini saat membaca atau menulis CSV
+        [IgnoreDataMember] // ClosedXML akan mengabaikan properti ini saat membaca atau menulis XLS
+        public IXLWorksheet WorksheetReference { get; set; }
 
         public class HonorSisipanViewModel
         {
@@ -40,10 +45,10 @@ namespace Payroll25.Models
             public string NPPFilter { get; set; }
 
             [Required]
-            [Display(Name = "CSV File")]
+            [Display(Name = "Excel File")] // Ubah label sesuai dengan jenis file
             [DataType(DataType.Upload)]
-            [FileExtensions(Extensions = "csv", ErrorMessage = "Please upload a valid CSV file.")]
-            public IFormFile CsvFile { get; set; }
+            [FileExtensions(Extensions = "xlsx", ErrorMessage = "Please upload a valid Excel file.")]
+            public IFormFile ExcelFile { get; set; }
         }
 
         [Optional]

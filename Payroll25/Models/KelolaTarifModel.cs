@@ -2,7 +2,7 @@
 {
     public class KelolaTarifModel
     {
-        // -------- CODE INPUT FORM -------- \\
+        // -------- Update & View Tarif-------- \\
         public int ID_MST_TARIF_PAYROLL { get; set; }
         public int ID_REF_JBTN_AKADEMIK { get; set; }
         public int ID_REF_STRUKTURAL { get; set; }
@@ -15,9 +15,27 @@
         public string JENJANG_KELAS { get; set; }
         public int ID_KOMPONEN_GAJI { get; set; }
 
-        // -------- CODE INPUT FORM -------- \\
+        // -------- Update & View  Tarif -------- \\
 
-        public string KOMPONEN_GAJI { get; set; } // Menampung nilai untuk dropdown
+
+
+        // -------- Insert Komponen -------- \\
+
+        public int ID_JNS_KOMPONEN { get; set; }
+        public string KOMPONEN_GAJI { get; set; }
+        public int NO_URUT { get;set; }
+        public int IS_SATUAN { get; set; }
+        public string JENIS_FUNGSIONAL { get; set; }
+        public int IS_DELETED { get; set; }
+
+        // -------- Insert Komponen -------- \\
+
+
+
+
+
+
+
 
         public class KelolaTarifViewModel
         {

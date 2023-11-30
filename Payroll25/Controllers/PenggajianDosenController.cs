@@ -13,7 +13,6 @@ namespace Payroll25.Controllers
         public PenggajianDosenController()
         {
             DAO = new PenggajianDosenDAO();
-
         }
 
         public IActionResult Index()

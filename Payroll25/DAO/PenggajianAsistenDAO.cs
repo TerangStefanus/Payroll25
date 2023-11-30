@@ -527,6 +527,8 @@ namespace Payroll25.DAO
 
                 string query = @"SELECT
                         [TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                        [TBL_BULAN_GAJI].BULAN,
+                        [TBL_BULAN_GAJI].ID_TAHUN,
                         [TBL_PENGGAJIAN].NPP, 
                         [TBL_PENGGAJIAN].NAMA,
                         [TBL_PENGGAJIAN].PANGKAT,
@@ -542,6 +544,7 @@ namespace Payroll25.DAO
                         JOIN [payroll].[TBL_ASISTEN] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_ASISTEN].NPM
                         JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_ASISTEN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
                         JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
+                        JOIN [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
                         WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
                         AND [MST_UNIT].NAMA_UNIT = @Unit 
                         AND [REF_JENIS_ASISTEN].JENIS = @Jenis

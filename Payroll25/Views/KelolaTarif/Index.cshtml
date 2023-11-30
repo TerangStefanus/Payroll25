@@ -11,22 +11,20 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <style>
-        .editable-cell:hover {
-            cursor: pointer; /* Ubah penunjuk mouse menjadi tangan saat dihover */
-        }
-
-        .dataTables_wrapper {
-            width: 100%;
+        .table-container {
             overflow-x: auto;
         }
 
-        table.dataTable {
-            width: 100%;
-            margin: 0 auto;
-            clear: both;
-            border-collapse: separate;
-            border-spacing: 0;
-            white-space: nowrap; /* Ini akan mencegah baris dari wrapping dan memastikan bahwa seluruh baris akan scrollable */
+        #dataTable_wrapper {
+            text-align: center;
+        }
+
+        #dataTable_filter {
+            text-align: right;
+        }
+
+        #dataTable_paginate {
+            text-align: center;
         }
     </style>
 
@@ -38,11 +36,30 @@
 
         <div class="row">
             <!-- Sub-container untuk Tambah -->
-            
+            <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
+                <h3 style="padding-bottom: 15px;">
+                    Tambah Data
+                </h3>
+
+                <form id="insertForm" method="post">
+                    
+
+                    <div class="mb-3">
+                        <label for="KOMPONEN_GAJI" class="form-label">Nama Tarif Payroll</label>
+                        <input type="text" class="form-control" id="KOMPONEN_GAJI" name="KOMPONEN_GAJI" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="NOMINAL" class="form-label">Nominal</label>
+                        <input type="text" class="form-control" id="NOMINAL" name="NOMINAL" required>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="insertBtn">Tambah Data</button>
+                </form>
+            </div>
 
             <!-- Sub-container untuk Pencarian -->
             <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
-
                 <h3 style="padding-bottom: 15px;">
                     Pencarian
                 </h3>
@@ -62,63 +79,50 @@
 
                     <button class="btn btn-primary" type="submit">Cari</button>
                 </form>
-
-
             </div>
         </div>
 
-        <!-- Tabel data beban mengajar -->
-        <table class="table mt-3" id="dataTable">
-            <thead style="background-color: #8FA0C7">
-                <tr>
-                    <th>NO</th>
-                    <th>ID MST TARIF_PAYROLL</th>
-                    <th>ID REF JBTN_AKADEMIK</th>
-                    <th>ID REF STRUKTURAL</th>
-                    <th>ID REF GOLONGAN</th>
-                    <th>ID REF FUNGSIONAL</th>
-                    <th>ID REF JENJANG</th>
-                    <th>NAMA TARIF PAYROLL</th>
-                    <th>NOMINAL</th>
-                    <th>JENIS</th>
-                    <th>JENJANG KELAS</th>
-                    <th>ID_KOMPONEN GAJI</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.KelolaTarifList != null)
-                {
-                    @foreach (var item in Model.KelolaTarifList)
+        <!-- Tabel data kelola tarif-->
+        <div class="table-container">
+            <table class="table mt-3" id="dataTable">
+                <thead style="background-color: #8FA0C7">
+                    <tr>
+                        <th>NO</th>
+                        <th>ID KOMPONEN GAJI</th>
+                        <th>NAMA TARIF PAYROLL</th>
+                        <th>NOMINAL</th>
+                        <th>BUTTON</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.KelolaTarifList != null)
                     {
-                        counter++;
-                        <tr>
-                            <td>@counter</td>
-                            <td>@item.ID_MST_TARIF_PAYROLL</td>
-                            <td>@item.ID_REF_JBTN_AKADEMIK</td>
-                            <td>@item.ID_REF_STRUKTURAL</td>
-                            <td>@item.ID_REF_GOLONGAN</td>
-                            <td>@item.ID_REF_FUNGSIONAL</td>
-                            <td>@item.ID_REF_JENJANG</td>
-                            <td>@item.NAMA_TARIF_PAYROLL</td>
-                            <td data-id="@item.ID_MST_TARIF_PAYROLL" class="editable-cell" title="Edit">@item.NOMINAL</td>
-                            <td>@item.JENIS</td>
-                            <td>@item.JENJANG_KELAS</td>
-                            <td>@item.ID_KOMPONEN_GAJI</td>
-                        </tr>
+                        @foreach (var item in Model.KelolaTarifList)
+                        {
+                            counter++;
+                            <tr>
+                                <td>@counter</td>
+                                <td>@item.ID_KOMPONEN_GAJI</td>
+                                <td>@item.NAMA_TARIF_PAYROLL</td>
+                                <td data-id="@item.ID_MST_TARIF_PAYROLL" class="editable-cell" title="Edit">@item.NOMINAL</td>
+                                <td><button type="button" class="btn btn-danger" onclick="deleteRow(@item.ID_MST_TARIF_PAYROLL)">Hapus</button></td>
+                            </tr>
+                        }
                     }
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+
+        
+
 
         @if (Model.KelolaTarifList != null && Model.KelolaTarifList.Any())
         {
             <button id="updateBtn" class="btn btn-success mt-3">Simpan</button>
         }
-
     </div>
-
 </body>
+
 
 
 @section Scripts {
@@ -128,6 +132,25 @@
 
     <script>
         var updatedData = [];
+
+        function deleteRow(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                $.ajax({
+                    url: '/KelolaTarif/DeleteKelolaTarif',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify([{ ID_MST_TARIF_PAYROLL: id }]), // Mengirimkan ID dalam format JSON
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil dihapus');
+                            location.reload(); // Memuat ulang halaman untuk memperbarui tampilan tabel
+                        } else {
+                            alert('Penghapusan data gagal');
+                        }
+                    }
+                });
+            }
+        }
 
         $(document).ready(function () {
 
@@ -172,7 +195,6 @@
             });
 
             $('#dataTable').DataTable({
-                "scrollX": true, // Ini akan menambahkan scroll horizontal
                 "pageLength": 10, // Menampilkan 10 baris per halaman
                 "lengthChange": false, // Sembunyikan dropdown untuk mengubah jumlah baris per halaman
                 "info": true, // Tampilkan info jumlah total baris
@@ -180,13 +202,41 @@
                 "language": {
                     "search": "Cari:",
                     "paginate": {
-                        "first": "Awal",
-                        "last": "Akhir",
+                        "first": "First",
+                        "last": "Last",
                         "next": ">",
                         "previous": "<"
                     }
                 }
             });
+
+
+            // Untuk menambah data baru
+            $("#insertBtn").click(function () {
+                var komponenGaji = $("#KOMPONEN_GAJI").val();
+                var nominal = $("#NOMINAL").val();
+
+                var newData = {
+                    KOMPONEN_GAJI: komponenGaji,
+                    NOMINAL: nominal
+                };
+
+                $.ajax({
+                    url: '/KelolaTarif/InsertKelolaTarif',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(newData),
+                    success: function (response) {
+                        if (response.status) {
+                            alert('Data berhasil ditambahkan');
+                            location.reload();
+                        } else {
+                            alert('Data gagal ditambahkan');
+                        }
+                    }
+                });
+            });
+
 
 
         });

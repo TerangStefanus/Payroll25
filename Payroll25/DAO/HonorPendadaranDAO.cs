@@ -37,9 +37,7 @@ namespace Payroll25.DAO
                                         JOIN
                                             PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
                                         WHERE 
-                                            MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 140 AND 174 
-                                        OR 
-                                            MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 190 AND 197 ";
+                                            (MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 140 AND 174 OR MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 190 AND 197)";
 
                     Dictionary<string, object> parameters = new Dictionary<string, object>();
 

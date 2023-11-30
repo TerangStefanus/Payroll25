@@ -3,6 +3,8 @@
     public class HeaderPenggajianUserDosen
     {
         public int ID_PENGGAJIAN { get; set; }
+        public string BULAN { get; set; }
+        public int ID_TAHUN { get; set; }
         public string NPP { get; set; }
         public string NAMA { get; set; }
         public string GOLONGAN { get; set; }

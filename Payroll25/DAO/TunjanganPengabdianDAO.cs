@@ -29,7 +29,7 @@ namespace Payroll25.DAO
                     if (string.IsNullOrEmpty(NPPFilter) && string.IsNullOrEmpty(NAMAFilter) && string.IsNullOrEmpty(NPMFilter))
                     {
                         // Filter NPP dan NPM dan NAMA
-                        finalQuery = KaryawanQuery(NPPFilter, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, NPMFilter);
+                        finalQuery = KaryawanQuery(NPPFilter, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, NPMFilter);// Spasi sebelah union penting agar tidak terjadi query error
                     }
                     else if (!string.IsNullOrEmpty(NPPFilter) && !string.IsNullOrEmpty(NPMFilter))
                     {
@@ -59,7 +59,7 @@ namespace Payroll25.DAO
                     else if (!string.IsNullOrEmpty(NAMAFilter))
                     {
                         // Filter NAMA saja
-                        finalQuery = KaryawanQuery(null, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, null);// Spasi sebelah union penting agar tidak terjadi query error
+                        finalQuery = KaryawanQuery(null, NAMAFilter, null) + "UNION " + AsistenQuery(null, NAMAFilter, null);
                     }
                     
 

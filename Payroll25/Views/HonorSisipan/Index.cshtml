@@ -45,7 +45,7 @@
             <div class="col-md-6 border border-5 p-3 mb-4 mt-3">
 
                 <h3 style="padding-bottom: 25px;">
-                    Tambah Vakasi Sisipan
+                    Panduan ID Vakasi Sisipan
                 </h3>
 
                 <div class="mb-3">
@@ -64,14 +64,14 @@
                 <div class="mb-3">
                     <label for="ID_BULAN_GAJI" class="form-label">BULAN GAJI</label>
                     <select class="form-control" name="ID_BULAN_GAJI" id="bulanGajiDropdown">
-                        <option value="">Pilih Bulan</option>
+                        <option value="">Cari ID Bulan</option>
                     </select>
                 </div>
 
                 <div class="mb-3">
                     <label for="ID_KOMPONEN_GAJI" class="form-label">KOMPONEN GAJI</label>
                     <select class="form-control" name="ID_KOMPONEN_GAJI" id="komponenGajiDropdown">
-                        <option value="">Pilih Komponen Gaji</option>
+                        <option value="">Cari ID Komponen Gaji</option>
                         @foreach (var item in (IEnumerable<Payroll25.Models.HonorPendadaranModel>)ViewBag.KomponenGajiList)
                         {
                             <option value="@item.ID_KOMPONEN_GAJI">@item.ID_KOMPONEN_GAJI - @item.KOMPONEN_GAJI</option>
@@ -92,9 +92,9 @@
                 <form id="searchForm" method="get" action="@Url.Action("Index", "HonorSisipan")">
 
                     <div>
-                        <h3>Cari Berdasarkan NPP</h3>
+                        <h3>Cari Berdasarkan NPP / NPM</h3>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan NPP">
+                            <input type="text" class="form-control" id="NPPFilter" name="NPPFilter" value="@Model.NPPFilter" placeholder="Masukkan Pencarian">
                         </div>
                     </div>
 
@@ -107,21 +107,22 @@
         </div>
 
         <div class="border border-5 rounded p-4 mb-5">
-            <a href="@Url.Action("DownloadCSV", "HonorSisipan")" class="btn btn-primary mb-3">
-                <i class="fas fa-file-csv"></i> Download CSV
+            <a href="@Url.Action("DownloadExcel", "HonorSisipan")" class="btn btn-primary mb-3">
+                <i class="fas fa-file-excel"></i> Download Excel
             </a>
+
             <div class="row">
                 <div class="col-sm-6 mt-3">
-                    @using (Html.BeginForm("UploadCSV", "HonorSisipan", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    @using (Html.BeginForm("UploadExcel", "HonorSisipan", FormMethod.Post, new { enctype = "multipart/form-data" }))
                     {
                         @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="form-group px-3 pt-2" style="width: 670px;">
-                            <label for="csvFile">Select CSV File</label>
-                            <input type="file" name="CsvFile" id="csvFile" class="form-control" accept=".csv" />
-                            @Html.ValidationMessageFor(model => model.CsvFile, "", new { @class = "text-danger" })
+                            <label for="excelFile">Pilih File Excel</label>
+                            <input type="file" name="ExcelFile" id="excelFile" class="form-control" accept=".xlsx" />
+                            @Html.ValidationMessageFor(model => model.ExcelFile, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="form-group px-3 pt-2" style="width: 670px;">
@@ -137,7 +138,7 @@
             <thead style="background-color: #8FA0C7">
                 <tr>
                     <th>NO</th>
-                    <th>NPP</th>
+                    <th>NPP / NPM</th>
                     <th>KOMPONEN GAJI</th>
                     <th>JUMLAH</th>
                     <th>TANGGAL</th>
@@ -333,19 +334,19 @@
                 e.preventDefault();
 
                 var formData = new FormData();
-                formData.append('CsvFile', $('#csvFile')[0].files[0]);
+                formData.append('ExcelFile', $('#excelFile')[0].files[0]);
 
                 $.ajax({
-                    url: '@Url.Action("UploadCSV", "HonorSisipan")',
+                    url: '@Url.Action("UploadExcel", "HonorSisipan")',
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function (result) {
                         if (result.success) {
-                            alert('Berhasil mengunggah dan memproses CSV!');
+                            alert('Berhasil mengunggah dan memproses Excel!');
                         } else {
-                            alert('Gagal memproses CSV: ' + result.errorMessage);
+                            alert('Gagal memproses Excel: ' + result.errorMessage);
                         }
                     },
                     error: function (xhr, status, error) {
@@ -360,7 +361,7 @@
                 var tahun = $("#tahunInput").val();
                 $.get("/HonorSisipan/GetBulanGajiDropdown", { tahun: tahun }, function (data) {
                     console.log("Data yang diterima dari server:", data);
-                    var options = "<option value=''>Pilih ID Bulan Gaji</option>";
+                    var options = "<option value=''>Cari ID Bulan Gaji</option>";
                     var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                     for (var i = 0; i < data.length; i++) {
                         // options += "<option value='" + data[i].id_bulan + "'>" + namaBulan[i] + "</option>";

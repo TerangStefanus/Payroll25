@@ -97,16 +97,18 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column text-dark" data-widget="treeview" role="menu" data-accordion="false">
                         @*@Html.Raw(menu)*@
-                        <li class="nav-item">
-                            <a href="/User/Index_User" class="nav-link">
-                                <i class="nav-icon fas fa-home"></i>
-                                <p>
-                                    Profile
-                                </p>
-                            </a>
-                        </li>
+                        
                         @if (roleClaim == "Mahasiswa")
                         {
+                            <li class="nav-item">
+                                <a href="/User/Index_User" class="nav-link">
+                                    <i class="nav-icon fas fa-home"></i>
+                                    <p>
+                                        Profile
+                                    </p>
+                                </a>
+                            </li>
+
                             <li class="nav-item">
                                 <a href="\Payslip\Index" class="nav-link">
                                     <i class="nav-icon fas fa-wallet"></i>
@@ -120,6 +122,15 @@
                         @if (roleClaim == "Dosen Kontrak")
                         {
                             <li class="nav-item">
+                                <a href="/User/Index_Dosen" class="nav-link">
+                                    <i class="nav-icon fas fa-home"></i>
+                                    <p>
+                                        Profile
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
                                 <a href="\PayslipDosen\Index" class="nav-link">
                                     <i class="nav-icon fas fa-wallet"></i>
                                     <p>
@@ -131,6 +142,15 @@
 
                         @if (roleClaim == "Pelatih")
                         {
+                            <li class="nav-item">
+                                <a href="/User/Index_Pelatih" class="nav-link">
+                                    <i class="nav-icon fas fa-home"></i>
+                                    <p>
+                                        Profile
+                                    </p>
+                                </a>
+                            </li>
+
                             <li class="nav-item">
                                 <a href="\PayslipPelatih\Index" class="nav-link">
                                     <i class="nav-icon fas fa-wallet"></i>

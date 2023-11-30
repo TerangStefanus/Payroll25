@@ -284,39 +284,48 @@ namespace Payroll25.DAO
                 {
                     // SQL query untuk mengambil data ID komponen gaji , jumlah satuan dan tarif
                     string query = @"
-                    SELECT 
-                    TBL_BEBAN_MENGAJAR.NPP, 
-                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
-                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
-                    TBL_BEBAN_MENGAJAR.TOTAL_SKS AS JUMLAH, 
-                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
-                    FROM [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
-                    INNER JOIN [PAYROLL].[simka].[MST_KARYAWAN] ON TBL_BEBAN_MENGAJAR.NPP = MST_KARYAWAN.NPP
-                    JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_KARYAWAN.ID_REF_JBTN_AKADEMIK = MST_TARIF_PAYROLL.ID_REF_JBTN_AKADEMIK 
-                    JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI 
-                    JOIN [PAYROLL].[simka].[REF_JENJANG] ON MST_KARYAWAN.PENDIDIKAN_TERAKHIR = REF_JENJANG.DESKRIPSI AND REF_JENJANG.ID_REF_JENJANG = MST_TARIF_PAYROLL.ID_REF_JENJANG
-                    WHERE 
-                        MONTH(TGL_AWAL_SK) = (SELECT ID_BULAN FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI] WHERE ID_BULAN_GAJI = @ID_BULAN_GAJI) 
-                        AND YEAR(TGL_AWAL_SK) = @TAHUN
-	                    AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 77 
-	                    AND TBL_BEBAN_MENGAJAR.NPP = @NPP
+                                    SELECT 
+                                    TBL_BEBAN_MENGAJAR.NPP, 
+                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
+                                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                                    TBL_BEBAN_MENGAJAR.TOTAL_SKS AS JUMLAH, 
+                                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
+                                    FROM 
+                                    [PAYROLL].[payroll].[TBL_BEBAN_MENGAJAR]
+                                    INNER JOIN [PAYROLL].[simka].[MST_KARYAWAN] ON TBL_BEBAN_MENGAJAR.NPP = MST_KARYAWAN.NPP
+                                    JOIN [PAYROLL].[simka].[MST_TARIF_PAYROLL] ON MST_KARYAWAN.ID_REF_JBTN_AKADEMIK = MST_TARIF_PAYROLL.ID_REF_JBTN_AKADEMIK 
+                                    JOIN [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] ON MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI 
+                                    JOIN [PAYROLL].[simka].[REF_JENJANG] ON MST_KARYAWAN.PENDIDIKAN_TERAKHIR = REF_JENJANG.DESKRIPSI AND REF_JENJANG.ID_REF_JENJANG = MST_TARIF_PAYROLL.ID_REF_JENJANG
+                                    WHERE 
+                                    MONTH(TGL_AWAL_SK) = 
+                                    (
+                                    CASE 
+                                        WHEN (SELECT ID_BULAN FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI] WHERE ID_BULAN_GAJI = @ID_BULAN_GAJI) IN (9, 10, 11, 12, 1) THEN 9
+                                        WHEN (SELECT ID_BULAN FROM [PAYROLL].[payroll].[TBL_BULAN_GAJI] WHERE ID_BULAN_GAJI = @ID_BULAN_GAJI) IN (2, 3, 4, 5, 6, 7) THEN 2
+                                    ELSE
+                                        NULL 
+                                    END
+                                    )
+                                    AND YEAR(TGL_AWAL_SK) = @TAHUN
+                                    AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = 77 
+                                    AND TBL_BEBAN_MENGAJAR.NPP = @NPP
 
-                    UNION ALL 
+                                    UNION ALL 
 
-                    SELECT DISTINCT
-                    MST_KARYAWAN.NPP,
-                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
-                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
-                    TBL_VAKASI.JUMLAH, 
-                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
-                    FROM PAYROLL.simka.MST_KARYAWAN
-                    JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
-                    JOIN PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
-                    JOIN PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
-                    WHERE 
-	                    TBL_VAKASI.ID_BULAN_GAJI = @ID_BULAN_GAJI
-                        AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 78 AND 201 
-	                    AND MST_KARYAWAN.NPP = @NPP";
+                                    SELECT DISTINCT
+                                    MST_KARYAWAN.NPP,
+                                    MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI,
+                                    MST_KOMPONEN_GAJI.KOMPONEN_GAJI AS NAMA_KOMPONEN_GAJI, 
+                                    TBL_VAKASI.JUMLAH, 
+                                    MST_TARIF_PAYROLL.NOMINAL AS TARIF
+                                    FROM PAYROLL.simka.MST_KARYAWAN
+                                    JOIN PAYROLL.payroll.TBL_VAKASI ON MST_KARYAWAN.NPP = TBL_VAKASI.NPP
+                                    JOIN PAYROLL.payroll.MST_KOMPONEN_GAJI ON TBL_VAKASI.ID_KOMPONEN_GAJI = MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI
+                                    JOIN PAYROLL.simka.MST_TARIF_PAYROLL ON MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI = MST_TARIF_PAYROLL.ID_KOMPONEN_GAJI
+                                    WHERE 
+	                                    TBL_VAKASI.ID_BULAN_GAJI = @ID_BULAN_GAJI
+                                        AND MST_KOMPONEN_GAJI.ID_KOMPONEN_GAJI BETWEEN 78 AND 201 
+	                                    AND MST_KARYAWAN.NPP = @NPP";
 
                     // Inisialisasi parameter SQL
                     var parameters = new
@@ -450,6 +459,8 @@ namespace Payroll25.DAO
             {
                 string query = @"SELECT
                                 [payroll].[TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                                [TBL_BULAN_GAJI].BULAN,
+                                [TBL_BULAN_GAJI].ID_TAHUN,      
                                 [payroll].[TBL_PENGGAJIAN].NPP, 
                                 [payroll].[TBL_PENGGAJIAN].NAMA, 
                                 [payroll].[TBL_PENGGAJIAN].GOLONGAN, 
@@ -467,6 +478,8 @@ namespace Payroll25.DAO
                                     [simka].[MST_KARYAWAN] ON [payroll].[TBL_PENGGAJIAN].NPP = [simka].[MST_KARYAWAN].NPP
                                 JOIN 
                                     [siatmax].[MST_UNIT] ON [simka].[MST_KARYAWAN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
+                                JOIN
+	                                [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
                                 WHERE 
                                     [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = @idBulanGaji ";
 
