@@ -94,20 +94,31 @@ namespace Payroll25.Controllers
             DBOutput data = new DBOutput();
             var success = 0;
 
-            success = DAO.DeleteKelolaTarif(model);
-            if (success != 0)
+            try
             {
-                data.status = true;
-                data.pesan = " Delete data berhasil ";
+                success = DAO.DeleteKelolaTarif(model);
+
+                if (success != 0)
+                {
+                    data.status = true;
+                    data.pesan = "Delete data berhasil";
+                }
+                else
+                {
+                    data.status = false;
+                    data.pesan = "Delete data gagal";
+                }
             }
-            else
+            catch (Exception ex)
             {
+                // Handle exception, log, or perform additional actions as needed
                 data.status = false;
-                data.pesan = " Delete data gagal";
+                data.pesan = $"Terjadi kesalahan: {ex.Message}";
             }
 
             return Json(data);
         }
+
 
 
     }

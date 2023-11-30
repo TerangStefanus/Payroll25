@@ -3,8 +3,9 @@
     using System.Data.SqlClient;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Drawing.Charts;
 
-    namespace Payroll25.DAO
+namespace Payroll25.DAO
     {
     public class KelolaTarifDAO
     {
@@ -17,7 +18,7 @@
                     try
                     {
                         await conn.OpenAsync();
-                        var query = @"SELECT 
+                    var query = @"SELECT 
                                     [ID_MST_TARIF_PAYROLL],
                                     [ID_REF_JBTN_AKADEMIK],
                                     [ID_REF_STRUKTURAL],
@@ -34,9 +35,15 @@
                                     JOIN 
                                     [PAYROLL].[MST_KOMPONEN_GAJI] ON [PAYROLL].[simka].[MST_TARIF_PAYROLL].[ID_KOMPONEN_GAJI] = [PAYROLL].[MST_KOMPONEN_GAJI].[ID_KOMPONEN_GAJI]
                                     WHERE 
-                                    [PAYROLL].[MST_KOMPONEN_GAJI].[JENIS_FUNGSIONAL] = 'Kontrak'";
+                                    [PAYROLL].[MST_KOMPONEN_GAJI].[JENIS_FUNGSIONAL] = 'Kontrak'
+                                    AND
+                                    [PAYROLL].[MST_KOMPONEN_GAJI].IS_DELETED = 0
+                                    AND
+                                    [PAYROLL].[simka].[MST_TARIF_PAYROLL].ISACTIVE = 1";
+             
 
-                        Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
 
                         if (!string.IsNullOrEmpty(NAMAFilter))
                         {
@@ -96,21 +103,23 @@
 
                     if (searchResult == null)
                     {
-                        // Jika pencarian tidak mengembalikan hasil, Anda mungkin ingin menangani kasus ini sesuai kebutuhan Anda
                         throw new Exception("Data komponen gaji tidak ditemukan");
                     }
 
                     // 3. Insert tarif berdasarkan nama komponen dan id komponen gaji
                     var tarifQuery = @"INSERT INTO PAYROLL.[simka].[MST_TARIF_PAYROLL]
-                                    ([NAMA_TARIF_PAYROLL],[NOMINAL],[ID_KOMPONEN_GAJI])
+                                    ([NAMA_TARIF_PAYROLL],[NOMINAL],[ID_KOMPONEN_GAJI],[JENIS],[ISACTIVE],[JENJANG_KELAS])
                                     VALUES
-                                    (@NAMA_TARIF_PAYROLL,@NOMINAL,@ID_KOMPONEN_GAJI)";
+                                    (@NAMA_TARIF_PAYROLL,@NOMINAL,@ID_KOMPONEN_GAJI,@JENIS,@ISACTIVE,@JENJANG_KELAS)";
 
                     var tarifParameters = new
                     {
                         NAMA_TARIF_PAYROLL = model.KOMPONEN_GAJI,
                         NOMINAL = model.NOMINAL,
-                        ID_KOMPONEN_GAJI = searchResult.ID_KOMPONEN_GAJI // Menggunakan ID dari hasil pencarian
+                        ID_KOMPONEN_GAJI = searchResult.ID_KOMPONEN_GAJI,// Menggunakan ID dari hasil pencarian
+                        JENIS = "Komponen Gaji",
+                        ISACTIVE = 1,
+                        JENJANG_KELAS = "Tidak Diketahui"
                     };
 
                     conn.Execute(tarifQuery, tarifParameters, transaction);
@@ -165,10 +174,10 @@
                     try
                     {
                         var query = @"SELECT 
-                            [ID_KOMPONEN_GAJI],
-                            [KOMPONEN_GAJI]
-                            FROM [PAYROLL].[payroll].[MST_KOMPONEN_GAJI]
-                            WHERE JENIS_FUNGSIONAL = 'Kontrak'";
+                                    [ID_KOMPONEN_GAJI],
+                                    [KOMPONEN_GAJI]
+                                    FROM [PAYROLL].[payroll].[MST_KOMPONEN_GAJI]
+                                    WHERE JENIS_FUNGSIONAL = 'Kontrak'";
 
                         var data = await conn.QueryAsync<KelolaTarifModel>(query);
 
@@ -182,37 +191,68 @@
                 }
             }
 
-            public int DeleteKelolaTarif(List<KelolaTarifModel> model)
-            {
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-                {
-                    try
-                    {
-                        var query = @"DELETE FROM [simka].[MST_TARIF_PAYROLL]
-                                    WHERE ID_MST_TARIF_PAYROLL = @ID_MST_TARIF_PAYROLL";
 
-                        return conn.Execute(query, model);
-                    }
-                    catch (SqlException sqlEx)
+        // Fungsi ini tidak benar benar menghapus tarif tetapi hanya mengubah status is delete dan is activenya saja
+        public int DeleteKelolaTarif(List<KelolaTarifModel> model)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                conn.Open();
+
+                try
+                {
+                    foreach (var tarif in model)
                     {
-                        Console.WriteLine($"SQL Error: {sqlEx.Message}");
-                        return 0;
+                        // Step 1: Find ID_KOMPONEN_GAJI in MST_TARIF_PAYROLL
+                        var selectQuery = @"SELECT ID_KOMPONEN_GAJI FROM [PAYROLL].[simka].[MST_TARIF_PAYROLL] WHERE ID_MST_TARIF_PAYROLL = @ID_MST_TARIF_PAYROLL";
+                        int idKomponenGaji = conn.ExecuteScalar<int>(selectQuery, tarif);
+
+                        // Logging for Step 2
+                        if (idKomponenGaji != 0)
+                        {
+                            Console.WriteLine($"Found ID_KOMPONEN_GAJI: {idKomponenGaji}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ID_KOMPONEN_GAJI not found for ID_MST_TARIF_PAYROLL: {tarif.ID_MST_TARIF_PAYROLL}");
+                        }
+
+                        // Step 2: Update tarif with ID_MST_TARIF_PAYROLL 
+                        var updateTarifQuery = @"UPDATE [simka].[MST_TARIF_PAYROLL] SET [ISACTIVE] = 0 WHERE ID_MST_TARIF_PAYROLL = @ID_MST_TARIF_PAYROLL";
+                        Console.WriteLine($"Updating tarif with ID_MST_TARIF_PAYROLL: {tarif.ID_MST_TARIF_PAYROLL}");
+                        conn.Execute(updateTarifQuery, tarif);
+
+                        // Step 3: Update MST_KOMPONEN_GAJI with ID_KOMPONEN_GAJI
+                        var updateKomponenQuery = @"UPDATE [PAYROLL].[payroll].[MST_KOMPONEN_GAJI] SET [IS_DELETED] = 1 WHERE ID_KOMPONEN_GAJI = @ID_KOMPONEN_GAJI";
+                        Console.WriteLine($"Updating MST_KOMPONEN_GAJI with ID_KOMPONEN_GAJI: {idKomponenGaji}");
+                        conn.Execute(updateKomponenQuery, new { ID_KOMPONEN_GAJI = idKomponenGaji });
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"An error occurred: {ex.Message}");
-                        throw;
-                    }
+
+                    return model.Count; // Return the number of tarifs deleted
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    throw;
                 }
             }
-
-
-
-
-
-
         }
 
+
+
+
+
+
+
+
+
     }
+
+}
 
     

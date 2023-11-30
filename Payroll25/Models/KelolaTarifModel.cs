@@ -18,7 +18,6 @@
         // -------- Update & View  Tarif -------- \\
 
 
-
         // -------- Insert Komponen -------- \\
 
         public int ID_JNS_KOMPONEN { get; set; }
@@ -29,13 +28,6 @@
         public int IS_DELETED { get; set; }
 
         // -------- Insert Komponen -------- \\
-
-
-
-
-
-
-
 
         public class KelolaTarifViewModel
         {
