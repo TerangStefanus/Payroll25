@@ -57,35 +57,6 @@
         public string JENIS { get; set; }
     }
 
-    public class KomponenGajiDictionaryModel
-    {
-        public static readonly Dictionary<string, Dictionary<string, List<int>>> validKomponenGaji = new Dictionary<string, Dictionary<string, List<int>>>()
-    {
-        {
-            "Asisten Mahasiswa", new Dictionary<string, List<int>>()
-            {
-                { "1", new List<int> { 77, 78, 79, 80, 167, 182, 194, 197, 199 } },
-                // Tambahkan mapping untuk PANGKAT lainnya di sini
-            }
-        },
-        {
-            "Asisten Lab", new Dictionary<string, List<int>>()
-            {
-                { "2", new List<int> { 77,78,80,168, 200 } },
-                // Tambahkan mapping untuk PANGKAT lainnya di sini
-            }
-        },
-        {
-            "Student Staf", new Dictionary<string, List<int>>()
-            {
-                { "3", new List<int> { 169, 170, 201 } },
-                // Tambahkan mapping untuk PANGKAT lainnya di sini
-            }
-        }
-    };
-    }
-
-
 
     public class HeaderPenggajianMhs
     {
@@ -112,7 +83,11 @@
         public decimal TotalPenerimaanKotor { get; set; }
         public decimal TotalPajak { get; set; }
         public decimal TotalPenerimaanBersih { get; set; }
+        public byte[] TandaTangan { get; set; }
+        public string NamaKepalaKSDM { get; set; }
     }
+
+
 
 
 }

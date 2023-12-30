@@ -295,12 +295,9 @@
 
                 <tr>
                     <td colspan="3"></td>
-                    <td style="text-align:right; white-space: nowrap;">Kantor Sumber Daya Manusia</td>
+                    <td style="text-align:right; white-space: nowrap;">Kepala Kantor Sumber Daya Manusia,</td>
                 </tr>
-                <tr>
-                    <td colspan="3"></td>
-                    <td style="text-align:right;">Kepala,</td>
-                </tr>
+
 
                 <tr style="height: 20px;">
                     <td colspan="4"></td>
@@ -308,11 +305,14 @@
 
                 <tr>
                     <td colspan="3"></td>
-                    <td style="text-align:right;">(.............................)</td>
+                    <td style="text-align:right;">
+                        <img src="data:image/png;base64,@Convert.ToBase64String(Model.TandaTangan)" alt="Tanda Tangan" />
+                    </td>
                 </tr>
+
                 <tr>
                     <td colspan="3"></td>
-                    <td style="text-align:right;">Nama Kepala KSDM</td>
+                    <td style="text-align:right;">@Model.NamaKepalaKSDM</td>
                 </tr>
 
             </tbody>

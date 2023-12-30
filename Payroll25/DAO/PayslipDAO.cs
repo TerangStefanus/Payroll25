@@ -62,7 +62,7 @@ namespace Payroll25.DAO
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
-                string query = @"SELECT TOP (3) 
+                string query = @"SELECT TOP (1) 
                                 [ID_ASISTEN],
                                 [ID_TAHUN_AKADEMIK],
                                 [NO_SEMESTER],
@@ -126,10 +126,9 @@ namespace Payroll25.DAO
                                 JOIN [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
                                 WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
                                 AND [REF_JENIS_ASISTEN].JENIS = @Jenis
-                                AND [TBL_PENGGAJIAN].PANGKAT = @pangkat
                                 AND NPM = @npp";
 
-                var headers = await conn.QueryAsync<HeaderPenggajianUserAsistenModel>(query, new { IdBulanGaji = idBulanGaji , npp = npp , Jenis = jenis , Pangkat = pangkat});
+                var headers = await conn.QueryAsync<HeaderPenggajianUserAsistenModel>(query, new { IdBulanGaji = idBulanGaji , npp = npp , Jenis = jenis });
                 return headers;
                   
             }
@@ -176,6 +175,83 @@ namespace Payroll25.DAO
             }
         }
 
+        public async Task<decimal> GetTarifPajakByNPWPStatus(string npp)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                string query = @"SELECT 
+                                CASE 
+                                    WHEN TBL_ASISTEN.NPWP IS NOT NULL THEN 1
+                                    ELSE 0
+                                END AS STATUS_NPWP,
+                                ISNULL
+                                (
+                                    CASE 
+                                        WHEN TBL_ASISTEN.NPWP IS NOT NULL THEN (SELECT [NOMINAL] FROM [PAYROLL].[simka].[MST_TARIF_PAYROLL] WHERE ID_MST_TARIF_PAYROLL = 1182)
+                                        ELSE (SELECT [NOMINAL] FROM [PAYROLL].[simka].[MST_TARIF_PAYROLL] WHERE ID_MST_TARIF_PAYROLL = 1183)
+                                    END, 0
+                                ) 
+                                AS TARIF_PAJAK
+                                FROM 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN]
+                                WHERE 
+                                    TBL_ASISTEN.NPM = @npp";
+
+                var result = await conn.QueryFirstOrDefaultAsync<(int StatusNPWP, decimal TarifPajak)>(query, new { npp });
+
+                return result.TarifPajak;
+            }
+        }
+
+        public async Task<byte[]> GetTandaTanganKSDM()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                string query = @"SELECT [IMG_TTD_PEJABAT]
+                                FROM [PAYROLL].[siatmax].[MST_UNIT]
+                                WHERE NAMA_UNIT LIKE '%Kepala Kantor Sumber Daya Manusia%'";
+
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            // Pastikan untuk menyesuaikan nama kolom dan tipenya sesuai dengan database Anda
+                            if (!reader.IsDBNull(0))
+                            {
+                                // Ambil byte array dari hasil query
+                                byte[] imageBytes = (byte[])reader[0];
+                                return imageBytes;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null; // Return null jika data tidak ditemukan
+        }
+
+
+        public async Task<string> GetNamaKepalaKSDM()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                conn.Open();
+
+                string query = @"SELECT [PAYROLL].[simka].[MST_KARYAWAN].[NAMA_LENGKAP_GELAR]
+                               FROM [PAYROLL].[siatmax].[MST_UNIT]
+                               JOIN [PAYROLL].[simka].[MST_KARYAWAN] 
+                               ON [PAYROLL].[siatmax].[MST_UNIT].[NPP] = [PAYROLL].[simka].[MST_KARYAWAN].[NPP]
+                               WHERE [PAYROLL].[siatmax].[MST_UNIT].[NAMA_UNIT] LIKE '%Kepala Kantor Sumber Daya Manusia%';";
+
+                var result = await conn.QueryFirstOrDefaultAsync<string>(query);
+
+                return result;
+            }
+        }
 
 
 

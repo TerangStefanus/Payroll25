@@ -101,6 +101,7 @@ namespace Payroll25.Controllers
             return Ok(new { success = true, message = "Data gaji tersedia" });
         }
 
+
         [HttpGet]
         public async Task<IActionResult> AutoCetakSlipGaji(int idBulanGaji)
         {
@@ -122,12 +123,14 @@ namespace Payroll25.Controllers
                 decimal totalPenerimaanKotor = 0;
                 decimal totalPajak = 0;
 
+                var Tax = await DAO.GetTarifPajakByNPWPStatus(header.NPP);
+
                 foreach (var item in body)
                 {
                     totalPenerimaanKotor += (decimal)item.NOMINAL.GetValueOrDefault();
                 }
 
-                totalPajak = totalPenerimaanKotor * 0.03m;  // Misalnya pajak adalah 3%
+                totalPajak = totalPenerimaanKotor * Tax;  
                 decimal totalPenerimaanBersih = totalPenerimaanKotor - totalPajak;
 
                 var model = new SlipGajiViewModel
@@ -136,9 +139,10 @@ namespace Payroll25.Controllers
                     Body = body,
                     TotalPenerimaanKotor = totalPenerimaanKotor,
                     TotalPajak = totalPajak,
-                    TotalPenerimaanBersih = totalPenerimaanBersih
+                    TotalPenerimaanBersih = totalPenerimaanBersih,
+                    TandaTangan = await DAO.GetTandaTanganKSDM(),
+                    NamaKepalaKSDM = await DAO.GetNamaKepalaKSDM()
                 };
-
 
                 var pdf = new ViewAsPdf("SlipGaji", model)
                 {

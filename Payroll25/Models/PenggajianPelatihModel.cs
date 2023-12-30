@@ -31,6 +31,7 @@
         public string NO_REKENING { get; set; }
         public string NAMA_REKENING { get; set; }
         public string NAMA_BANK { get; set; }
+        public string npwp{ get; set; }
     }
 
     public class KomponenGajiPelatihModel
@@ -78,6 +79,8 @@
         public decimal TotalPenerimaanKotor { get; set; }
         public decimal TotalPajak { get; set; }
         public decimal TotalPenerimaanBersih { get; set; }
+        public byte[] TandaTangan { get; set; }
+        public string NamaKepalaKSDM { get; set; }
     }
 
 

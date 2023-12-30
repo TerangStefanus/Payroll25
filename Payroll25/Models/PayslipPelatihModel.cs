@@ -32,6 +32,8 @@
         public decimal TotalPenerimaanKotor { get; set; }
         public decimal TotalPajak { get; set; }
         public decimal TotalPenerimaanBersih { get; set; }
+        public byte[] TandaTangan { get; set; }
+        public string NamaKepalaKSDM { get; set; }
     }
 
 

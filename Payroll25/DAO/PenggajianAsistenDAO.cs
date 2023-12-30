@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Payroll25.DAO;
 using Payroll25.Models;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -129,45 +130,6 @@ namespace Payroll25.DAO
             }
         }
 
-        public async Task<bool> IsDataExist(string npp, int idBulanGaji , string unit, string jenis)
-        {
-            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-            {
-                try
-                {
-                    string query = @" DECLARE @InputJenisAsisten NVARCHAR(50)
-                                    SET @InputJenisAsisten = @JenisAsisten
-
-                                    SELECT COUNT(*) 
-                                    FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
-                                    JOIN payroll.TBL_ASISTEN ON TBL_PENGGAJIAN.NPP = TBL_ASISTEN.NPM AND CAST(TBL_PENGGAJIAN.PANGKAT AS INT) = TBL_ASISTEN.ID_JENIS_ASISTEN
-                                    JOIN PAYROLL.siatmax.MST_UNIT ON TBL_ASISTEN.ID_UNIT = MST_UNIT.ID_UNIT
-                                    JOIN payroll.REF_JENIS_ASISTEN ON TBL_ASISTEN.ID_JENIS_ASISTEN = REF_JENIS_ASISTEN.ID_JENIS_ASISTEN
-                                    WHERE TBL_PENGGAJIAN.NPP = @NPP 
-                                    AND ID_BULAN_GAJI = @ID_BULAN_GAJI 
-                                    AND MST_UNIT.NAMA_UNIT = @NamaUnit 
-                                    AND REF_JENIS_ASISTEN.ID_JENIS_ASISTEN = CASE
-                                                        WHEN @InputJenisAsisten = 'Student Staf' THEN 3
-                                                        WHEN @InputJenisAsisten = 'Asisten Mahasiswa' THEN 1
-                                                        WHEN @InputJenisAsisten = 'Asisten Lab' THEN 2
-                                                        ELSE NULL
-                                                        END";
-
-                    var count = await conn.ExecuteScalarAsync<int>(query, new { NPP = npp, ID_BULAN_GAJI = idBulanGaji , Unit = unit, Jenis = jenis });
-
-                    return count > 0;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-                finally
-                {
-                    conn.Close();
-                }
-            }
-        }
-
         public async Task<bool> InsertToTblPenggajianMhs(PenggajianAsistenModel insertData)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -204,48 +166,25 @@ namespace Payroll25.DAO
 
                 foreach (var asisten in asistenData) // 2. Lakukan secara iterasi berdasarkan NPM asisten
                 {
-                    if (!await IsDataExist(asisten.NPM, idBulanGaji, unit, jenis)) // 3. Cek Apakah data Penggajian dengan ID_BULAN_GAJI dan ( NPP = NPM ) sudah ada 
+                    var insertData = new PenggajianAsistenModel
                     {
-                        string jenjang = null;
-                        string golongan = "II/A";
-                        string pangkat = null;
+                        NPP = asisten.NPM,
+                        ID_BULAN_GAJI = idBulanGaji,
+                        NAMA = asisten.NAMA_MHS,
+                        STATUS_KEPEGAWAIAN = "Kontrak",
+                        MASA_KERJA_RIIL = "0",
+                        MASA_KERJA_GOL = "0",
+                        JBT_STRUKTURAL = "-",
+                        JBT_AKADEMIK = "-",
+                        JBT_FUNGSIONAL = "-",
+                        PANGKAT = "S0",
+                        GOLONGAN = "II/A",
+                        JENJANG = "-",
+                        NO_TABUNGAN = asisten.NO_REKENING,
+                        NPWP = null
+                    };
 
-                        switch (jenis)
-                        {
-                            case "Asisten Mahasiswa":
-                                jenjang = "S0";
-                                pangkat = "1";
-                                break;
-                            case "Asisten Lab":
-                                jenjang = "S0";
-                                golongan = null;
-                                pangkat = "2";
-                                break;
-                            case "Student Staf":
-                                pangkat = "3";
-                                break;
-                        }
-
-                        var insertData = new PenggajianAsistenModel
-                        {
-                            NPP = asisten.NPM,
-                            ID_BULAN_GAJI = idBulanGaji,
-                            NAMA = asisten.NAMA_MHS,
-                            STATUS_KEPEGAWAIAN = "Kontrak",
-                            MASA_KERJA_RIIL = "0",
-                            MASA_KERJA_GOL = "0",
-                            JBT_STRUKTURAL = "-",
-                            JBT_AKADEMIK = "-",
-                            JBT_FUNGSIONAL = "-",
-                            PANGKAT = pangkat, // Set PANGKAT based on jenis
-                            GOLONGAN = golongan, // Gunakan variabel golongan yang sudah ditentukan
-                            JENJANG = jenjang, // Gunakan variabel jenjang yang sudah ditentukan
-                            NO_TABUNGAN = asisten.NO_REKENING,
-                            NPWP = null
-                        };
-
-                        await InsertToTblPenggajianMhs(insertData); // 4. Insert Data ke TBL_PENGGAJIAN 
-                    }
+                    await InsertToTblPenggajianMhs(insertData); // 4. Insert Data ke TBL_PENGGAJIAN 
                 }
 
                 return true;
@@ -257,41 +196,10 @@ namespace Payroll25.DAO
             }
         }
 
+
         // Auto Hitung Gaji Asisten / Mahasiswa
 
-        public async Task<IEnumerable<string>> IsCheckPangkat(string jenis)
-        {
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
-                {
-                    await conn.OpenAsync();
-
-                    var query = @"SELECT DISTINCT 
-                            CAST([PAYROLL].[payroll].[TBL_PENGGAJIAN].PANGKAT AS VARCHAR)
-                          FROM 
-                            [PAYROLL].[payroll].[TBL_PENGGAJIAN]
-                          JOIN 
-                            [PAYROLL].[payroll].[TBL_ASISTEN] ON CAST([PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN AS varchar) = [PAYROLL].[payroll].[TBL_PENGGAJIAN].PANGKAT
-                          JOIN 
-                            [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [PAYROLL].[payroll].[TBL_ASISTEN].ID_JENIS_ASISTEN = [PAYROLL].[payroll].[REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
-                          WHERE REF_JENIS_ASISTEN.JENIS = @Jenis";
-
-                    var result = await conn.QueryAsync<string>(query, new { Jenis = jenis });
-
-                    return result.ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exception (e.g., log it)
-                return null;
-            }
-        }
-
-
-
-        public async Task<IEnumerable<PenggajianAsistenModel>> GetPenggajianDataMhs(int idBulanGaji, string unit, string pangkat)
+        public async Task<IEnumerable<PenggajianAsistenModel>> GetPenggajianDataMhs(int idBulanGaji, string unit)
         {
             try
             {
@@ -300,24 +208,24 @@ namespace Payroll25.DAO
                     await conn.OpenAsync();
 
                     var query = @"SELECT 
-                    [ID_PENGGAJIAN], 
-                    [payroll].[TBL_PENGGAJIAN].[NPP], 
-                    [ID_BULAN_GAJI], 
-                    [NAMA], 
-                    [STATUS_KEPEGAWAIAN], 
-                    [PANGKAT], 
-                    [GOLONGAN], 
-                    [JENJANG], 
-                    [NO_TABUNGAN], 
-                    [NPWP]
-                    FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
-                    JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON [TBL_PENGGAJIAN].NPP = [TBL_ASISTEN].NPM
-                    JOIN [PAYROLL].[siatmax].[MST_UNIT] ON [TBL_ASISTEN].ID_UNIT = [MST_UNIT].ID_UNIT
-                    JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
-                    WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji AND [MST_UNIT].NAMA_UNIT = @Unit AND [TBL_PENGGAJIAN].PANGKAT = @Pangkat
-                    ORDER BY [TBL_PENGGAJIAN].ID_PENGGAJIAN DESC;";
+                                [ID_PENGGAJIAN], 
+                                [payroll].[TBL_PENGGAJIAN].[NPP], 
+                                [ID_BULAN_GAJI], 
+                                [NAMA], 
+                                [STATUS_KEPEGAWAIAN], 
+                                [PANGKAT], 
+                                [GOLONGAN], 
+                                [JENJANG], 
+                                [NO_TABUNGAN], 
+                                TBL_PENGGAJIAN.[NPWP]
+                                FROM [PAYROLL].[payroll].[TBL_PENGGAJIAN]
+                                JOIN [PAYROLL].[payroll].[TBL_ASISTEN] ON [TBL_PENGGAJIAN].NPP = [TBL_ASISTEN].NPM
+                                JOIN [PAYROLL].[siatmax].[MST_UNIT] ON [TBL_ASISTEN].ID_UNIT = [MST_UNIT].ID_UNIT
+                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
+                                WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji AND [MST_UNIT].NAMA_UNIT = @Unit
+                                ORDER BY [TBL_PENGGAJIAN].ID_PENGGAJIAN DESC;";
 
-                    var result = await conn.QueryAsync<PenggajianAsistenModel>(query, new { IdBulanGaji = idBulanGaji, Unit = unit, Pangkat = pangkat });
+                    var result = await conn.QueryAsync<PenggajianAsistenModel>(query, new { IdBulanGaji = idBulanGaji, Unit = unit });
 
                     return result.ToList();
                 }
@@ -384,7 +292,8 @@ namespace Payroll25.DAO
             }
         }
 
-
+        // Logika masih kurang tepat bisa ditinjau ulang codenya 
+        // tidak ada logika menghapus data komponen gaji yang sudah terlanjur dimasukkan ( pastikan logika bisnisnya )
         public async Task<bool> InsertOrUpdateToDtlPenggajianMhs(DetailPenggajianMhsModel insertData)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
@@ -430,44 +339,30 @@ namespace Payroll25.DAO
         {
             try
             {
-                // Get valid PANGKATs based on the provided 'jenis'
-                var validPangkats = await IsCheckPangkat(jenis);
-                if (validPangkats == null || !validPangkats.Any()) return false; // If no valid PANGKATs, return false
 
-                foreach (var validPangkat in validPangkats)
+                var penggajianData = await GetPenggajianDataMhs(idBulanGaji, unit);
+             
+                foreach (var penggajian in penggajianData) // Iterasi untuk setiap NPP
                 {
-                    // Get Penggajian Data with additional 'validPangkat' parameter
-                    var penggajianData = await GetPenggajianDataMhs(idBulanGaji, unit, validPangkat);
-                    if (penggajianData == null || !penggajianData.Any()) continue; // If no penggajian data, continue to next iteration
+                    if (penggajianData == null || !penggajianData.Any()) continue; // jika tidak data penggajian , keluar dari foreach 
 
-                    // Ambil daftar komponen gaji yang valid berdasarkan jenis asisten dan pangkat
-                    var validKomponenIds = KomponenGajiDictionaryModel.validKomponenGaji[jenis][validPangkat];
+                    var komponenGajiDataList = await GetKomponenGajiMhs(idBulanGaji, penggajian.NPP); // Ambil Data ID_KOMPONEN_GAJI , JUMLAH , dan TARIF
 
-                    foreach (var penggajian in penggajianData) // Iterasi untuk setiap NPP
+                    foreach (var komponenGajiData in komponenGajiDataList) // Iterasi untuk setiap ID_KOMPONEN_GAJI
                     {
-                        var komponenGajiDataList = await GetKomponenGajiMhs(idBulanGaji, penggajian.NPP); // Ambil Data ID_KOMPONEN_GAJI , JUMLAH , dan TARIF
 
-                        foreach (var komponenGajiData in komponenGajiDataList) // Iterasi untuk setiap ID_KOMPONEN_GAJI
+                        var tarif = komponenGajiData.TARIF;
+                        var nominal = tarif * komponenGajiData.JUMLAH;
+
+                        var insertData = new DetailPenggajianMhsModel
                         {
-                            // Jika komponen gaji tidak valid untuk jenis asisten ini dan pangkat ini, lewati iterasi ini
-                            if (!validKomponenIds.Contains(komponenGajiData.ID_KOMPONEN_GAJI))
-                            {
-                                continue;
-                            }
+                            ID_PENGGAJIAN = penggajian.ID_PENGGAJIAN,
+                            ID_KOMPONEN_GAJI = komponenGajiData.ID_KOMPONEN_GAJI,
+                            JUMLAH_SATUAN = komponenGajiData.JUMLAH,
+                            NOMINAL = nominal
+                        };
 
-                            var tarif = komponenGajiData.TARIF;
-                            var nominal = tarif * komponenGajiData.JUMLAH;
-
-                            var insertData = new DetailPenggajianMhsModel
-                            {
-                                ID_PENGGAJIAN = penggajian.ID_PENGGAJIAN,
-                                ID_KOMPONEN_GAJI = komponenGajiData.ID_KOMPONEN_GAJI,
-                                JUMLAH_SATUAN = komponenGajiData.JUMLAH,
-                                NOMINAL = nominal
-                            };
-
-                            await InsertOrUpdateToDtlPenggajianMhs(insertData); // Insert atau Update ke DTL_PENGGAJIAN
-                        }
+                        await InsertOrUpdateToDtlPenggajianMhs(insertData); // Insert atau Update ke DTL_PENGGAJIAN
                     }
                 }
 
@@ -479,9 +374,6 @@ namespace Payroll25.DAO
                 return false;
             }
         }
-
-
-
 
         // Cetak Slip Gaji 
 
@@ -503,58 +395,38 @@ namespace Payroll25.DAO
             }
         }
 
-        public static string ConvertJenisToPangkat(string jenis)
-        {
-            switch (jenis)
-            {
-                case "Asisten Mahasiswa":
-                    return "1";
-                case "Asisten Lab":
-                    return "2";
-                case "Student Staf":
-                    return "3";
-                default:
-                    throw new ArgumentException("Jenis not recognized");
-            }
-        }
-
-
         public async Task<IEnumerable<HeaderPenggajianMhs>> GetHeaderPenggajianAsisten(int idBulanGaji, string unit, string jenis)
         {
             using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
             {
-                string pangkat = ConvertJenisToPangkat(jenis); // Konversi jenis ke pangkat
-
                 string query = @"SELECT
-                        [TBL_PENGGAJIAN].ID_PENGGAJIAN,
-                        [TBL_BULAN_GAJI].BULAN,
-                        [TBL_BULAN_GAJI].ID_TAHUN,
-                        [TBL_PENGGAJIAN].NPP, 
-                        [TBL_PENGGAJIAN].NAMA,
-                        [TBL_PENGGAJIAN].PANGKAT,
-                        [TBL_PENGGAJIAN].GOLONGAN, 
-                        [TBL_PENGGAJIAN].JENJANG, 
-                        [TBL_PENGGAJIAN].NPWP,
-                        [TBL_PENGGAJIAN].NO_TABUNGAN,
-                        [TBL_ASISTEN].NAMA_BANK,
-                        [TBL_ASISTEN].NAMA_REKENING,
-                        [siatmax].[MST_UNIT].NAMA_UNIT,
-                        [REF_JENIS_ASISTEN].JENIS
-                        FROM [payroll].[TBL_PENGGAJIAN]
-                        JOIN [payroll].[TBL_ASISTEN] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_ASISTEN].NPM
-                        JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_ASISTEN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
-                        JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
-                        JOIN [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
-                        WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
-                        AND [MST_UNIT].NAMA_UNIT = @Unit 
-                        AND [REF_JENIS_ASISTEN].JENIS = @Jenis
-                        AND [TBL_PENGGAJIAN].PANGKAT = @Pangkat"; 
+                                [TBL_PENGGAJIAN].ID_PENGGAJIAN,
+                                [TBL_BULAN_GAJI].BULAN,
+                                [TBL_BULAN_GAJI].ID_TAHUN,
+                                [TBL_PENGGAJIAN].NPP, 
+                                [TBL_PENGGAJIAN].NAMA,
+                                [TBL_PENGGAJIAN].PANGKAT,
+                                [TBL_PENGGAJIAN].GOLONGAN, 
+                                [TBL_PENGGAJIAN].JENJANG, 
+                                [TBL_PENGGAJIAN].NPWP,
+                                [TBL_PENGGAJIAN].NO_TABUNGAN,
+                                [TBL_ASISTEN].NAMA_BANK,
+                                [TBL_ASISTEN].NAMA_REKENING,
+                                [siatmax].[MST_UNIT].NAMA_UNIT,
+                                [REF_JENIS_ASISTEN].JENIS
+                                FROM [payroll].[TBL_PENGGAJIAN]
+                                JOIN [payroll].[TBL_ASISTEN] ON [payroll].[TBL_PENGGAJIAN].NPP = [payroll].[TBL_ASISTEN].NPM
+                                JOIN [siatmax].[MST_UNIT] ON [payroll].[TBL_ASISTEN].ID_UNIT = [siatmax].[MST_UNIT].ID_UNIT
+                                JOIN [PAYROLL].[payroll].[REF_JENIS_ASISTEN] ON [TBL_ASISTEN].ID_JENIS_ASISTEN = [REF_JENIS_ASISTEN].ID_JENIS_ASISTEN
+                                JOIN [payroll].[TBL_BULAN_GAJI] ON [payroll].[TBL_PENGGAJIAN].ID_BULAN_GAJI = [payroll].[TBL_BULAN_GAJI].ID_BULAN_GAJI 
+                                WHERE [TBL_PENGGAJIAN].[ID_BULAN_GAJI] = @IdBulanGaji 
+                                AND [MST_UNIT].NAMA_UNIT = @Unit 
+                                AND [REF_JENIS_ASISTEN].JENIS = @Jenis";
 
-                var headers = await conn.QueryAsync<HeaderPenggajianMhs>(query, new { IdBulanGaji = idBulanGaji, Unit = unit, Jenis = jenis, Pangkat = pangkat });
+                var headers = await conn.QueryAsync<HeaderPenggajianMhs>(query, new { IdBulanGaji = idBulanGaji, Unit = unit, Jenis = jenis });
                 return headers;
             }
         }
-
 
         public async Task<bool> CheckDetailGajiAsisten(int idPenggajian)
         {
@@ -586,6 +458,89 @@ namespace Payroll25.DAO
                 return result;
             }
         }
+
+        public async Task<decimal> GetTarifPajakByNPWPStatus(string npp)
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                string query = @"SELECT 
+                                CASE 
+                                    WHEN TBL_ASISTEN.NPWP IS NOT NULL THEN 1
+                                    ELSE 0
+                                END AS STATUS_NPWP,
+                                ISNULL
+                                (
+                                    CASE 
+                                        WHEN TBL_ASISTEN.NPWP IS NOT NULL THEN (SELECT [NOMINAL] FROM [PAYROLL].[simka].[MST_TARIF_PAYROLL] WHERE ID_MST_TARIF_PAYROLL = 1182)
+                                        ELSE (SELECT [NOMINAL] FROM [PAYROLL].[simka].[MST_TARIF_PAYROLL] WHERE ID_MST_TARIF_PAYROLL = 1183)
+                                    END, 0
+                                ) 
+                                AS TARIF_PAJAK
+                                FROM 
+                                    [PAYROLL].[payroll].[TBL_ASISTEN]
+                                WHERE 
+                                    TBL_ASISTEN.NPM = @npp";
+
+                var result = await conn.QueryFirstOrDefaultAsync<(int StatusNPWP, decimal TarifPajak)>(query, new { npp });
+
+                return result.TarifPajak;
+            }
+        }
+
+        public async Task<byte[]> GetTandaTanganKSDM()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                string query = @"SELECT [IMG_TTD_PEJABAT]
+                                FROM [PAYROLL].[siatmax].[MST_UNIT]
+                                WHERE NAMA_UNIT LIKE '%Kepala Kantor Sumber Daya Manusia%'";
+
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            // Pastikan untuk menyesuaikan nama kolom dan tipenya sesuai dengan database Anda
+                            if (!reader.IsDBNull(0))
+                            {
+                                // Ambil byte array dari hasil query
+                                byte[] imageBytes = (byte[])reader[0];
+                                return imageBytes;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null; // Return null jika data tidak ditemukan
+        }
+
+
+        public async Task<string> GetNamaKepalaKSDM()
+        {
+            using (SqlConnection conn = new SqlConnection(DBkoneksi.payrollkoneksi))
+            {
+                conn.Open();
+
+                string query = @"SELECT [PAYROLL].[simka].[MST_KARYAWAN].[NAMA_LENGKAP_GELAR]
+                               FROM [PAYROLL].[siatmax].[MST_UNIT]
+                               JOIN [PAYROLL].[simka].[MST_KARYAWAN] 
+                               ON [PAYROLL].[siatmax].[MST_UNIT].[NPP] = [PAYROLL].[simka].[MST_KARYAWAN].[NPP]
+                               WHERE [PAYROLL].[siatmax].[MST_UNIT].[NAMA_UNIT] LIKE '%Kepala Kantor Sumber Daya Manusia%';";
+
+                var result = await conn.QueryFirstOrDefaultAsync<string>(query);
+
+                return result;
+            }
+        }
+
+
+
+
+
 
 
 

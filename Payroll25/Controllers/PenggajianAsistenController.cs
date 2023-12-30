@@ -61,7 +61,6 @@ namespace Payroll25.Controllers
             return Ok(new { success = result });
         }
 
-
         [HttpPost]
         public async Task<IActionResult> AutoHitungGajiAsisten(int idBulanGaji, string tahun, string unit, string jenis)
         {
@@ -97,32 +96,34 @@ namespace Payroll25.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AutoCetakSlipGajiAsisten(int idBulanGaji, string tahun, string unit, string jenis)
+        public async Task<IActionResult> AutoCetakSlipGajiAsisten(int idBulanGaji, string tahun, string unit,string jenis)
         {
-            var headers = await DAO.GetHeaderPenggajianAsisten(idBulanGaji,  unit,  jenis); 
+            var headers = await DAO.GetHeaderPenggajianAsisten(idBulanGaji, unit, jenis);
             string tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             Directory.CreateDirectory(tempFolder);
 
             foreach (var header in headers)
             {
-                var isDetailAvailable = await DAO.CheckDetailGajiAsisten(header.ID_PENGGAJIAN); 
+                var isDetailAvailable = await DAO.CheckDetailGajiAsisten(header.ID_PENGGAJIAN);
                 if (!isDetailAvailable)
                 {
                     continue;
                 }
 
-                var body = await DAO.GetBodyPenggajianAsisten(header.ID_PENGGAJIAN); 
+                var body = await DAO.GetBodyPenggajianAsisten(header.ID_PENGGAJIAN);
 
                 decimal totalPenerimaanKotor = 0;
                 decimal totalPajak = 0;
+
+                var Tax = await DAO.GetTarifPajakByNPWPStatus(header.NPP);
 
                 foreach (var item in body)
                 {
                     totalPenerimaanKotor += (decimal)item.NOMINAL.GetValueOrDefault();
                 }
 
-                totalPajak = totalPenerimaanKotor * 0.03m;  // Misalnya pajak adalah 3%
+                totalPajak = totalPenerimaanKotor * Tax;
                 decimal totalPenerimaanBersih = totalPenerimaanKotor - totalPajak;
 
                 var model = new SlipGajiAsistenViewModel
@@ -131,16 +132,18 @@ namespace Payroll25.Controllers
                     Body = body,
                     TotalPenerimaanKotor = totalPenerimaanKotor,
                     TotalPajak = totalPajak,
-                    TotalPenerimaanBersih = totalPenerimaanBersih
+                    TotalPenerimaanBersih = totalPenerimaanBersih,
+                    TandaTangan = await DAO.GetTandaTanganKSDM(),
+                    NamaKepalaKSDM = await DAO.GetNamaKepalaKSDM()
                 };
 
                 var pdf = new ViewAsPdf("SlipGajiAsisten", model)
                 {
-                    FileName = Path.Combine(tempFolder, $"SlipGaji{header.JENIS}_{header.NPP}.pdf")
+                    FileName = Path.Combine(tempFolder, $"SlipGaji_{header.NPP}.pdf")
                 };
 
                 var pdfFile = await pdf.BuildFile(ControllerContext);
-                System.IO.File.WriteAllBytes(Path.Combine(tempFolder, $"SlipGaji{header.JENIS}_{header.NPP}.pdf"), pdfFile);
+                System.IO.File.WriteAllBytes(Path.Combine(tempFolder, $"SlipGaji_{header.NPP}.pdf"), pdfFile);
             }
 
             string zipPath = Path.Combine(Path.GetTempPath(), "SlipGaji.zip");
@@ -160,6 +163,11 @@ namespace Payroll25.Controllers
                 return NotFound(new { success = false, message = "Tidak ada data yang bisa dicetak." });
             }
         }
+
+
+
+
+
 
 
 

@@ -41,7 +41,7 @@ namespace Payroll25.Controllers
 
         [HttpGet]
         public async Task<IActionResult> CheckAutoCetakSlipGaji(int idBulanGaji, string npp)
-        {
+            {
             var isAvailable = await DAO.CheckDataGajiMhs(idBulanGaji, npp); // Data harus 1 NPM
             if (!isAvailable)
             {
@@ -90,12 +90,14 @@ namespace Payroll25.Controllers
                     decimal totalPenerimaanKotor = 0;
                     decimal totalPajak = 0;
 
+                    var Tax = await DAO.GetTarifPajakByNPWPStatus(header.NPP);
+
                     foreach (var item in body)
                     {
                         totalPenerimaanKotor += (decimal)item.NOMINAL.GetValueOrDefault();
                     }
 
-                    totalPajak = totalPenerimaanKotor * 0.03m;  // Misalnya pajak adalah 3%
+                    totalPajak = totalPenerimaanKotor * Tax;
                     decimal totalPenerimaanBersih = totalPenerimaanKotor - totalPajak;
 
                     var model = new SlipUserAsistenViewModel
@@ -104,7 +106,9 @@ namespace Payroll25.Controllers
                         Body = body,
                         TotalPenerimaanKotor = totalPenerimaanKotor,
                         TotalPajak = totalPajak,
-                        TotalPenerimaanBersih = totalPenerimaanBersih
+                        TotalPenerimaanBersih = totalPenerimaanBersih,
+                        TandaTangan = await DAO.GetTandaTanganKSDM(),
+                        NamaKepalaKSDM = await DAO.GetNamaKepalaKSDM()
                     };
 
                     var pdf = new ViewAsPdf("SlipGajiUserAsisten", model)
